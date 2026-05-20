@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-orbitron), sans-serif;
+  --font-mono: ui-monospace, monospace;
+
+  --color-background: #0a0a0f;
+  --color-surface: #12121a;
+  --color-surface-light: #1a1a2e;
+  --color-primary: #00f5d4;
+  --color-primary-dark: #00c4a8;
+  --color-secondary: #7b2ff7;
+  --color-accent: #ff6b6b;
+  --color-neon-blue: #00d4ff;
+  --color-neon-purple: #b829dd;
+  --color-neon-pink: #ff2e63;
+  --color-neon-green: #00ff88;
+  --color-text: #ffffff;
+  --color-text-muted: #a0a0b0;
+  --color-text-dim: #6b6b80;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-glass: rgba(255, 255, 255, 0.05);
+  
+  --spacing-container-max: 1400px;
+  --spacing-margin-desktop: 80px;
+  --spacing-margin-mobile: 20px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  
+  body {
+    @apply bg-background text-text font-sans antialiased overflow-x-hidden;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-surface;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/50;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-glass backdrop-blur-xl border border-white/10 rounded-2xl;
+  }
+
+  .glass-card {
+    @apply bg-glass backdrop-blur-lg border border-white/5 rounded-xl hover:border-primary/30 transition-all duration-300;
+  }
+
+  .neon-border {
+    @apply border border-primary/50 shadow-[0_0_15px_rgba(0,245,212,0.3)];
+  }
+
+  .neon-text {
+    @apply text-primary drop-shadow-[0_0_10px_rgba(0,245,212,0.5)];
+  }
+
+  .neon-glow {
+    box-shadow: 0 0 20px rgba(0, 245, 212, 0.4), 0 0 40px rgba(0, 245, 212, 0.2);
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-neon-blue to-secondary bg-clip-text text-transparent;
+  }
+
+  .btn-primary {
+    @apply px-8 py-4 bg-primary text-background font-bold rounded-lg font-display tracking-wider uppercase transition-all duration-300 hover:scale-105 active:scale-95;
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 20px rgba(0, 245, 212, 0.4), 0 0 40px rgba(0, 245, 212, 0.2);
+  }
+
+  .btn-secondary {
+    @apply px-8 py-4 border border-primary/50 text-primary font-bold rounded-lg font-display tracking-wider uppercase transition-all duration-300 hover:bg-primary/10 hover:scale-105 active:scale-95;
+  }
+
+  .btn-glow {
+    @apply relative overflow-hidden;
+  }
+
+  .btn-glow::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-primary/20;
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+
+  .btn-glow:hover::before {
+    transform: translateX(100%);
+  }
+
+  .section-title {
+    @apply font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-4;
+    @apply bg-gradient-to-r from-primary via-neon-blue to-secondary bg-clip-text text-transparent;
+  }
+
+  .section-subtitle {
+    @apply text-text-muted text-lg md:text-xl max-w-2xl mx-auto;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,245,212,0.15)];
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-surface-light border border-white/10 rounded-lg text-text placeholder-text-dim focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all;
+  }
+
+  .label-text {
+    @apply text-text-muted text-sm font-medium mb-2 block;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+.particle-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
