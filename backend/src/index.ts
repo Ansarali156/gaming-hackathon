@@ -1,6 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { prisma } from '../lib/prisma';
 
 // Import routes
@@ -13,7 +15,6 @@ import chatRoutes from './routes/chat';
 import emailRoutes from './routes/email';
 import discordRoutes from './routes/discord';
 
-dotenv.config();
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 4000;

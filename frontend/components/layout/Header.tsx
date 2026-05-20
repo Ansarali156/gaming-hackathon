@@ -34,7 +34,7 @@ export function Header() {
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="font-display text-2xl font-bold gradient-text">
-            IncuXai<span className="text-primary">.AI</span>
+            IncuXai
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">

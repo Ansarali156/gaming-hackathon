@@ -11,7 +11,7 @@ const features = [
 
 export function AboutSection() {
   return (
-    <section className="py-24 bg-surface/50 relative">
+    <section id="about" className="py-24 bg-surface/50 relative">
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

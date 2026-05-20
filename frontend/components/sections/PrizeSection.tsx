@@ -8,7 +8,7 @@ const prizeIcons = [Trophy, Medal, Award, Star, Gift];
 
 export function PrizeSection() {
   return (
-    <section className="py-24 relative">
+    <section id="prizes" className="py-24 relative">
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
