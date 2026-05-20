@@ -1,94 +1,492 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
-import Link from "next/link";
+import { motion, AnimatePresence } from "motion/react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Users, CreditCard, TrendingUp, MessageCircle, CheckCircle, XCircle, Download, Search, Filter } from "lucide-react";
+import {
+  Users,
+  CreditCard,
+  TrendingUp,
+  MessageCircle,
+  CheckCircle,
+  XCircle,
+  Download,
+  Search,
+  Filter,
+  Megaphone,
+  LifeBuoy,
+  Shield,
+  Plus,
+  Trash2,
+  ExternalLink,
+  DollarSign,
+  AlertCircle,
+  LogOut
+} from "lucide-react";
+import { signOut } from "next-auth/react";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [analytics, setAnalytics] = useState<any>(null);
   const [participants, setParticipants] = useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [sponsors, setSponsors] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
+  const [filterCategory, setFilterCategory] = useState("ALL");
+  const [filterDiscord, setFilterDiscord] = useState("ALL");
+
+  // Selected Item Modals
+  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [ticketResponse, setTicketResponse] = useState("");
+
+  // New Sponsor Form
+  const [showAddSponsor, setShowAddSponsor] = useState(false);
+  const [newSponsor, setNewSponsor] = useState({
+    name: "",
+    tier: "GOLD",
+    logo: "",
+    website: "",
+    description: "",
+    contact: "",
+    isActive: true
+  });
+
+  // New Announcement Form
+  const [announcementTitle, setAnnouncementTitle] = useState("");
+  const [announcementMsg, setAnnouncementMsg] = useState("");
+  const [announcementTarget, setAnnouncementTarget] = useState("ALL");
+  const [channels, setChannels] = useState({ dashboard: true, email: false, discord: false });
+  const [announcementLogs, setAnnouncementLogs] = useState<string[]>([]);
+
+  const fetchData = async () => {
+    try {
+      const [
+        analyticsRes,
+        participantsRes,
+        paymentsRes,
+        ticketsRes,
+        sponsorsRes,
+        announcementsRes
+      ] = await Promise.all([
+        fetch("/api/admin/analytics"),
+        fetch("/api/admin/participants"),
+        fetch("/api/admin/payments"),
+        fetch("/api/admin/tickets"),
+        fetch("/api/admin/sponsors"),
+        fetch("/api/admin/announcements")
+      ]);
+
+      const analyticsData = await analyticsRes.json();
+      const participantsData = await participantsRes.json();
+      const paymentsData = await paymentsRes.json();
+      const ticketsData = await ticketsRes.json();
+      const sponsorsData = await sponsorsRes.json();
+      const announcementsData = await announcementsRes.json();
+
+      setAnalytics(analyticsData);
+      setParticipants(participantsData.teams || []);
+      setPayments(paymentsData.payments || []);
+      setTickets(ticketsData.tickets || []);
+      setSponsors(sponsorsData.sponsors || []);
+      setAnnouncements(announcementsData.announcements || []);
+    } catch (error) {
+      console.error("Failed to fetch admin data:", error);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [analyticsRes, participantsRes] = await Promise.all([
-          fetch("/api/admin/analytics"),
-          fetch("/api/admin/participants"),
-        ]);
-        const analyticsData = await analyticsRes.json();
-        const participantsData = await participantsRes.json();
-        setAnalytics(analyticsData);
-        setParticipants(participantsData.teams || []);
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      }
-      setLoading(false);
-    };
     fetchData();
   }, []);
 
+  const handleApproveTeam = async (teamId: string) => {
+    try {
+      const res = await fetch("/api/admin/participants", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamId, status: "APPROVED" })
+      });
+      if (res.ok) fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRejectTeam = async (teamId: string) => {
+    try {
+      const res = await fetch("/api/admin/participants", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamId, status: "REJECTED" })
+      });
+      if (res.ok) fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleToggleSponsorStatus = async (sponsorId: string, isActive: boolean) => {
+    try {
+      const res = await fetch("/api/admin/sponsors", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sponsorId, isActive })
+      });
+      if (res.ok) fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteSponsor = async (sponsorId: string) => {
+    try {
+      const res = await fetch(`/api/admin/sponsors?sponsorId=${sponsorId}`, {
+        method: "DELETE"
+      });
+      if (res.ok) fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleAddSponsorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/admin/sponsors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSponsor)
+      });
+      if (res.ok) {
+        setShowAddSponsor(false);
+        setNewSponsor({
+          name: "",
+          tier: "GOLD",
+          logo: "",
+          website: "",
+          description: "",
+          contact: "",
+          isActive: true
+        });
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSendAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/admin/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: announcementTitle,
+          message: announcementMsg,
+          visibility: announcementTarget,
+          channels
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAnnouncementTitle("");
+        setAnnouncementMsg("");
+        setAnnouncementLogs(data.logs || []);
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleReplyTicket = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTicket) return;
+    try {
+      const res = await fetch("/api/admin/tickets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ticketId: selectedTicket.id,
+          response: ticketResponse,
+          status: "RESOLVED"
+        })
+      });
+      if (res.ok) {
+        setTicketResponse("");
+        setSelectedTicket(null);
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleCloseTicket = async (ticketId: string) => {
+    try {
+      const res = await fetch("/api/admin/tickets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticketId, status: "CLOSED" })
+      });
+      if (res.ok) {
+        setSelectedTicket(null);
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleProcessRefund = async (paymentId: string) => {
+    if (!confirm("Are you sure you want to process this refund?")) return;
+    try {
+      const res = await fetch("/api/admin/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentId, status: "REFUNDED" })
+      });
+      if (res.ok) fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // CSV Exporter for teams
+  const handleExportCSV = () => {
+    const headers = ["Team ID", "Team Name", "Category", "Approval Status", "Payment Status", "Discord Joined"];
+    const rows = participants.map((team: any) => [
+      team.teamId,
+      team.name,
+      team.category,
+      team.status,
+      team.payment?.status || "N/A",
+      team.members?.some((m: any) => m.user?.discordJoined) ? "Yes" : "No"
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e: any) => e.join(","))].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `incuxai_participants_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Participant filters
   const filteredParticipants = participants.filter((team) => {
-    const matchesSearch = team.name.toLowerCase().includes(searchTerm.toLowerCase()) || team.teamId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === "ALL" || team.status === filterStatus;
-    return matchesSearch && matchesFilter;
+    const matchesSearch =
+      team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      team.teamId.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === "ALL" || team.status === filterStatus;
+    const matchesCategory = filterCategory === "ALL" || team.category === filterCategory;
+    
+    const hasDiscordJoined = team.members?.some((m: any) => m.user?.discordJoined);
+    const matchesDiscord =
+      filterDiscord === "ALL" ||
+      (filterDiscord === "YES" && hasDiscordJoined) ||
+      (filterDiscord === "NO" && !hasDiscordJoined);
+
+    return matchesSearch && matchesStatus && matchesCategory && matchesDiscord;
   });
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center"><div className="text-primary">Loading admin dashboard...</div></div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-text-muted">Loading IncuXai Admin Portal...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-28 pb-16">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="flex flex-col lg:flex-row gap-8">
+            {/* Sidebar Navigation */}
             <aside className="lg:w-64 flex-shrink-0">
-              <div className="glass-card p-6 sticky top-28">
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 mx-auto rounded-full bg-secondary/20 flex items-center justify-center mb-3">
-                    <Users className="text-secondary" size={32} />
+              <div className="glass-card p-6 sticky top-28 space-y-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-secondary/10 flex items-center justify-center mb-3">
+                    <Shield className="text-secondary" size={28} />
                   </div>
-                  <h3 className="font-display font-bold text-text">Admin Panel</h3>
-                  <p className="text-text-muted text-sm">Event Management</p>
+                  <h3 className="font-display font-bold text-text text-lg">IncuXai Admin</h3>
+                  <p className="text-text-muted text-xs">Event Management Hub</p>
                 </div>
 
-                <nav className="space-y-2">
-                  <NavItem icon={<TrendingUp size={18} />} label="Overview" active={activeTab === "overview"} onClick={() => setActiveTab("overview")} />
-                  <NavItem icon={<Users size={18} />} label="Participants" active={activeTab === "participants"} onClick={() => setActiveTab("participants")} />
-                  <NavItem icon={<CreditCard size={18} />} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
-                  <NavItem icon={<MessageCircle size={18} />} label="Announcements" active={activeTab === "announcements"} onClick={() => setActiveTab("announcements")} />
-                  <NavItem icon={<CheckCircle size={18} />} label="Support" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
+                <nav className="space-y-1">
+                  <NavItem icon={<TrendingUp size={16} />} label="Overview" active={activeTab === "overview"} onClick={() => setActiveTab("overview")} />
+                  <NavItem icon={<Users size={16} />} label="Participants" active={activeTab === "participants"} onClick={() => setActiveTab("participants")} />
+                  <NavItem icon={<CreditCard size={16} />} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
+                  <NavItem icon={<Megaphone size={16} />} label="Announcements" active={activeTab === "announcements"} onClick={() => setActiveTab("announcements")} />
+                  <NavItem icon={<LifeBuoy size={16} />} label="Support System" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
+                  <NavItem icon={<Plus size={16} />} label="Sponsor Hub" active={activeTab === "sponsors"} onClick={() => setActiveTab("sponsors")} />
                 </nav>
+
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="w-full mt-4 py-2 border border-white/10 rounded-lg text-text-muted hover:text-red-400 hover:border-red-400/30 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
               </div>
             </aside>
 
-            <div className="flex-1">
-              {activeTab === "overview" && analytics && <OverviewTab analytics={analytics} />}
+            {/* Dashboard Content Panes */}
+            <div className="flex-1 min-w-0">
+              {activeTab === "overview" && analytics && (
+                <OverviewPane analytics={analytics} sponsors={sponsors} />
+              )}
               {activeTab === "participants" && (
-                <ParticipantsTab
+                <ParticipantsPane
                   participants={filteredParticipants}
                   searchTerm={searchTerm}
                   setSearchTerm={setSearchTerm}
                   filterStatus={filterStatus}
                   setFilterStatus={setFilterStatus}
+                  filterCategory={filterCategory}
+                  setFilterCategory={setFilterCategory}
+                  filterDiscord={filterDiscord}
+                  setFilterDiscord={setFilterDiscord}
+                  handleExportCSV={handleExportCSV}
+                  handleApproveTeam={handleApproveTeam}
+                  handleRejectTeam={handleRejectTeam}
+                  setSelectedReceipt={setSelectedReceipt}
                 />
               )}
-              {activeTab === "payments" && <PaymentsTab />}
-              {activeTab === "announcements" && <AnnouncementsTab />}
-              {activeTab === "support" && <SupportTab />}
+              {activeTab === "payments" && (
+                <PaymentsPane
+                  payments={payments}
+                  handleProcessRefund={handleProcessRefund}
+                  setSelectedReceipt={setSelectedReceipt}
+                />
+              )}
+              {activeTab === "announcements" && (
+                <AnnouncementsPane
+                  announcements={announcements}
+                  announcementTitle={announcementTitle}
+                  setAnnouncementTitle={setAnnouncementTitle}
+                  announcementMsg={announcementMsg}
+                  setAnnouncementMsg={setAnnouncementMsg}
+                  announcementTarget={announcementTarget}
+                  setAnnouncementTarget={setAnnouncementTarget}
+                  channels={channels}
+                  setChannels={setChannels}
+                  handleSendAnnouncement={handleSendAnnouncement}
+                  announcementLogs={announcementLogs}
+                />
+              )}
+              {activeTab === "support" && (
+                <SupportPane
+                  tickets={tickets}
+                  selectedTicket={selectedTicket}
+                  setSelectedTicket={setSelectedTicket}
+                  ticketResponse={ticketResponse}
+                  setTicketResponse={setTicketResponse}
+                  handleReplyTicket={handleReplyTicket}
+                  handleCloseTicket={handleCloseTicket}
+                />
+              )}
+              {activeTab === "sponsors" && (
+                <SponsorsPane
+                  sponsors={sponsors}
+                  showAddSponsor={showAddSponsor}
+                  setShowAddSponsor={setShowAddSponsor}
+                  newSponsor={newSponsor}
+                  setNewSponsor={setNewSponsor}
+                  handleAddSponsorSubmit={handleAddSponsorSubmit}
+                  handleToggleSponsorStatus={handleToggleSponsorStatus}
+                  handleDeleteSponsor={handleDeleteSponsor}
+                />
+              )}
             </div>
           </div>
         </div>
       </main>
       <Footer />
+
+      {/* Payment Receipt Details Modal */}
+      <AnimatePresence>
+        {selectedReceipt && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="glass-card p-6 w-full max-w-md relative space-y-6"
+            >
+              <button
+                onClick={() => setSelectedReceipt(null)}
+                className="absolute top-4 right-4 text-text-muted hover:text-text"
+              >
+                <XCircle size={20} />
+              </button>
+              <div className="text-center border-b border-white/5 pb-4">
+                <h3 className="font-display font-bold text-lg text-text">GST Payment Receipt</h3>
+                <p className="text-text-muted text-xs">Official Registration Invoice</p>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-text-muted">GSTIN Invoice ID:</span>
+                  <span className="text-text font-mono font-bold text-primary">{selectedReceipt.gstInvoice || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Team ID:</span>
+                  <span className="text-text font-mono">{selectedReceipt.team?.teamId || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Team Name:</span>
+                  <span className="text-text">{selectedReceipt.team?.name || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Category:</span>
+                  <span className="text-text font-bold">{selectedReceipt.team?.category || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Razorpay Order ID:</span>
+                  <span className="text-text font-mono text-xs">{selectedReceipt.razorpayOrderId || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Razorpay Payment ID:</span>
+                  <span className="text-text font-mono text-xs">{selectedReceipt.razorpayPaymentId || "N/A"}</span>
+                </div>
+                <div className="flex justify-between border-t border-white/5 pt-3">
+                  <span className="text-text-muted">Transaction Status:</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                    selectedReceipt.status === "SUCCESS" ? "bg-green-500/10 text-green-400" :
+                    selectedReceipt.status === "PENDING" ? "bg-yellow-500/10 text-yellow-400" :
+                    selectedReceipt.status === "REFUNDED" ? "bg-purple-500/10 text-purple-400" :
+                    "bg-red-500/10 text-red-400"
+                  }`}>{selectedReceipt.status}</span>
+                </div>
+                <div className="flex justify-between border-t border-white/5 pt-3">
+                  <span className="text-text font-bold">Total Amount Paid (INR):</span>
+                  <span className="text-neon-green font-bold text-lg">₹{selectedReceipt.amount}</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -97,7 +495,7 @@ function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; labe
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-left ${
+      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-left font-display font-medium ${
         active ? "bg-secondary/10 text-secondary" : "text-text-muted hover:text-text hover:bg-white/5"
       }`}
     >
@@ -107,40 +505,122 @@ function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; labe
   );
 }
 
-function OverviewTab({ analytics }: { analytics: any }) {
+/* ============================================================================
+   A. OVERVIEW PANE
+   ============================================================================ */
+function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[] }) {
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-text">Analytics Overview</h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<Users className="text-primary" />} label="Total Registrations" value={analytics.totalRegistrations || 0} />
-        <StatCard icon={<CreditCard className="text-neon-green" />} label="Total Revenue" value={`₹${analytics.totalRevenue || 0}`} />
-        <StatCard icon={<MessageCircle className="text-neon-blue" />} label="Discord Joins" value={analytics.discordJoins || 0} />
-        <StatCard icon={<TrendingUp className="text-neon-purple" />} label="Pending Payments" value={analytics.pendingPayments || 0} />
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+      <div>
+        <h2 className="font-display text-2xl font-bold text-text">Overview Analytics</h2>
+        <p className="text-text-muted text-sm">Visual tracking for registrations, financials, and community metrics.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Analytics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <OverviewCard icon={<Users className="text-primary" />} label="Total Teams" value={analytics.totalRegistrations || 0} />
+        <OverviewCard icon={<DollarSign className="text-neon-green" />} label="Total Revenue" value={`₹${analytics.totalRevenue || 0}`} />
+        <OverviewCard icon={<CreditCard className="text-yellow-400" />} label="Pending Payments" value={analytics.pendingPayments || 0} />
+        <OverviewCard icon={<MessageCircle className="text-neon-blue" />} label="Discord Joins" value={analytics.discordJoins || 0} />
+        <OverviewCard icon={<TrendingUp className="text-neon-purple" />} label="Referrals Made" value={analytics.referralAnalytics?.totalReferrals || 0} />
+      </div>
+
+      {/* Charts & Trends Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Registration Line Trend Chart (SVG) */}
         <div className="glass-card p-6">
-          <h3 className="font-bold text-text mb-4">Category Distribution</h3>
-          <div className="space-y-3">
-            {analytics.categoryDistribution?.map((cat: any) => (
-              <div key={cat.category} className="flex justify-between items-center">
-                <span className="text-text-muted">{cat.category}</span>
-                <span className="text-primary font-bold">{cat._count}</span>
-              </div>
-            )) || <p className="text-text-muted">No data yet</p>}
+          <h3 className="font-display font-bold text-text mb-4">Registration Trends (7 Days)</h3>
+          <div className="h-64 flex items-end justify-between gap-2 pt-6 relative border-l border-b border-white/10 pb-2 pl-2">
+            {analytics.dailyRegistrations?.map((item: any, idx: number) => {
+              const maxCount = Math.max(...analytics.dailyRegistrations.map((d: any) => d._count), 1);
+              const pct = (item._count / maxCount) * 100;
+              return (
+                <div key={idx} className="flex-1 flex flex-col items-center group relative h-full justify-end">
+                  <span className="absolute bottom-full mb-1 bg-surface-light px-2 py-0.5 rounded text-xs text-primary font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                    {item._count} teams
+                  </span>
+                  <div
+                    style={{ height: `${pct}%` }}
+                    className="w-full bg-gradient-to-t from-primary/20 to-primary rounded-t border-t border-primary/50 hover:to-secondary transition-all"
+                  />
+                  <span className="text-[10px] text-text-dim mt-2 truncate w-full text-center">{item.date}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
+        {/* Revenue Area Trend Chart (SVG) */}
         <div className="glass-card p-6">
-          <h3 className="font-bold text-text mb-4">Recent Registrations</h3>
-          <div className="space-y-3">
-            {analytics.dailyRegistrations?.slice(0, 5).map((reg: any, i: number) => (
-              <div key={i} className="flex justify-between items-center">
-                <span className="text-text-muted">{new Date(reg.createdAt).toLocaleDateString()}</span>
-                <span className="text-primary font-bold">{reg._count}</span>
+          <h3 className="font-display font-bold text-text mb-4">Revenue Analytics (7 Days)</h3>
+          <div className="h-64 flex items-end justify-between gap-2 pt-6 relative border-l border-b border-white/10 pb-2 pl-2">
+            {analytics.revenueTrends?.map((item: any, idx: number) => {
+              const maxAmount = Math.max(...analytics.revenueTrends.map((d: any) => d.amount), 1);
+              const pct = (item.amount / maxAmount) * 100;
+              return (
+                <div key={idx} className="flex-1 flex flex-col items-center group relative h-full justify-end">
+                  <span className="absolute bottom-full mb-1 bg-surface-light px-2 py-0.5 rounded text-xs text-neon-green font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                    ₹{item.amount}
+                  </span>
+                  <div
+                    style={{ height: `${pct}%` }}
+                    className="w-full bg-gradient-to-t from-neon-green/20 to-neon-green rounded-t border-t border-neon-green/50 hover:to-primary transition-all"
+                  />
+                  <span className="text-[10px] text-text-dim mt-2 truncate w-full text-center">{item.date}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Category distribution */}
+        <div className="glass-card p-6 flex flex-col justify-between">
+          <div>
+            <h3 className="font-display font-bold text-text mb-4">Category Distribution</h3>
+            <div className="space-y-4">
+              {analytics.categoryDistribution?.map((cat: any) => {
+                const total = analytics.totalRegistrations || 1;
+                const percent = Math.round((cat._count / total) * 100);
+                return (
+                  <div key={cat.category} className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text font-medium">{cat.category}</span>
+                      <span className="text-text-muted">{cat._count} ({percent}%)</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${percent}%` }}
+                        className={`h-full rounded-full bg-gradient-to-r ${
+                          cat.category === "STUDENT" ? "from-primary to-neon-blue" :
+                          cat.category === "IT_PROFESSIONAL" ? "from-secondary to-neon-purple" :
+                          "from-neon-green to-yellow-400"
+                        }`}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Lead Analytics / Referral points */}
+        <div className="glass-card p-6 flex flex-col justify-between">
+          <div>
+            <h3 className="font-display font-bold text-text mb-4">Sponsorship & Referral Stats</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-white/5 rounded-lg text-center">
+                <span className="text-xs text-text-muted">Total Sponsors</span>
+                <p className="text-2xl font-display font-bold text-secondary mt-1">{sponsors?.length || 0}</p>
               </div>
-            )) || <p className="text-text-muted">No data yet</p>}
+              <div className="p-4 bg-white/5 rounded-lg text-center">
+                <span className="text-xs text-text-muted">Referrals Points</span>
+                <p className="text-2xl font-display font-bold text-neon-purple mt-1">{analytics.referralAnalytics?.totalPoints || 0}</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-white/5">
+            <p className="text-xs text-text-dim italic">Referral analytics reflect registered ambassadors and organic user links.</p>
           </div>
         </div>
       </div>
@@ -148,89 +628,169 @@ function OverviewTab({ analytics }: { analytics: any }) {
   );
 }
 
-function ParticipantsTab({ participants, searchTerm, setSearchTerm, filterStatus, setFilterStatus }: any) {
+function OverviewCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
+  return (
+    <div className="glass-card p-5 relative overflow-hidden">
+      <div className="flex items-center gap-2 mb-2">
+        {icon}
+        <span className="text-text-muted text-xs font-medium truncate">{label}</span>
+      </div>
+      <p className="font-display text-2xl font-bold text-text mt-1">{value}</p>
+    </div>
+  );
+}
+
+/* ============================================================================
+   B. PARTICIPANT MANAGEMENT
+   ============================================================================ */
+function ParticipantsPane({
+  participants,
+  searchTerm,
+  setSearchTerm,
+  filterStatus,
+  setFilterStatus,
+  filterCategory,
+  setFilterCategory,
+  filterDiscord,
+  setFilterDiscord,
+  handleExportCSV,
+  handleApproveTeam,
+  handleRejectTeam,
+  setSelectedReceipt
+}: any) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h2 className="font-display text-2xl font-bold text-text">Participant Management</h2>
-        <button className="btn-secondary inline-flex items-center gap-2">
-          <Download size={18} />
+        <div>
+          <h2 className="font-display text-2xl font-bold text-text">Participant Teams</h2>
+          <p className="text-text-muted text-sm">Approve/reject registration logs, verify payments and Discord integration.</p>
+        </div>
+        <button onClick={handleExportCSV} className="btn-secondary inline-flex items-center gap-2 text-sm py-2">
+          <Download size={16} />
           Export CSV
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" size={18} />
+      {/* Filter and Search Bar */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white/5 p-4 rounded-xl border border-white/5">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" size={16} />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search teams..."
-            className="input-field pl-10"
+            placeholder="Search team ID/name..."
+            className="input-field pl-10 text-sm"
           />
         </div>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="input-field md:w-48"
-        >
-          <option value="ALL">All Status</option>
-          <option value="PENDING">Pending</option>
-          <option value="APPROVED">Approved</option>
-          <option value="REJECTED">Rejected</option>
-        </select>
+        <div>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="input-field text-sm h-full">
+            <option value="ALL">All Approvals</option>
+            <option value="PENDING">Pending Approval</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </div>
+        <div>
+          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="input-field text-sm h-full">
+            <option value="ALL">All Categories</option>
+            <option value="STUDENT">Student</option>
+            <option value="IT_PROFESSIONAL">IT Professional</option>
+            <option value="STARTUP">Startup</option>
+          </select>
+        </div>
+        <div>
+          <select value={filterDiscord} onChange={(e) => setFilterDiscord(e.target.value)} className="input-field text-sm h-full">
+            <option value="ALL">Discord Status</option>
+            <option value="YES">Joined Discord</option>
+            <option value="NO">Not Joined</option>
+          </select>
+        </div>
       </div>
 
+      {/* Participants Table */}
       <div className="glass-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-surface-light">
+          <table className="w-full text-left">
+            <thead className="bg-surface-light border-b border-white/5 text-text-muted text-xs font-semibold uppercase">
               <tr>
-                <th className="text-left p-4 text-text-muted text-sm font-medium">Team ID</th>
-                <th className="text-left p-4 text-text-muted text-sm font-medium">Team Name</th>
-                <th className="text-left p-4 text-text-muted text-sm font-medium">Category</th>
-                <th className="text-left p-4 text-text-muted text-sm font-medium">Payment</th>
-                <th className="text-left p-4 text-text-muted text-sm font-medium">Status</th>
-                <th className="text-left p-4 text-text-muted text-sm font-medium">Actions</th>
+                <th className="p-4">Team ID</th>
+                <th className="p-4">Team Name</th>
+                <th className="p-4">Category</th>
+                <th className="p-4 text-center">Payment Status</th>
+                <th className="p-4 text-center">Discord Joined</th>
+                <th className="p-4 text-center">Approval Status</th>
+                <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/5 text-sm">
               {participants.length > 0 ? (
-                participants.map((team: any) => (
-                  <tr key={team.id} className="border-t border-white/5">
-                    <td className="p-4 text-text font-mono text-sm">{team.teamId}</td>
-                    <td className="p-4 text-text">{team.name}</td>
-                    <td className="p-4 text-text-muted">{team.category}</td>
-                    <td className="p-4">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        team.payment?.status === "SUCCESS" ? "bg-green-500/10 text-green-400" :
-                        team.payment?.status === "PENDING" ? "bg-yellow-500/10 text-yellow-400" :
-                        "bg-red-500/10 text-red-400"
-                      }`}>
-                        {team.payment?.status || "N/A"}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        team.status === "APPROVED" ? "bg-green-500/10 text-green-400" :
-                        team.status === "REJECTED" ? "bg-red-500/10 text-red-400" :
-                        "bg-yellow-500/10 text-yellow-400"
-                      }`}>
-                        {team.status}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-2">
-                        <button className="p-1 text-green-400 hover:bg-green-500/10 rounded"><CheckCircle size={16} /></button>
-                        <button className="p-1 text-red-400 hover:bg-red-500/10 rounded"><XCircle size={16} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                participants.map((team: any) => {
+                  const hasDiscord = team.members?.some((m: any) => m.user?.discordJoined);
+                  return (
+                    <tr key={team.id} className="hover:bg-white/5 transition-colors">
+                      <td className="p-4 text-text font-mono font-bold text-primary">{team.teamId}</td>
+                      <td className="p-4 text-text font-medium">{team.name}</td>
+                      <td className="p-4 text-text-muted">{team.category}</td>
+                      <td className="p-4 text-center">
+                        <button
+                          onClick={() => team.payment && setSelectedReceipt(team.payment)}
+                          disabled={!team.payment}
+                          className={`px-2 py-0.5 rounded-full text-xs font-bold inline-flex items-center gap-1 ${
+                            team.payment?.status === "SUCCESS" ? "bg-green-500/10 text-green-400 cursor-pointer hover:bg-green-500/20" :
+                            team.payment?.status === "PENDING" ? "bg-yellow-500/10 text-yellow-400" :
+                            team.payment?.status === "REFUNDED" ? "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 cursor-pointer" :
+                            "bg-red-500/10 text-red-400"
+                          }`}
+                        >
+                          {team.payment?.status || "PENDING"}
+                          {team.payment?.status === "SUCCESS" && <ExternalLink size={10} />}
+                        </button>
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                          hasDiscord ? "bg-neon-blue/10 text-neon-blue" : "bg-white/5 text-text-dim"
+                        }`}>
+                          {hasDiscord ? "Joined" : "No"}
+                        </span>
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                          team.status === "APPROVED" ? "bg-green-500/10 text-green-400" :
+                          team.status === "REJECTED" ? "bg-red-500/10 text-red-400" :
+                          "bg-yellow-500/10 text-yellow-400"
+                        }`}>
+                          {team.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="flex justify-end gap-1.5">
+                          {team.status !== "APPROVED" && (
+                            <button
+                              onClick={() => handleApproveTeam(team.teamId)}
+                              className="p-1 text-green-400 hover:bg-green-500/10 rounded"
+                              title="Approve Team"
+                            >
+                              <CheckCircle size={18} />
+                            </button>
+                          )}
+                          {team.status !== "REJECTED" && (
+                            <button
+                              onClick={() => handleRejectTeam(team.teamId)}
+                              className="p-1 text-red-400 hover:bg-red-500/10 rounded"
+                              title="Reject Team"
+                            >
+                              <XCircle size={18} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-text-muted">No participants found</td>
+                  <td colSpan={7} className="p-8 text-center text-text-muted">No teams match selected filters</td>
                 </tr>
               )}
             </tbody>
@@ -241,58 +801,532 @@ function ParticipantsTab({ participants, searchTerm, setSearchTerm, filterStatus
   );
 }
 
-function PaymentsTab() {
+/* ============================================================================
+   C. PAYMENT MANAGEMENT
+   ============================================================================ */
+function PaymentsPane({ payments, handleProcessRefund, setSelectedReceipt }: any) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-text">Payment Management</h2>
-      <div className="glass-card p-6">
-        <p className="text-text-muted">Payment tracking and management will appear here.</p>
+      <div>
+        <h2 className="font-display text-2xl font-bold text-text">Payment Management</h2>
+        <p className="text-text-muted text-sm">Track GST billing, audit transactions, and process team refunds.</p>
       </div>
-    </motion.div>
-  );
-}
 
-function AnnouncementsTab() {
-  const [title, setTitle] = useState("");
-  const [message, setMessage] = useState("");
-
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-text">Announcements</h2>
-      <div className="glass-card p-6 space-y-4">
-        <div>
-          <label className="label-text">Title</label>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="input-field" placeholder="Announcement title" />
+      <div className="glass-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-surface-light border-b border-white/5 text-text-muted text-xs font-semibold uppercase">
+              <tr>
+                <th className="p-4">GST Invoice ID</th>
+                <th className="p-4">Team</th>
+                <th className="p-4">Amount</th>
+                <th className="p-4">Order ID</th>
+                <th className="p-4 text-center">Status</th>
+                <th className="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5 text-sm">
+              {payments.length > 0 ? (
+                payments.map((payment: any) => (
+                  <tr key={payment.id} className="hover:bg-white/5 transition-colors">
+                    <td className="p-4 text-text font-mono font-bold text-primary">
+                      {payment.gstInvoice ? (
+                        <button
+                          onClick={() => setSelectedReceipt(payment)}
+                          className="hover:underline text-left inline-flex items-center gap-1 text-primary font-bold"
+                        >
+                          {payment.gstInvoice}
+                          <ExternalLink size={10} />
+                        </button>
+                      ) : (
+                        <span className="text-text-dim italic">Pending</span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <span className="text-text font-medium block">{payment.team?.name}</span>
+                      <span className="text-xs text-text-muted font-mono">{payment.team?.teamId}</span>
+                    </td>
+                    <td className="p-4 text-neon-green font-bold">₹{payment.amount}</td>
+                    <td className="p-4 text-text-muted font-mono text-xs truncate max-w-[120px]">{payment.razorpayOrderId || "N/A"}</td>
+                    <td className="p-4 text-center">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                        payment.status === "SUCCESS" ? "bg-green-500/10 text-green-400" :
+                        payment.status === "PENDING" ? "bg-yellow-500/10 text-yellow-400" :
+                        payment.status === "REFUNDED" ? "bg-purple-500/10 text-purple-400" :
+                        "bg-red-500/10 text-red-400"
+                      }`}>{payment.status}</span>
+                    </td>
+                    <td className="p-4 text-right">
+                      {payment.status === "SUCCESS" && (
+                        <button
+                          onClick={() => handleProcessRefund(payment.id)}
+                          className="btn-secondary py-1 px-3 text-xs bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-purple-500/20"
+                        >
+                          Refund
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-text-muted">No transactions found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-        <div>
-          <label className="label-text">Message</label>
-          <textarea value={message} onChange={(e) => setMessage(e.target.value)} className="input-field h-32" placeholder="Announcement message" />
-        </div>
-        <button className="btn-primary">Send Announcement</button>
       </div>
     </motion.div>
   );
 }
 
-function SupportTab() {
+/* ============================================================================
+   D. ANNOUNCEMENT SYSTEM
+   ============================================================================ */
+function AnnouncementsPane({
+  announcements,
+  announcementTitle,
+  setAnnouncementTitle,
+  announcementMsg,
+  setAnnouncementMsg,
+  announcementTarget,
+  setAnnouncementTarget,
+  channels,
+  setChannels,
+  handleSendAnnouncement,
+  announcementLogs
+}: any) {
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Create Announcement Form */}
+      <div className="lg:col-span-2 space-y-6">
+        <div>
+          <h2 className="font-display text-2xl font-bold text-text">Broadcast Announcements</h2>
+          <p className="text-text-muted text-sm">Send real-time alerts to dashboard, emails, and discord channels.</p>
+        </div>
+
+        <form onSubmit={handleSendAnnouncement} className="glass-card p-6 space-y-4">
+          <div>
+            <label className="label-text text-sm">Announcement Title</label>
+            <input
+              type="text"
+              value={announcementTitle}
+              onChange={(e) => setAnnouncementTitle(e.target.value)}
+              className="input-field text-sm"
+              placeholder="e.g. Round 1 details released!"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="label-text text-sm">Target Audience</label>
+            <select
+              value={announcementTarget}
+              onChange={(e) => setAnnouncementTarget(e.target.value)}
+              className="input-field text-sm"
+            >
+              <option value="ALL">All Participants</option>
+              <option value="STUDENT">Students Only</option>
+              <option value="IT_PROFESSIONAL">IT Professionals Only</option>
+              <option value="STARTUP">Startups Only</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="label-text text-sm">Select Output Channels</label>
+            <div className="flex flex-wrap gap-4 mt-2">
+              <label className="flex items-center gap-2 text-sm text-text-muted cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={channels.dashboard}
+                  onChange={(e) => setChannels({ ...channels, dashboard: e.target.checked })}
+                  className="rounded border-white/10 text-primary focus:ring-primary"
+                />
+                Dashboard Feed
+              </label>
+              <label className="flex items-center gap-2 text-sm text-text-muted cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={channels.email}
+                  onChange={(e) => setChannels({ ...channels, email: e.target.checked })}
+                  className="rounded border-white/10 text-primary focus:ring-primary"
+                />
+                Broadcast Email (Resend)
+              </label>
+              <label className="flex items-center gap-2 text-sm text-text-muted cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={channels.discord}
+                  onChange={(e) => setChannels({ ...channels, discord: e.target.checked })}
+                  className="rounded border-white/10 text-primary focus:ring-primary"
+                />
+                Discord Hook (#announcements)
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label className="label-text text-sm">Message</label>
+            <textarea
+              value={announcementMsg}
+              onChange={(e) => setAnnouncementMsg(e.target.value)}
+              className="input-field text-sm h-32"
+              placeholder="Write the announcement description..."
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn-primary w-full text-sm">
+            Publish Broadcast
+          </button>
+        </form>
+
+        {announcementLogs.length > 0 && (
+          <div className="bg-green-500/5 border border-green-500/20 p-4 rounded-xl space-y-2">
+            <h4 className="text-green-400 font-bold text-sm flex items-center gap-2">
+              <CheckCircle size={16} /> Broadcast Executed Successfully
+            </h4>
+            <ul className="list-disc pl-4 text-xs text-text-muted space-y-1">
+              {announcementLogs.map((log: string, idx: number) => (
+                <li key={idx}>{log}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* Broadcast History */}
+      <div className="space-y-4">
+        <h3 className="font-display font-bold text-lg text-text">Broadcast Log</h3>
+        <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+          {announcements.map((ann: any) => (
+            <div key={ann.id} className="p-4 bg-white/5 border border-white/5 rounded-xl space-y-2 relative">
+              {ann.isPinned && (
+                <span className="absolute top-4 right-4 bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold">
+                  PINNED
+                </span>
+              )}
+              <h4 className="text-text font-bold text-sm leading-snug">{ann.title}</h4>
+              <p className="text-xs text-text-muted line-clamp-3">{ann.message}</p>
+              <span className="text-[10px] text-text-dim block">
+                {new Date(ann.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ============================================================================
+   F. SUPPORT SYSTEM
+   ============================================================================ */
+function SupportPane({
+  tickets,
+  selectedTicket,
+  setSelectedTicket,
+  ticketResponse,
+  setTicketResponse,
+  handleReplyTicket,
+  handleCloseTicket
+}: any) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-text">Support Tickets</h2>
-      <div className="glass-card p-6">
-        <p className="text-text-muted">Support ticket management will appear here.</p>
+      <div>
+        <h2 className="font-display text-2xl font-bold text-text">Support Tickets</h2>
+        <p className="text-text-muted text-sm">Assign, reply to, and resolve participant queries.</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Ticket List Queue */}
+        <div className="lg:col-span-1 glass-card p-4 space-y-4 max-h-[500px] overflow-y-auto">
+          <h3 className="font-display font-bold text-sm text-text border-b border-white/5 pb-2">Ticket Queue</h3>
+          <div className="space-y-2">
+            {tickets.length > 0 ? (
+              tickets.map((t: any) => (
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedTicket(t)}
+                  className={`w-full text-left p-3 rounded-lg transition-colors border ${
+                    selectedTicket?.id === t.id
+                      ? "bg-primary/10 border-primary/30"
+                      : "bg-white/5 border-transparent hover:bg-white/10"
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-text-muted font-bold uppercase truncate max-w-[80px]">
+                      {t.category}
+                    </span>
+                    <span className={`text-[9px] font-extrabold uppercase ${
+                      t.status === "OPEN" ? "text-red-400" :
+                      t.status === "IN_PROGRESS" ? "text-yellow-400" :
+                      t.status === "RESOLVED" ? "text-green-400" :
+                      "text-text-dim"
+                    }`}>{t.status}</span>
+                  </div>
+                  <h4 className="text-text font-bold text-xs truncate">{t.subject}</h4>
+                  <p className="text-[10px] text-text-dim truncate">{t.user?.name || "Participant"}</p>
+                </button>
+              ))
+            ) : (
+              <p className="text-xs text-text-muted text-center py-8">No tickets raised yet.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Ticket View/Reply Thread */}
+        <div className="lg:col-span-2">
+          {selectedTicket ? (
+            <div className="glass-card p-6 space-y-6">
+              <div className="flex justify-between items-start border-b border-white/5 pb-4">
+                <div>
+                  <span className="text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-bold uppercase">
+                    {selectedTicket.category}
+                  </span>
+                  <h3 className="font-display font-bold text-lg text-text mt-2">{selectedTicket.subject}</h3>
+                  <p className="text-xs text-text-muted mt-1">
+                    By {selectedTicket.user?.name} ({selectedTicket.user?.email})
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  {selectedTicket.status !== "CLOSED" && (
+                    <button
+                      onClick={() => handleCloseTicket(selectedTicket.id)}
+                      className="btn-secondary py-1 px-3 text-xs border-red-500/20 text-red-400 bg-red-500/5 hover:bg-red-500/10"
+                    >
+                      Close Ticket
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Message Details */}
+              <div className="space-y-4">
+                <div className="p-4 bg-white/5 border border-white/5 rounded-xl">
+                  <span className="text-[10px] text-text-dim block mb-1">
+                    Participant Message ({new Date(selectedTicket.createdAt).toLocaleString()}):
+                  </span>
+                  <p className="text-sm text-text leading-relaxed whitespace-pre-wrap">{selectedTicket.message}</p>
+                </div>
+
+                {selectedTicket.response && (
+                  <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl">
+                    <span className="text-[10px] text-primary block mb-1 font-bold">
+                      Admin Response ({new Date(selectedTicket.updatedAt).toLocaleString()}):
+                    </span>
+                    <p className="text-sm text-text leading-relaxed whitespace-pre-wrap">{selectedTicket.response}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Reply field */}
+              {selectedTicket.status !== "CLOSED" && (
+                <form onSubmit={handleReplyTicket} className="space-y-3 border-t border-white/5 pt-4">
+                  <label className="label-text text-sm">Write Response</label>
+                  <textarea
+                    value={ticketResponse}
+                    onChange={(e) => setTicketResponse(e.target.value)}
+                    className="input-field text-sm h-28"
+                    placeholder="Provide troubleshooting steps or resolving answer..."
+                    required
+                  />
+                  <button type="submit" className="btn-primary text-sm py-2">
+                    Send Response
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : (
+            <div className="glass-card p-12 text-center h-full flex flex-col justify-center items-center">
+              <LifeBuoy className="text-text-dim mb-4" size={48} />
+              <h3 className="font-display font-bold text-text mb-2">Select a Ticket</h3>
+              <p className="text-text-muted text-xs max-w-sm">
+                Click on any participant support ticket on the left pane to view details and response threads.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
 }
 
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
+/* ============================================================================
+   G. SPONSOR MANAGEMENT
+   ============================================================================ */
+function SponsorsPane({
+  sponsors,
+  showAddSponsor,
+  setShowAddSponsor,
+  newSponsor,
+  setNewSponsor,
+  handleAddSponsorSubmit,
+  handleToggleSponsorStatus,
+  handleDeleteSponsor
+}: any) {
   return (
-    <div className="glass-card p-6">
-      <div className="flex items-center gap-3 mb-3">
-        {icon}
-        <span className="text-text-muted text-sm">{label}</span>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="font-display text-2xl font-bold text-text">Sponsor Hub</h2>
+          <p className="text-text-muted text-sm">Manage banner displays, logos, contact info, and active tier layouts.</p>
+        </div>
+        <button
+          onClick={() => setShowAddSponsor(!showAddSponsor)}
+          className="btn-primary inline-flex items-center gap-1.5 text-sm py-2"
+        >
+          <Plus size={16} /> Add Sponsor
+        </button>
       </div>
-      <p className="font-display text-3xl font-bold text-text">{value}</p>
-    </div>
+
+      {showAddSponsor && (
+        <form onSubmit={handleAddSponsorSubmit} className="glass-card p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2 border-b border-white/5 pb-2">
+            <h3 className="font-display font-bold text-text">New Partner Record</h3>
+          </div>
+          <div>
+            <label className="label-text text-xs">Sponsor Name</label>
+            <input
+              type="text"
+              value={newSponsor.name}
+              onChange={(e) => setNewSponsor({ ...newSponsor, name: e.target.value })}
+              className="input-field text-sm"
+              placeholder="e.g. Microsoft"
+              required
+            />
+          </div>
+          <div>
+            <label className="label-text text-xs">Tier</label>
+            <select
+              value={newSponsor.tier}
+              onChange={(e) => setNewSponsor({ ...newSponsor, tier: e.target.value })}
+              className="input-field text-sm"
+            >
+              <option value="PLATINUM">PLATINUM</option>
+              <option value="GOLD">GOLD</option>
+              <option value="SILVER">SILVER</option>
+            </select>
+          </div>
+          <div>
+            <label className="label-text text-xs">Website URL</label>
+            <input
+              type="url"
+              value={newSponsor.website}
+              onChange={(e) => setNewSponsor({ ...newSponsor, website: e.target.value })}
+              className="input-field text-sm"
+              placeholder="https://microsoft.com"
+            />
+          </div>
+          <div>
+            <label className="label-text text-xs">Logo Image Link</label>
+            <input
+              type="url"
+              value={newSponsor.logo}
+              onChange={(e) => setNewSponsor({ ...newSponsor, logo: e.target.value })}
+              className="input-field text-sm"
+              placeholder="https://image-source.com/logo.png"
+            />
+          </div>
+          <div>
+            <label className="label-text text-xs">Contact E-mail</label>
+            <input
+              type="email"
+              value={newSponsor.contact}
+              onChange={(e) => setNewSponsor({ ...newSponsor, contact: e.target.value })}
+              className="input-field text-sm"
+              placeholder="partner@sponsors.com"
+            />
+          </div>
+          <div>
+            <label className="label-text text-xs">Description</label>
+            <input
+              type="text"
+              value={newSponsor.description}
+              onChange={(e) => setNewSponsor({ ...newSponsor, description: e.target.value })}
+              className="input-field text-sm"
+              placeholder="Partner contributions/sponsorship notes..."
+            />
+          </div>
+          <div className="md:col-span-2 flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowAddSponsor(false)}
+              className="btn-secondary py-2 text-sm"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary py-2 text-sm">
+              Save Partner
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Sponsors Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {sponsors.map((sp: any) => (
+          <div key={sp.id} className="glass-card p-5 flex flex-col justify-between border border-white/5 relative">
+            <div className="flex gap-4">
+              <div className="w-16 h-16 rounded bg-white/5 flex-shrink-0 flex items-center justify-center overflow-hidden border border-white/10">
+                {sp.logo ? (
+                  <img src={sp.logo} alt={sp.name} className="object-cover w-full h-full" />
+                ) : (
+                  <Plus className="text-text-dim" size={24} />
+                )}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-text font-bold text-base leading-tight">{sp.name}</h4>
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${
+                    sp.tier === "PLATINUM" ? "bg-purple-500/10 text-purple-400" :
+                    sp.tier === "GOLD" ? "bg-yellow-500/10 text-yellow-400" :
+                    "bg-gray-500/10 text-gray-400"
+                  }`}>{sp.tier}</span>
+                </div>
+                <p className="text-xs text-text-muted mt-1 leading-snug">{sp.description || "No description set."}</p>
+                {sp.website && (
+                  <a
+                    href={sp.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-primary hover:underline inline-flex items-center gap-1 mt-2"
+                  >
+                    Visit Website
+                    <ExternalLink size={10} />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 mt-4 pt-3 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-text-muted font-medium">Dashboard Active Layout:</span>
+                <button
+                  onClick={() => handleToggleSponsorStatus(sp.id, !sp.isActive)}
+                  className={`w-10 h-5 rounded-full p-0.5 transition-colors relative ${
+                    sp.isActive ? "bg-neon-green" : "bg-white/10"
+                  }`}
+                >
+                  <div
+                    className={`w-4 h-4 bg-background rounded-full transition-transform ${
+                      sp.isActive ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+              <button
+                onClick={() => handleDeleteSponsor(sp.id)}
+                className="text-text-dim hover:text-red-400 p-1"
+                title="Remove Sponsor"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
   );
 }

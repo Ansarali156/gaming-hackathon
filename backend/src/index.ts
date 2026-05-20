@@ -52,12 +52,26 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 app.listen(PORT, async () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
   
-  try {
-    await prisma.$connect();
-    console.log('✅ Database connected successfully');
-  } catch (error) {
-    console.error('❌ Database connection failed:', error);
-  }
+  // Retry DB connection (Render free-tier databases wake up slowly)
+  const maxRetries = 10;
+  let retries = 0;
+  
+  const connectWithRetry = async () => {
+    try {
+      await prisma.$connect();
+      console.log('✅ Database connected successfully');
+    } catch (error: any) {
+      retries++;
+      if (retries < maxRetries) {
+        console.log(`⏳ Database not ready (attempt ${retries}/${maxRetries}), retrying in 5s...`);
+        setTimeout(connectWithRetry, 5000);
+      } else {
+        console.error('❌ Database connection failed after max retries:', error?.message || error);
+      }
+    }
+  };
+  
+  connectWithRetry();
 });
 
 export default app;

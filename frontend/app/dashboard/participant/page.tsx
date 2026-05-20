@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ChatBot } from "@/components/ui/ChatBot";
@@ -54,7 +54,10 @@ export default function ParticipantDashboard() {
                   <NavItem icon={<Settings size={18} />} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
                 </nav>
 
-                <button className="w-full mt-6 py-2 border border-white/10 rounded-lg text-text-muted hover:text-red-400 hover:border-red-400/30 transition-colors flex items-center justify-center gap-2">
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="w-full mt-6 py-2 border border-white/10 rounded-lg text-text-muted hover:text-red-400 hover:border-red-400/30 transition-colors flex items-center justify-center gap-2"
+                >
                   <LogOut size={16} />
                   Logout
                 </button>

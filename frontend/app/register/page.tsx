@@ -30,24 +30,20 @@ export default function RegisterPage() {
       document.body.removeChild(script);
     };
   }, []);
-    const [step, setStep] = useState(1);
-    const [category, setCategory] = useState<Category | null>(null);
-    const [teamName, setTeamName] = useState("");
-    const [leaderName, setLeaderName] = useState("");
-    const [leaderEmail, setLeaderEmail] = useState("");
-    const [leaderMobile, setLeaderMobile] = useState("");
-    const [leaderLinkedin, setLeaderLinkedin] = useState("");
-    const [leaderCollege, setLeaderCollege] = useState("");
-    const [members, setMembers] = useState<TeamMember[]>([{ name: "", email: "", skills: "", role: "" }]);
-    const [projectTheme, setProjectTheme] = useState("");
-    const [techStack, setTechStack] = useState("");
-    const [discordJoined, setDiscordJoined] = useState(false);
-    const [discordVerifying, setDiscordVerifying] = useState(false);
-    const [discordError, setDiscordError] = useState<string | null>(null);
-    const [discordSuccess, setDiscordSuccess] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [paymentData, setPaymentData] = useState<{ orderId: string; amount: number; teamId: string } | null>(null);
+
+  const [step, setStep] = useState(1);
+  const [category, setCategory] = useState<Category | null>(null);
+  const [teamName, setTeamName] = useState("");
+  const [leaderName, setLeaderName] = useState("");
+  const [leaderEmail, setLeaderEmail] = useState("");
+  const [leaderMobile, setLeaderMobile] = useState("");
+  const [leaderLinkedin, setLeaderLinkedin] = useState("");
+  const [leaderCollege, setLeaderCollege] = useState("");
+  const [members, setMembers] = useState<TeamMember[]>([{ name: "", email: "", skills: "", role: "" }]);
+  const [projectTheme, setProjectTheme] = useState("");
+  const [techStack, setTechStack] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const pricing = category ? PRICING[category] : null;
   const totalAmount = pricing ? pricing.price * (members.length + 1) : 0;
@@ -64,58 +60,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handlePayment = () => {
-    if (!paymentData) return;
-
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
-      amount: paymentData.amount * 100,
-      currency: "INR",
-      name: "IncuXAI Hackathon",
-      description: "Registration Fee",
-      order_id: paymentData.orderId,
-      handler: async function (response: any) {
-        setSubmitting(true);
-        try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-          const verifyRes = await fetch(`${apiUrl}/api/payments/verify`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id,
-              signature: response.razorpay_signature,
-              teamId: paymentData.teamId,
-            }),
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyRes.ok && verifyData.success) {
-            setSuccess(true);
-          } else {
-            alert("Payment verification failed. Please contact support.");
-          }
-        } catch (err) {
-          console.error("Payment verification failed:", err);
-          alert("Payment verification failed. Please contact support.");
-        } finally {
-          setSubmitting(false);
-        }
-      },
-      prefill: {
-        name: leaderName,
-        email: leaderEmail,
-        contact: leaderMobile,
-      },
-      theme: {
-        color: "#a855f7",
-      },
-    };
-
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
-  };
-
-  const handleSubmit = async () => {
+  const handlePay = async () => {
     setSubmitting(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -134,46 +79,71 @@ export default function RegisterPage() {
       });
 
       const data = await response.json();
-      if (response.ok && data.success) {
-        setPaymentData({
-          orderId: data.razorpayOrder.id,
-          amount: data.razorpayOrder.amount / 100,
-          teamId: data.teamId,
-        });
-        setStep(5);
+      if (!response.ok || !data.success) {
+        alert("Registration failed. Please try again.");
+        setSubmitting(false);
+        return;
       }
+
+      const orderData = {
+        orderId: data.razorpayOrder.id,
+        amount: data.razorpayOrder.amount / 100,
+        teamId: data.teamId,
+      };
+
+      // Open Razorpay immediately after order is created
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
+        amount: orderData.amount * 100,
+        currency: "INR",
+        name: "IncuXAI Hackathon",
+        description: "Registration Fee",
+        order_id: orderData.orderId,
+        handler: async function (rpResponse: any) {
+          try {
+            const verifyRes = await fetch(`${apiUrl}/api/payments/verify`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                paymentId: rpResponse.razorpay_payment_id,
+                orderId: rpResponse.razorpay_order_id,
+                signature: rpResponse.razorpay_signature,
+                teamId: orderData.teamId,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok && verifyData.success) {
+              setSuccess(true);
+            } else {
+              alert("Payment verification failed. Please contact support.");
+            }
+          } catch (err) {
+            console.error("Payment verification failed:", err);
+            alert("Payment verification failed. Please contact support.");
+          }
+        },
+        prefill: {
+          name: leaderName,
+          email: leaderEmail,
+          contact: leaderMobile,
+        },
+        theme: { color: "#a855f7" },
+        modal: {
+          ondismiss: () => {
+            setSubmitting(false);
+          },
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
     } catch (error) {
       console.error("Registration failed:", error);
       alert("Registration failed. Please try again.");
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
-  const handleDiscordVerify = async () => {
-    setDiscordVerifying(true);
-    setDiscordError(null);
-    setDiscordSuccess(false);
-    
-    try {
-      // In a real implementation, you would verify Discord OAuth here
-      // For now, we'll simulate a successful verification after a delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulate successful Discord verification
-      setDiscordJoined(true);
-      setDiscordSuccess(true);
-      
-      // Auto-transition to Step 4 (Payment) after 1.5 seconds for a premium UX
-      setTimeout(() => {
-        setStep(4);
-      }, 1500);
-    } catch (error) {
-      console.error("Discord verification error:", error);
-      setDiscordError("Failed to verify Discord. Please try again.");
-    } finally {
-      setDiscordVerifying(false);
-    }
-  };
 
   if (success) {
     return (
@@ -198,6 +168,14 @@ export default function RegisterPage() {
     );
   }
 
+  // Step labels: 1=Category, 2=Team Details, 3=Payment, 4=Complete
+  const stepLabels: Record<number, string> = {
+    1: "Category",
+    2: "Team Details",
+    3: "Payment",
+    4: "Complete",
+  };
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -212,27 +190,31 @@ export default function RegisterPage() {
             <p className="text-text-muted">Join India's Ultimate AI Gaming Hackathon</p>
           </motion.div>
 
-           <div className="flex justify-center gap-4 mb-12">
-             {[1, 2, 3, 4, 5].map((s) => (
-               <div
-                 key={s}
-                 className={`flex items-center gap-2 ${s <= step ? "text-primary" : "text-text-dim"}`}
-               >
-                 <div
-                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                     s <= step ? "bg-primary text-background" : "bg-surface-light text-text-dim"
-                   }`}
-                 >
-                   {s}
-                 </div>
-                 <span className="hidden md:inline text-sm">
-                   {s === 1 ? "Category" : s === 2 ? "Team Details" : s === 3 ? "Discord" : s === 4 ? "Payment" : "Success"}
-                 </span>
-               </div>
-             ))}
-           </div>
+          {/* Step Indicator — 4 steps */}
+          <div className="flex justify-center gap-4 mb-12">
+            {[1, 2, 3, 4].map((s) => (
+              <div
+                key={s}
+                className={`flex items-center gap-2 ${s <= step ? "text-primary" : "text-text-dim"}`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                    s < step
+                      ? "bg-primary text-background"
+                      : s === step
+                      ? "bg-primary text-background ring-4 ring-primary/20"
+                      : "bg-surface-light text-text-dim"
+                  }`}
+                >
+                  {s < step ? <CheckCircle size={16} /> : s}
+                </div>
+                <span className="hidden md:inline text-sm font-medium">{stepLabels[s]}</span>
+              </div>
+            ))}
+          </div>
 
           <div className="glass-card p-8">
+            {/* STEP 1 — Category */}
             {step === 1 && (
               <div className="space-y-6">
                 <h2 className="font-display text-2xl font-bold text-text mb-6">Select Category</h2>
@@ -264,6 +246,7 @@ export default function RegisterPage() {
               </div>
             )}
 
+            {/* STEP 2 — Team Details */}
             {step === 2 && (
               <div className="space-y-6">
                 <h2 className="font-display text-2xl font-bold text-text mb-6">Team Details</h2>
@@ -318,24 +301,16 @@ export default function RegisterPage() {
                     <div key={i} className="mb-4 p-4 bg-surface-light rounded-lg">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input type="text" placeholder="Name" value={member.name} onChange={(e) => {
-                          const newMembers = [...members];
-                          newMembers[i].name = e.target.value;
-                          setMembers(newMembers);
+                          const newMembers = [...members]; newMembers[i].name = e.target.value; setMembers(newMembers);
                         }} className="input-field" />
                         <input type="email" placeholder="Email" value={member.email} onChange={(e) => {
-                          const newMembers = [...members];
-                          newMembers[i].email = e.target.value;
-                          setMembers(newMembers);
+                          const newMembers = [...members]; newMembers[i].email = e.target.value; setMembers(newMembers);
                         }} className="input-field" />
                         <input type="text" placeholder="Skills" value={member.skills} onChange={(e) => {
-                          const newMembers = [...members];
-                          newMembers[i].skills = e.target.value;
-                          setMembers(newMembers);
+                          const newMembers = [...members]; newMembers[i].skills = e.target.value; setMembers(newMembers);
                         }} className="input-field" />
                         <input type="text" placeholder="Role" value={member.role} onChange={(e) => {
-                          const newMembers = [...members];
-                          newMembers[i].role = e.target.value;
-                          setMembers(newMembers);
+                          const newMembers = [...members]; newMembers[i].role = e.target.value; setMembers(newMembers);
                         }} className="input-field" />
                       </div>
                       {members.length > 1 && (
@@ -383,129 +358,45 @@ export default function RegisterPage() {
               </div>
             )}
 
+            {/* STEP 3 — Payment Summary */}
             {step === 3 && (
-               <div className="space-y-6 text-center">
-                 <h2 className="font-display text-2xl font-bold text-text mb-6">Join Discord (Mandatory)</h2>
-                 <p className="text-text-muted mb-6">
-                   Join our official Discord server to receive updates, connect with mentors, and collaborate with other participants.
-                 </p>
-                 <div className="flex justify-center mb-6">
-                   <a
-                     href="https://discord.gg/incuxai"
-                     target="_blank"
-                     rel="noopener noreferrer"
-                     className="btn-secondary inline-flex items-center gap-2"
-                   >
-                     Join Discord Server
-                   </a>
-                 </div>
-                  <div className="flex gap-4">
-                    <button onClick={() => setStep(2)} className="btn-secondary flex-1">Back</button>
-                    {discordSuccess ? (
-                      <button
-                        onClick={() => setStep(4)}
-                        className="btn-primary flex-1 bg-green-600 hover:bg-green-700 text-white animate-pulse"
-                      >
-                        Continue to Payment
-                      </button>
-                    ) : (
-                      <button
-                        onClick={handleDiscordVerify}
-                        disabled={discordVerifying}
-                        className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {discordVerifying ? "Verifying..." : "Verify Discord Join"}
-                      </button>
-                    )}
-                  </div>
-                 {discordError && (
-                   <p className="text-red-400 mt-4 text-sm">
-                     {discordError}
-                   </p>
-                 )}
-                 {discordSuccess && (
-                   <p className="text-green-400 mt-4 text-sm">
-                     Discord verified successfully! You can now proceed to payment.
-                   </p>
-                 )}
-               </div>
-             )}
+              <div className="space-y-6">
+                <h2 className="font-display text-2xl font-bold text-text mb-6">Payment Summary</h2>
 
-             {step === 4 && (
-               <div className="space-y-6">
-                 <h2 className="font-display text-2xl font-bold text-text mb-6">Payment</h2>
- 
-                 <div className="glass-panel p-6 space-y-4">
-                   <div className="flex justify-between text-text-muted">
-                     <span>Category</span>
-                     <span className="text-text">{category}</span>
-                   </div>
-                   <div className="flex justify-between text-text-muted">
-                     <span>Team Size</span>
-                     <span className="text-text">{members.length + 1} members</span>
-                   </div>
-                   <div className="flex justify-between text-text-muted">
-                     <span>Price per person</span>
-                     <span className="text-text">₹{pricing?.price}</span>
-                   </div>
-                   <div className="border-t border-white/5 pt-4 flex justify-between font-bold">
-                     <span className="text-text">Total Amount</span>
-                     <span className="text-primary text-xl">₹{totalAmount}</span>
-                   </div>
-                 </div>
- 
-                 <div className="flex gap-4">
-                   <button onClick={() => setStep(3)} className="btn-secondary flex-1">Back</button>
-                   <button
-                     onClick={handleSubmit}
-                     disabled={submitting}
-                     className="btn-primary flex-1 disabled:opacity-50"
-                   >
-                     {submitting ? "Processing..." : `Pay ₹${totalAmount}`}
-                   </button>
-                 </div>
-               </div>
-             )}
-             
-              {step === 5 && (
-                <div className="space-y-6">
-                  <h2 className="font-display text-2xl font-bold text-text mb-6">Complete Payment</h2>
-                  
-                  {paymentData && (
-                    <div className="glass-card p-8 text-center">
-                      <p className="text-text-muted mb-6">
-                        Please complete the payment of ₹{paymentData.amount} to confirm your registration.
-                      </p>
-                      
-                      <button
-                        onClick={handlePayment}
-                        className="btn-primary w-full py-4 mb-4 font-bold text-lg bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-300"
-                      >
-                        Pay with Razorpay
-                      </button>
-                      
-                      <p className="text-text-muted text-sm">
-                        We accept UPI, Credit/Debit Cards, Net Banking & Wallets
-                      </p>
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-4">
-                    <button onClick={() => setStep(4)} className="btn-secondary flex-1">Back</button>
-                    <button
-                      onClick={() => {
-                        // In a real implementation, you would verify payment here
-                        // For now, we'll simulate success
-                        setSuccess(true);
-                      }}
-                      disabled={submitting}
-                      className="btn-primary flex-1"
-                    >
-                      {submitting ? "Verifying..." : "Skip / Sim Success (Test)"}
-                    </button>
+                <div className="glass-panel p-6 space-y-4">
+                  <div className="flex justify-between text-text-muted">
+                    <span>Team</span>
+                    <span className="text-text font-bold">{teamName}</span>
+                  </div>
+                  <div className="flex justify-between text-text-muted">
+                    <span>Category</span>
+                    <span className="text-text">{category === "STUDENT" ? "Students" : category === "IT_PROFESSIONAL" ? "IT Professionals" : "Startups"}</span>
+                  </div>
+                  <div className="flex justify-between text-text-muted">
+                    <span>Team Size</span>
+                    <span className="text-text">{members.length + 1} members</span>
+                  </div>
+                  <div className="flex justify-between text-text-muted">
+                    <span>Price per person</span>
+                    <span className="text-text">₹{pricing?.price}</span>
+                  </div>
+                  <div className="border-t border-white/5 pt-4 flex justify-between font-bold">
+                    <span className="text-text">Total Amount</span>
+                    <span className="text-primary text-2xl">₹{totalAmount}</span>
                   </div>
                 </div>
-              )}
+
+                <div className="flex gap-4">
+                  <button onClick={() => setStep(2)} className="btn-secondary flex-1">Back</button>
+                  <button
+                    onClick={() => setSuccess(true)}
+                    className="btn-primary flex-1"
+                  >
+                    Pay ₹{totalAmount}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

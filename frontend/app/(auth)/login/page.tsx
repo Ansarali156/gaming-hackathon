@@ -31,7 +31,13 @@ export default function LoginPage() {
     if (result?.error) {
       setError("Invalid email or password");
     } else {
-      router.push("/dashboard/participant");
+      const sessionRes = await fetch("/api/auth/session");
+      const session = await sessionRes.json();
+      if (session?.user?.role === "ADMIN") {
+        router.push("/dashboard/admin");
+      } else {
+        router.push("/dashboard/participant");
+      }
     }
     setLoading(false);
   };

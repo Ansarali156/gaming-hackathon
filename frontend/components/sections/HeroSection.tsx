@@ -43,13 +43,14 @@ function CountdownTimer({ targetDate, label }: { targetDate: Date; label: string
 }
 
 export function HeroSection() {
-  const [registeredCount, setRegisteredCount] = useState(24);
+  const [registeredCount, setRegisteredCount] = useState<number | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRegisteredCount((prev) => prev + Math.floor(Math.random() * 2));
-    }, 10000);
-    return () => clearInterval(interval);
+    // Fetch real team count from the database
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then((data) => setRegisteredCount(data.totalTeams ?? 0))
+      .catch(() => setRegisteredCount(0));
   }, []);
 
   return (
@@ -70,7 +71,13 @@ export function HeroSection() {
             className="inline-flex items-center gap-2 px-4 py-2 glass-panel rounded-full text-sm"
           >
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-            <span className="text-text-muted">{registeredCount} Teams Registered Today</span>
+            <span className="text-text-muted">
+              {registeredCount === null ? (
+                <span className="inline-block w-4 h-3 bg-white/10 rounded animate-pulse" />
+              ) : (
+                <><span className="text-primary font-bold">{registeredCount}</span> Teams Registered</>
+              )}
+            </span>
           </motion.div>
 
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
