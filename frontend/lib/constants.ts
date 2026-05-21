@@ -1,17 +1,17 @@
 export const EVENT_DATES = {
   registrationOpen: new Date("2026-05-18T00:00:00Z"),
-  registrationClose: new Date("2026-06-20T23:59:59Z"),
-  round1: new Date("2026-06-20T00:00:00Z"),
-  round2: new Date("2026-06-27T00:00:00Z"),
-  hackathonStart: new Date("2026-06-28T09:00:00Z"),
-  submissionDeadline: new Date("2026-06-28T18:00:00Z"),
+  registrationClose: new Date("2026-06-16T23:59:59Z"),
+  submissionDeadline: new Date("2026-06-16T23:59:59Z"),
+  resultsOut: new Date("2026-06-20T00:00:00Z"),
+  hackathonStart: new Date("2026-06-27T09:00:00Z"),
+  hackathonEnd: new Date("2026-06-28T18:00:00Z"),
   winnerAnnouncement: new Date("2026-06-28T20:00:00Z"),
 };
 
 export const PRICING = {
   STUDENT: { price: 300, minTeam: 2, maxTeam: 5 },
-  IT_PROFESSIONAL: { price: 1000, minTeam: 2, maxTeam: 3 },
-  STARTUP: { price: 5000, minTeam: 2, maxTeam: 2 },
+  IT_PROFESSIONAL: { price: 1000, minTeam: 2, maxTeam: 4 },
+  STARTUP: { price: 1000, minTeam: 2, maxTeam: 4 },
 };
 
 export const TRACKS = [
@@ -61,44 +61,50 @@ export const TRACKS = [
 
 export const TIMELINE = [
   { phase: "Registrations Open", date: "May 18", status: "active" },
-  { phase: "Hackathon Begins", date: "June 12", status: "upcoming" },
-  { phase: "Round 1", date: "June 12-20", status: "upcoming" },
-  { phase: "Final Submission", date: "June 20", status: "upcoming" },
-  { phase: "Round 2", date: "June 27, 28", status: "upcoming" },
+  { phase: "Online Submission Deadline", date: "June 16", status: "upcoming" },
+  { phase: "Results Announced", date: "June 20", status: "upcoming" },
+  { phase: "Final Round (Offline)", date: "June 27-28", status: "upcoming" },
   { phase: "Winner Announcement", date: "June 28", status: "upcoming" },
 ];
 
 export const PRIZE_POOL = [
-  { place: "1st Place", prize: "₹1,00,000", color: "from-yellow-400 to-yellow-600" },
-  { place: "2nd Place", prize: "₹50,000", color: "from-gray-300 to-gray-500" },
-  { place: "3rd Place", prize: "₹25,000", color: "from-orange-400 to-orange-600" },
-  { place: "Best AI Innovation", prize: "₹15,000", color: "from-primary to-neon-blue" },
-  { place: "Best Game Design", prize: "₹15,000", color: "from-secondary to-neon-purple" },
+  { place: "Grand Prize", prize: "10,00,000", color: "from-yellow-400 to-yellow-600" },
+  { place: "Creative Ideas", prize: "Opportunity", color: "from-primary to-neon-blue" },
+  { place: "Internships", prize: "Career Growth", color: "from-secondary to-neon-purple" },
+  { place: "Incubation", prize: "Startup Support", color: "from-green-400 to-green-600" },
+  { place: "Investments", prize: "Funding", color: "from-orange-400 to-orange-600" },
 ];
 
 export const FAQS = [
   {
     question: "What is the team size?",
-    answer: "Teams can have 2-5 members for students, 2-3 for IT professionals, and 2 members for startups.",
+    answer: "Students: 2-5 members | Startups & Professionals: 2-4 members",
   },
   {
     question: "Is there a registration fee?",
-    answer: "Yes: ₹300/person for students, ₹1000/person for IT professionals, and ₹5000/company for startups.",
+    answer: "Students: ₹300/person | Startups & Working Professionals: ₹1000/person",
   },
   {
     question: "Is the event online or offline?",
-    answer: "The hackathon will be held in a hybrid format with both online and offline participation options.",
+    answer: "The final round will be held OFFLINE on June 27th & 28th, 2026.",
   },
   {
-    question: "Are refunds available?",
-    answer: "Refunds are available up to 7 days before the event start date. Please contact support for assistance.",
+    question: "When is the last date for online submission?",
+    answer: "June 16th, 2026. Results will be announced on June 20th.",
   },
   {
     question: "Who is eligible to participate?",
-    answer: "Students, IT professionals, and startups from across India are welcome to participate.",
+    answer: "All B.Tech, M.Tech students, Startups & Working Professionals can participate.",
   },
   {
-    question: "Will certificates be provided?",
-    answer: "Yes, all participants will receive digital certificates. Winners will receive special recognition certificates.",
+    question: "What are the cash prizes?",
+    answer: "Cash prizes worth ₹10 Lakhs along with opportunities for internships, incubation & investments.",
   },
 ];
+
+export const CONTACT_INFO = {
+  website: "https://incuxai.com",
+  phone: "+91 795061289",
+  email: "info@incuxai.com",
+  instagram: "@incuxai",
+};

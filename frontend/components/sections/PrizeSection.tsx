@@ -16,8 +16,8 @@ export function PrizeSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="section-title">Prize Pool</h2>
-          <p className="section-subtitle">Compete for exciting prizes, internships, and startup incubation opportunities.</p>
+          <h2 className="section-title">Prize Pool — ₹10 Lakhs</h2>
+          <p className="section-subtitle">Cash prizes, internships, incubation & investment opportunities await you.</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">

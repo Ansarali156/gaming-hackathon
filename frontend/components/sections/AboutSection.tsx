@@ -21,7 +21,7 @@ export function AboutSection() {
         >
           <h2 className="section-title">About the Hackathon</h2>
           <p className="section-subtitle">
-            India's First Large-Scale AI Gaming Innovation Festival. A community-driven platform combining AI hackathons, gaming festivals, startup networking, and developer community building.
+            Gaming Hackathon Final Round — 27th & 28th June 2026 (Offline). All B.Tech, M.Tech students, Startups & Working Professionals can participate. Build your game, solve real challenges, and win cash prizes worth ₹10 Lakhs.
           </p>
         </motion.div>
 

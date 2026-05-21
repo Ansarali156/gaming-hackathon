@@ -80,15 +80,17 @@ export function HeroSection() {
             </span>
           </motion.div>
 
+          <p className="text-primary font-bold tracking-widest text-sm md:text-base">CODE. DESIGN. PLAY. WIN.</p>
+
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
-            India's Ultimate{" "}
-            <span className="gradient-text">AI Gaming</span>
+            GAMING{" "}
+            <span className="gradient-text">HACKATHON</span>
             <br />
-            Hackathon
+            <span className="text-2xl md:text-4xl text-text-muted font-normal">Final Round — Offline</span>
           </h1>
 
           <p className="text-text-muted text-lg md:text-xl max-w-3xl mx-auto">
-            Build intelligent games, AI systems & immersive experiences with developers, gamers, startups & innovators.
+            27th & 28th June 2026 | Cash Prizes Worth ₹10 Lakhs | Internships, Incubation & Investments
           </p>
 
           <CountdownTimer targetDate={EVENT_DATES.registrationClose} label="Registration Closing In" />
@@ -111,10 +113,10 @@ export function HeroSection() {
           </div>
 
           <div className="flex flex-wrap gap-8 justify-center pt-8">
-            <Stat icon={<Trophy className="text-primary" />} value="₹2,00,000+" label="Prize Pool" />
-            <Stat icon={<Users className="text-neon-blue" />} value="50+" label="Colleges" />
-            <Stat icon={<Users className="text-neon-purple" />} value="20+" label="Startups" />
-            <Stat icon={<Users className="text-neon-green" />} value="15+" label="Sponsors" />
+            <Stat icon={<Trophy className="text-primary" />} value="₹10,00,000" label="Cash Prizes" />
+            <Stat icon={<Users className="text-neon-blue" />} value="B.Tech & M.Tech" label="Students Eligible" />
+            <Stat icon={<Users className="text-neon-purple" />} value="Startups" label="Welcome" />
+            <Stat icon={<Users className="text-neon-green" />} value="Professionals" label="Can Participate" />
           </div>
         </motion.div>
       </div>
