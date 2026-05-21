@@ -538,13 +538,47 @@ function SubmissionTab({ teamData, paymentStatus, onSubmitSuccess }: any) {
 
 // ── Notifications Tab ─────────────────────────────────────────────────────────
 function NotificationsTab() {
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchAnnouncements() {
+      try {
+        const res = await fetch("/api/admin/announcements");
+        const data = await res.json();
+        if (data.success && data.announcements) {
+          setAnnouncements(data.announcements);
+        }
+      } catch (error) {
+        console.error("Failed to load announcements:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAnnouncements();
+  }, []);
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <h2 className="font-display text-2xl font-bold text-text">Notifications</h2>
       <div className="glass-card p-6 space-y-3">
-        <NotificationItem title="🎉 Welcome to IncuXAI Hackathon!" time="Just now" unread />
-        <NotificationItem title="📅 Registrations are now open!" time="2 days ago" />
-        <NotificationItem title="💡 Submission deadline: June 16" time="3 days ago" />
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : announcements.length === 0 ? (
+          <p className="text-center text-text-muted py-8">No new announcements right now.</p>
+        ) : (
+          announcements.map((a) => (
+            <NotificationItem 
+              key={a.id}
+              title={a.title} 
+              message={a.message}
+              time={new Date(a.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 
+              unread={a.isPinned} 
+            />
+          ))
+        )}
       </div>
     </motion.div>
   );
@@ -631,15 +665,21 @@ function LinkField({ label, icon, value, onChange, placeholder }: {
   );
 }
 
-function NotificationItem({ title, time, unread }: {
-  title: string; time: string; unread?: boolean;
+function NotificationItem({ title, message, time, unread }: {
+  title: string; message?: string; time: string; unread?: boolean;
 }) {
   return (
     <div className={`p-4 rounded-lg ${unread ? "bg-primary/5 border border-primary/20" : "bg-surface-light"}`}>
-      <div className="flex justify-between items-start gap-4">
-        <p className={`text-sm ${unread ? "text-text font-medium" : "text-text-muted"}`}>{title}</p>
-        <span className="text-text-dim text-xs whitespace-nowrap">{time}</span>
+      <div className="flex justify-between items-start gap-4 mb-2">
+        <p className={`text-sm ${unread ? "text-text font-medium" : "text-text-muted"}`}>
+          {unread && <span className="mr-2">📌</span>}
+          {title}
+        </p>
+        <span className="text-text-dim text-xs whitespace-nowrap mt-0.5">{time}</span>
       </div>
+      {message && (
+        <p className="text-text-muted text-sm whitespace-pre-wrap">{message}</p>
+      )}
     </div>
   );
 }
