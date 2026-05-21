@@ -83,10 +83,10 @@ export function HeroSection() {
           <p className="text-primary font-bold tracking-widest text-sm md:text-base">CODE. DESIGN. PLAY. WIN.</p>
 
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
-            GAMING{" "}
-            <span className="gradient-text">HACKATHON</span>
+            India's Ultimate{" "}
+            <span className="gradient-text">AI Gaming</span>
             <br />
-            <span className="text-2xl md:text-4xl text-text-muted font-normal">Final Round — Offline</span>
+            Hackathon
           </h1>
 
           <p className="text-text-muted text-lg md:text-xl max-w-3xl mx-auto">

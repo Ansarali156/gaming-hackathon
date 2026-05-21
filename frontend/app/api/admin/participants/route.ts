@@ -30,6 +30,7 @@ export async function GET(request: Request) {
             },
           },
           payment: true,
+          submission: true,
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,

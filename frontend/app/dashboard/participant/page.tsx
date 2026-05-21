@@ -1,20 +1,81 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ChatBot } from "@/components/ui/ChatBot";
-import { Users, CreditCard, Clock, Bell, FileText, Video, Github, MessageCircle, LogOut, Settings } from "lucide-react";
+import {
+  Users,
+  CreditCard,
+  Clock,
+  Bell,
+  FileText,
+  Github,
+  ExternalLink,
+  LogOut,
+  CheckCircle,
+  AlertCircle,
+  Lock,
+} from "lucide-react";
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function isValidUrl(url: string) {
+  try { new URL(url); return true; } catch { return false; }
+}
+
+// ── Nav Item ─────────────────────────────────────────────────────────────────
+function NavItem({ icon, label, active, onClick }: {
+  icon: React.ReactNode; label: string; active: boolean; onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-left ${
+        active ? "bg-primary/10 text-primary" : "text-text-muted hover:text-text hover:bg-white/5"
+      }`}
+    >
+      {icon}
+      <span className="text-sm font-medium">{label}</span>
+    </button>
+  );
+}
+
+// ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function ParticipantDashboard() {
   const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState("overview");
+  const [teamData, setTeamData] = useState<any>(null);
+  const [paymentStatus, setPaymentStatus] = useState<string>("PENDING");
+  const [loadingTeam, setLoadingTeam] = useState(true);
+
+  const fetchTeamData = async () => {
+    try {
+      const res = await fetch("/api/teams/me");
+      if (res.ok) {
+        const data = await res.json();
+        setTeamData(data.team);
+        setPaymentStatus(data.team?.payment?.status || "PENDING");
+      }
+    } catch (e) {
+      console.error("Failed to load team data", e);
+    } finally {
+      setLoadingTeam(false);
+    }
+  };
+
+  useEffect(() => {
+    if (session) fetchTeamData();
+  }, [session]);
 
   if (status === "loading") {
-    return <div className="min-h-screen flex items-center justify-center"><div className="text-primary">Loading...</div></div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   if (!session) {
@@ -34,6 +95,7 @@ export default function ParticipantDashboard() {
       <main className="pt-28 pb-16">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="flex flex-col lg:flex-row gap-8">
+            {/* Sidebar */}
             <aside className="lg:w-64 flex-shrink-0">
               <div className="glass-card p-6 sticky top-28">
                 <div className="text-center mb-6">
@@ -41,22 +103,23 @@ export default function ParticipantDashboard() {
                     <Users className="text-primary" size={32} />
                   </div>
                   <h3 className="font-display font-bold text-text">{session.user?.name || "Participant"}</h3>
-                  <p className="text-text-muted text-sm">{session.user?.email}</p>
+                  <p className="text-text-muted text-sm truncate">{session.user?.email}</p>
+                  {teamData && (
+                    <p className="text-primary font-mono text-xs mt-1">{teamData.teamId}</p>
+                  )}
                 </div>
 
-                <nav className="space-y-2">
-                  <NavItem icon={<Clock size={18} />} label="Overview" active={activeTab === "overview"} onClick={() => setActiveTab("overview")} />
-                  <NavItem icon={<Users size={18} />} label="Team" active={activeTab === "team"} onClick={() => setActiveTab("team")} />
-                  <NavItem icon={<FileText size={18} />} label="Submission" active={activeTab === "submission"} onClick={() => setActiveTab("submission")} />
-                  <NavItem icon={<CreditCard size={18} />} label="Payment" active={activeTab === "payment"} onClick={() => setActiveTab("payment")} />
-                  <NavItem icon={<Bell size={18} />} label="Notifications" active={activeTab === "notifications"} onClick={() => setActiveTab("notifications")} />
-                  <NavItem icon={<MessageCircle size={18} />} label="Discord" active={activeTab === "discord"} onClick={() => setActiveTab("discord")} />
-                  <NavItem icon={<Settings size={18} />} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
+                <nav className="space-y-1">
+                  <NavItem icon={<Clock size={16} />} label="Overview" active={activeTab === "overview"} onClick={() => setActiveTab("overview")} />
+                  <NavItem icon={<Users size={16} />} label="My Team" active={activeTab === "team"} onClick={() => setActiveTab("team")} />
+                  <NavItem icon={<CreditCard size={16} />} label="Payment" active={activeTab === "payment"} onClick={() => setActiveTab("payment")} />
+                  <NavItem icon={<FileText size={16} />} label="Submission" active={activeTab === "submission"} onClick={() => setActiveTab("submission")} />
+                  <NavItem icon={<Bell size={16} />} label="Notifications" active={activeTab === "notifications"} onClick={() => setActiveTab("notifications")} />
                 </nav>
 
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="w-full mt-6 py-2 border border-white/10 rounded-lg text-text-muted hover:text-red-400 hover:border-red-400/30 transition-colors flex items-center justify-center gap-2"
+                  className="w-full mt-6 py-2 border border-white/10 rounded-lg text-text-muted hover:text-red-400 hover:border-red-400/30 transition-colors flex items-center justify-center gap-2 text-sm"
                 >
                   <LogOut size={16} />
                   Logout
@@ -64,14 +127,33 @@ export default function ParticipantDashboard() {
               </div>
             </aside>
 
-            <div className="flex-1">
-              {activeTab === "overview" && <OverviewTab />}
-              {activeTab === "team" && <TeamTab />}
-              {activeTab === "submission" && <SubmissionTab />}
-              {activeTab === "payment" && <PaymentTab />}
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              {activeTab === "overview" && (
+                <OverviewTab teamData={teamData} paymentStatus={paymentStatus} loading={loadingTeam} />
+              )}
+              {activeTab === "team" && (
+                <TeamTab teamData={teamData} loading={loadingTeam} />
+              )}
+              {activeTab === "payment" && (
+                <PaymentTab
+                  teamData={teamData}
+                  paymentStatus={paymentStatus}
+                  onPaymentComplete={() => {
+                    setPaymentStatus("SUCCESS");
+                    fetchTeamData();
+                  }}
+                  session={session}
+                />
+              )}
+              {activeTab === "submission" && (
+                <SubmissionTab
+                  teamData={teamData}
+                  paymentStatus={paymentStatus}
+                  onSubmitSuccess={fetchTeamData}
+                />
+              )}
               {activeTab === "notifications" && <NotificationsTab />}
-              {activeTab === "discord" && <DiscordTab />}
-              {activeTab === "settings" && <SettingsTab />}
             </div>
           </div>
         </div>
@@ -82,172 +164,490 @@ export default function ParticipantDashboard() {
   );
 }
 
-function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-left ${
-        active ? "bg-primary/10 text-primary" : "text-text-muted hover:text-text hover:bg-white/5"
-      }`}
-    >
-      {icon}
-      <span className="text-sm">{label}</span>
-    </button>
-  );
-}
-
-function OverviewTab() {
+// ── Overview Tab ──────────────────────────────────────────────────────────────
+function OverviewTab({ teamData, paymentStatus, loading }: any) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <h2 className="font-display text-2xl font-bold text-text">Dashboard Overview</h2>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard label="Team Status" value="Registered" color="text-primary" />
-        <StatCard label="Payment Status" value="Pending" color="text-yellow-400" />
-        <StatCard label="Submission Deadline" value="June 28" color="text-neon-blue" />
+        <StatCard
+          label="Registration"
+          value={teamData ? "Registered ✓" : loading ? "Loading..." : "Not Registered"}
+          color={teamData ? "text-green-400" : "text-yellow-400"}
+        />
+        <StatCard
+          label="Payment Status"
+          value={paymentStatus === "SUCCESS" ? "Paid ✓" : "Pending"}
+          color={paymentStatus === "SUCCESS" ? "text-green-400" : "text-yellow-400"}
+        />
+        <StatCard
+          label="Submission"
+          value={teamData?.submission ? "Submitted ✓" : "Pending"}
+          color={teamData?.submission ? "text-green-400" : "text-text-dim"}
+        />
       </div>
+
+      {!teamData && !loading && (
+        <div className="glass-card p-6 text-center">
+          <AlertCircle className="text-yellow-400 mx-auto mb-3" size={32} />
+          <p className="text-text-muted mb-4">You have not registered a team yet.</p>
+          <Link href="/register" className="btn-primary inline-block">Register Now</Link>
+        </div>
+      )}
+
       <div className="glass-card p-6">
-        <h3 className="font-bold text-text mb-4">Upcoming Events</h3>
+        <h3 className="font-bold text-text mb-4">Event Timeline</h3>
         <div className="space-y-3">
-          <EventItem date="June 20" title="Round 1 Begins" />
-          <EventItem date="June 27" title="Round 2 Begins" />
-          <EventItem date="June 28" title="Hackathon & Final Submission" />
+          <EventItem date="May 18" title="Registrations Open" done />
+          <EventItem date="June 16" title="Online Submission Deadline" />
+          <EventItem date="June 20" title="Results Announced" />
+          <EventItem date="June 27–28" title="Final Offline Round" />
+          <EventItem date="June 28" title="Winner Announcement" />
         </div>
       </div>
     </motion.div>
   );
 }
 
-function TeamTab() {
+// ── Team Tab ──────────────────────────────────────────────────────────────────
+function TeamTab({ teamData, loading }: any) {
+  if (loading) return <Spinner />;
+  if (!teamData) return (
+    <div className="glass-card p-8 text-center">
+      <p className="text-text-muted mb-4">No team found for your account.</p>
+      <Link href="/register" className="btn-primary">Register a Team</Link>
+    </div>
+  );
+
+  const leader = teamData.members?.find((m: any) => m.role === "LEADER");
+  const members = teamData.members?.filter((m: any) => m.role !== "LEADER") || [];
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-text">Team Management</h2>
-      <div className="glass-card p-6">
-        <h3 className="font-bold text-text mb-4">Team Members</h3>
-        <p className="text-text-muted">Your team details will appear here once registered.</p>
+      <h2 className="font-display text-2xl font-bold text-text">My Team</h2>
+
+      <div className="glass-card p-6 space-y-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-display font-bold text-xl text-text">{teamData.name}</h3>
+            <p className="text-primary font-mono text-sm">{teamData.teamId}</p>
+          </div>
+          <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+            teamData.status === "APPROVED" ? "bg-green-500/10 text-green-400" :
+            teamData.status === "REJECTED" ? "bg-red-500/10 text-red-400" :
+            "bg-yellow-500/10 text-yellow-400"
+          }`}>
+            {teamData.status}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 text-sm border-t border-white/5 pt-4">
+          <InfoRow label="Category" value={teamData.category} />
+          {teamData.projectTheme && <InfoRow label="Theme" value={teamData.projectTheme} />}
+          {teamData.techStack && <InfoRow label="Tech Stack" value={teamData.techStack} />}
+        </div>
       </div>
+
+      {leader && (
+        <div className="glass-card p-6">
+          <h3 className="font-bold text-text mb-4">Team Leader</h3>
+          <MemberCard member={leader} isLeader />
+        </div>
+      )}
+
+      {members.length > 0 && (
+        <div className="glass-card p-6">
+          <h3 className="font-bold text-text mb-4">Members ({members.length})</h3>
+          <div className="space-y-3">
+            {members.map((m: any, i: number) => (
+              <MemberCard key={i} member={m} />
+            ))}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
 
-function SubmissionTab() {
+// ── Payment Tab ───────────────────────────────────────────────────────────────
+function PaymentTab({ teamData, paymentStatus, onPaymentComplete, session }: any) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePay = async () => {
+    if (!teamData) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Create Razorpay order
+      const res = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create-order", teamId: teamData.teamId }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.orderId) {
+        setError(data.error || "Failed to create payment order.");
+        setLoading(false);
+        return;
+      }
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
+        amount: data.amount,
+        currency: data.currency,
+        name: "IncuXAI Hackathon",
+        description: "Registration Fee",
+        order_id: data.orderId,
+        handler: async (rpResponse: any) => {
+          const verifyRes = await fetch("/api/payments", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "verify",
+              paymentId: rpResponse.razorpay_payment_id,
+              orderId: rpResponse.razorpay_order_id,
+              signature: rpResponse.razorpay_signature,
+              teamId: teamData.teamId,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyRes.ok && verifyData.success) {
+            onPaymentComplete();
+          } else {
+            setError("Payment verification failed. Contact support.");
+          }
+          setLoading(false);
+        },
+        prefill: {
+          name: session?.user?.name || "",
+          email: session?.user?.email || "",
+        },
+        theme: { color: "#a855f7" },
+        modal: { ondismiss: () => setLoading(false) },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (e) {
+      setError("Payment failed. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <h2 className="font-display text-2xl font-bold text-text">Payment</h2>
+
+      {paymentStatus === "SUCCESS" ? (
+        <div className="glass-card p-8 text-center">
+          <CheckCircle className="text-green-400 mx-auto mb-4" size={48} />
+          <h3 className="font-bold text-text text-xl mb-2">Payment Complete!</h3>
+          <p className="text-text-muted">
+            Your registration fee has been paid. You can now submit your project links.
+          </p>
+        </div>
+      ) : (
+        <div className="glass-card p-6 space-y-6">
+          {!teamData ? (
+            <p className="text-text-muted text-center">Register a team first to make a payment.</p>
+          ) : (
+            <>
+              <div className="space-y-3">
+                <InfoRow label="Team" value={teamData.name} />
+                <InfoRow label="Category" value={teamData.category} />
+                <InfoRow label="Team Size" value={`${teamData.members?.length || 0} members`} />
+                <div className="border-t border-white/5 pt-3 flex justify-between">
+                  <span className="text-text font-bold">Total Due</span>
+                  <span className="text-primary font-bold text-xl">₹{teamData.payment?.amount || 0}</span>
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm flex items-center gap-2">
+                  <AlertCircle size={16} />
+                  {error}
+                </div>
+              )}
+
+              <button
+                onClick={handlePay}
+                disabled={loading}
+                className="btn-primary w-full disabled:opacity-50"
+              >
+                {loading ? "Processing..." : `Pay ₹${teamData.payment?.amount || 0} Now`}
+              </button>
+
+              <p className="text-text-dim text-xs text-center">
+                Secured by Razorpay • UPI, Cards, Net Banking & Wallets accepted
+              </p>
+            </>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+// ── Submission Tab ────────────────────────────────────────────────────────────
+function SubmissionTab({ teamData, paymentStatus, onSubmitSuccess }: any) {
+  const [pptLink, setPptLink] = useState("");
+  const [demoVideo, setDemoVideo] = useState("");
+  const [githubLink, setGithubLink] = useState("");
+  const [apkLink, setApkLink] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [existingSubmission, setExistingSubmission] = useState<any>(null);
+
+  useEffect(() => {
+    if (teamData?.submission) {
+      const s = teamData.submission;
+      setExistingSubmission(s);
+      setPptLink(s.pptLink || "");
+      setDemoVideo(s.demoVideo || "");
+      setGithubLink(s.githubLink || "");
+      setApkLink(s.apkLink || "");
+    }
+  }, [teamData]);
+
+  const handleSubmit = async () => {
+    if (!pptLink && !demoVideo && !githubLink && !apkLink) {
+      setError("Please provide at least one link.");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/teams/${teamData.teamId}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pptLink, demoVideo, githubLink, apkLink }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSubmitted(true);
+        onSubmitSuccess();
+      } else {
+        setError(data.error || "Submission failed.");
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Payment gate
+  if (paymentStatus !== "SUCCESS") {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+        <h2 className="font-display text-2xl font-bold text-text">Submission Portal</h2>
+        <div className="glass-card p-10 text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-full bg-yellow-500/10 flex items-center justify-center">
+            <Lock className="text-yellow-400" size={28} />
+          </div>
+          <h3 className="font-bold text-text text-lg">Payment Required</h3>
+          <p className="text-text-muted text-sm max-w-md mx-auto">
+            You must complete your registration payment before you can submit project links.
+          </p>
+          <button
+            className="btn-primary"
+            onClick={() => {/* switch to payment tab handled by parent */}}
+          >
+            Go to Payment Tab
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <h2 className="font-display text-2xl font-bold text-text">Submission Portal</h2>
-      <div className="glass-card p-6 space-y-4">
-        <div>
-          <label className="label-text">PPT Link</label>
-          <input type="url" className="input-field" placeholder="https://docs.google.com/presentation/..." />
+
+      {submitted && (
+        <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3">
+          <CheckCircle size={18} className="text-green-400" />
+          <span className="text-green-400 text-sm font-medium">
+            Links submitted successfully!
+          </span>
         </div>
-        <div>
-          <label className="label-text">Demo Video</label>
-          <input type="url" className="input-field" placeholder="https://youtube.com/watch?v=..." />
-        </div>
-        <div>
-          <label className="label-text">GitHub Repository</label>
-          <input type="url" className="input-field" placeholder="https://github.com/..." />
-        </div>
-        <div>
-          <label className="label-text">APK/Game Build</label>
-          <input type="url" className="input-field" placeholder="https://drive.google.com/..." />
-        </div>
-        <button className="btn-primary">Submit Project</button>
+      )}
+
+      <div className="glass-card p-6 space-y-5">
+        <p className="text-text-muted text-sm">
+          Submit your project links below. You can update them until the deadline.
+        </p>
+
+        <LinkField
+          label="PPT / Presentation"
+          icon="📊"
+          value={pptLink}
+          onChange={setPptLink}
+          placeholder="https://docs.google.com/presentation/..."
+        />
+        <LinkField
+          label="Demo Video"
+          icon="🎬"
+          value={demoVideo}
+          onChange={setDemoVideo}
+          placeholder="https://youtube.com/watch?v=..."
+        />
+        <LinkField
+          label="GitHub Repository"
+          icon="🐙"
+          value={githubLink}
+          onChange={setGithubLink}
+          placeholder="https://github.com/yourteam/project"
+        />
+        <LinkField
+          label="APK / Game Build"
+          icon="📦"
+          value={apkLink}
+          onChange={setApkLink}
+          placeholder="https://drive.google.com/file/..."
+        />
+
+        {error && (
+          <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm flex items-center gap-2">
+            <AlertCircle size={16} />
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={handleSubmit}
+          disabled={submitting}
+          className="btn-primary w-full disabled:opacity-50"
+        >
+          {submitting
+            ? "Saving..."
+            : existingSubmission
+            ? "Update Submission"
+            : "Submit Project"}
+        </button>
       </div>
     </motion.div>
   );
 }
 
-function PaymentTab() {
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-text">Payment Status</h2>
-      <div className="glass-card p-6">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-text-muted">Status</span>
-          <span className="px-3 py-1 bg-yellow-500/10 text-yellow-400 rounded-full text-sm">Pending</span>
-        </div>
-        <button className="btn-primary w-full">Complete Payment</button>
-      </div>
-    </motion.div>
-  );
-}
-
+// ── Notifications Tab ─────────────────────────────────────────────────────────
 function NotificationsTab() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <h2 className="font-display text-2xl font-bold text-text">Notifications</h2>
-      <div className="glass-card p-6">
-        <NotificationItem title="Registration Open" time="2 days ago" unread />
-        <NotificationItem title="Welcome to IncuXai Hackathon!" time="1 day ago" />
+      <div className="glass-card p-6 space-y-3">
+        <NotificationItem title="🎉 Welcome to IncuXAI Hackathon!" time="Just now" unread />
+        <NotificationItem title="📅 Registrations are now open!" time="2 days ago" />
+        <NotificationItem title="💡 Submission deadline: June 16" time="3 days ago" />
       </div>
     </motion.div>
   );
 }
 
-function DiscordTab() {
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-text">Discord Community</h2>
-      <div className="glass-card p-6 text-center">
-        <MessageCircle className="text-primary mx-auto mb-4" size={48} />
-        <h3 className="font-bold text-text mb-2">Join Our Discord Server</h3>
-        <p className="text-text-muted mb-6">Connect with mentors, teammates, and fellow participants.</p>
-        <a href="#" className="btn-secondary inline-flex items-center gap-2">
-          <MessageCircle size={18} />
-          Join Discord
-        </a>
-      </div>
-    </motion.div>
-  );
-}
-
-function SettingsTab() {
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-text">Settings</h2>
-      <div className="glass-card p-6 space-y-4">
-        <div>
-          <label className="label-text">Name</label>
-          <input type="text" className="input-field" />
-        </div>
-        <div>
-          <label className="label-text">Email</label>
-          <input type="email" className="input-field" disabled />
-        </div>
-        <div>
-          <label className="label-text">Mobile</label>
-          <input type="tel" className="input-field" />
-        </div>
-        <button className="btn-primary">Save Changes</button>
-      </div>
-    </motion.div>
-  );
-}
-
+// ── Helper Components ─────────────────────────────────────────────────────────
 function StatCard({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div className="glass-card p-6">
-      <p className="text-text-muted text-sm">{label}</p>
-      <p className={`font-display text-2xl font-bold ${color}`}>{value}</p>
+    <div className="glass-card p-5">
+      <p className="text-text-muted text-xs mb-1">{label}</p>
+      <p className={`font-display text-xl font-bold ${color}`}>{value}</p>
     </div>
   );
 }
 
-function EventItem({ date, title }: { date: string; title: string }) {
+function EventItem({ date, title, done }: { date: string; title: string; done?: boolean }) {
+  return (
+    <div className={`flex items-center gap-4 p-3 rounded-lg ${done ? "bg-primary/5" : "bg-surface-light"}`}>
+      <div className={`font-bold text-sm ${done ? "text-primary" : "text-text-muted"}`}>{date}</div>
+      <div className={`text-sm ${done ? "text-text" : "text-text-muted"}`}>{title}</div>
+      {done && <CheckCircle size={14} className="text-primary ml-auto" />}
+    </div>
+  );
+}
+
+function MemberCard({ member, isLeader }: { member: any; isLeader?: boolean }) {
   return (
     <div className="flex items-center gap-4 p-3 bg-surface-light rounded-lg">
-      <div className="text-primary font-bold text-sm">{date}</div>
-      <div className="text-text">{title}</div>
+      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+        {member.user?.name?.[0]?.toUpperCase() || "?"}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-text font-medium text-sm truncate">{member.user?.name}</p>
+        <p className="text-text-muted text-xs truncate">{member.user?.email}</p>
+        {member.skills && <p className="text-text-dim text-xs">{member.skills}</p>}
+      </div>
+      {isLeader && (
+        <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-bold">
+          Leader
+        </span>
+      )}
     </div>
   );
 }
 
-function NotificationItem({ title, time, unread }: { title: string; time: string; unread?: boolean }) {
+function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className={`p-4 rounded-lg mb-3 ${unread ? "bg-primary/5 border border-primary/20" : "bg-surface-light"}`}>
-      <div className="flex justify-between items-start">
-        <h4 className={`text-sm ${unread ? "text-text font-medium" : "text-text-muted"}`}>{title}</h4>
-        <span className="text-text-dim text-xs">{time}</span>
+    <div className="flex justify-between text-sm">
+      <span className="text-text-muted">{label}</span>
+      <span className="text-text font-medium">{value}</span>
+    </div>
+  );
+}
+
+function LinkField({ label, icon, value, onChange, placeholder }: {
+  label: string; icon: string; value: string; onChange: (v: string) => void; placeholder: string;
+}) {
+  return (
+    <div>
+      <label className="label-text flex items-center gap-2">
+        <span>{icon}</span>
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          type="url"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="input-field pr-10"
+          placeholder={placeholder}
+        />
+        {value && (
+          <a
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary"
+          >
+            <ExternalLink size={14} />
+          </a>
+        )}
       </div>
+    </div>
+  );
+}
+
+function NotificationItem({ title, time, unread }: {
+  title: string; time: string; unread?: boolean;
+}) {
+  return (
+    <div className={`p-4 rounded-lg ${unread ? "bg-primary/5 border border-primary/20" : "bg-surface-light"}`}>
+      <div className="flex justify-between items-start gap-4">
+        <p className={`text-sm ${unread ? "text-text font-medium" : "text-text-muted"}`}>{title}</p>
+        <span className="text-text-dim text-xs whitespace-nowrap">{time}</span>
+      </div>
+    </div>
+  );
+}
+
+function Spinner() {
+  return (
+    <div className="flex justify-center py-12">
+      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }

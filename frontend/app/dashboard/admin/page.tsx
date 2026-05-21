@@ -34,13 +34,14 @@ export default function AdminDashboard() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [sponsors, setSponsors] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [filterCategory, setFilterCategory] = useState("ALL");
-  const [filterDiscord, setFilterDiscord] = useState("ALL");
+
 
   // Selected Item Modals
   const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
@@ -74,14 +75,16 @@ export default function AdminDashboard() {
         paymentsRes,
         ticketsRes,
         sponsorsRes,
-        announcementsRes
+        announcementsRes,
+        submissionsRes
       ] = await Promise.all([
         fetch("/api/admin/analytics"),
         fetch("/api/admin/participants"),
         fetch("/api/admin/payments"),
         fetch("/api/admin/tickets"),
         fetch("/api/admin/sponsors"),
-        fetch("/api/admin/announcements")
+        fetch("/api/admin/announcements"),
+        fetch("/api/admin/submissions")
       ]);
 
       const analyticsData = await analyticsRes.json();
@@ -90,6 +93,7 @@ export default function AdminDashboard() {
       const ticketsData = await ticketsRes.json();
       const sponsorsData = await sponsorsRes.json();
       const announcementsData = await announcementsRes.json();
+      const submissionsData = await submissionsRes.json();
 
       setAnalytics(analyticsData);
       setParticipants(participantsData.teams || []);
@@ -97,6 +101,7 @@ export default function AdminDashboard() {
       setTickets(ticketsData.tickets || []);
       setSponsors(sponsorsData.sponsors || []);
       setAnnouncements(announcementsData.announcements || []);
+      setSubmissions(submissionsData.submissions || []);
     } catch (error) {
       console.error("Failed to fetch admin data:", error);
     }
@@ -263,14 +268,14 @@ export default function AdminDashboard() {
 
   // CSV Exporter for teams
   const handleExportCSV = () => {
-    const headers = ["Team ID", "Team Name", "Category", "Approval Status", "Payment Status", "Discord Joined"];
+    const headers = ["Team ID", "Team Name", "Category", "Approval Status", "Payment Status", "Members"];
     const rows = participants.map((team: any) => [
       team.teamId,
-      team.name,
+      `"${team.name}"`,
       team.category,
       team.status,
       team.payment?.status || "N/A",
-      team.members?.some((m: any) => m.user?.discordJoined) ? "Yes" : "No"
+      team.members?.length || 0
     ]);
 
     const csvContent =
@@ -293,14 +298,7 @@ export default function AdminDashboard() {
       team.teamId.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "ALL" || team.status === filterStatus;
     const matchesCategory = filterCategory === "ALL" || team.category === filterCategory;
-    
-    const hasDiscordJoined = team.members?.some((m: any) => m.user?.discordJoined);
-    const matchesDiscord =
-      filterDiscord === "ALL" ||
-      (filterDiscord === "YES" && hasDiscordJoined) ||
-      (filterDiscord === "NO" && !hasDiscordJoined);
-
-    return matchesSearch && matchesStatus && matchesCategory && matchesDiscord;
+    return matchesSearch && matchesStatus && matchesCategory;
   });
 
   if (loading) {
@@ -335,6 +333,7 @@ export default function AdminDashboard() {
                   <NavItem icon={<TrendingUp size={16} />} label="Overview" active={activeTab === "overview"} onClick={() => setActiveTab("overview")} />
                   <NavItem icon={<Users size={16} />} label="Participants" active={activeTab === "participants"} onClick={() => setActiveTab("participants")} />
                   <NavItem icon={<CreditCard size={16} />} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
+                  <NavItem icon={<ExternalLink size={16} />} label="Submissions" active={activeTab === "submissions"} onClick={() => setActiveTab("submissions")} />
                   <NavItem icon={<Megaphone size={16} />} label="Announcements" active={activeTab === "announcements"} onClick={() => setActiveTab("announcements")} />
                   <NavItem icon={<LifeBuoy size={16} />} label="Support System" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
                   <NavItem icon={<Plus size={16} />} label="Sponsor Hub" active={activeTab === "sponsors"} onClick={() => setActiveTab("sponsors")} />
@@ -364,13 +363,14 @@ export default function AdminDashboard() {
                   setFilterStatus={setFilterStatus}
                   filterCategory={filterCategory}
                   setFilterCategory={setFilterCategory}
-                  filterDiscord={filterDiscord}
-                  setFilterDiscord={setFilterDiscord}
                   handleExportCSV={handleExportCSV}
                   handleApproveTeam={handleApproveTeam}
                   handleRejectTeam={handleRejectTeam}
                   setSelectedReceipt={setSelectedReceipt}
                 />
+              )}
+              {activeTab === "submissions" && (
+                <SubmissionsPane submissions={submissions} />
               )}
               {activeTab === "payments" && (
                 <PaymentsPane
@@ -651,8 +651,6 @@ function ParticipantsPane({
   setFilterStatus,
   filterCategory,
   setFilterCategory,
-  filterDiscord,
-  setFilterDiscord,
   handleExportCSV,
   handleApproveTeam,
   handleRejectTeam,
@@ -663,7 +661,7 @@ function ParticipantsPane({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="font-display text-2xl font-bold text-text">Participant Teams</h2>
-          <p className="text-text-muted text-sm">Approve/reject registration logs, verify payments and Discord integration.</p>
+          <p className="text-text-muted text-sm">Approve/reject registration logs and verify payments.</p>
         </div>
         <button onClick={handleExportCSV} className="btn-secondary inline-flex items-center gap-2 text-sm py-2">
           <Download size={16} />
@@ -672,7 +670,7 @@ function ParticipantsPane({
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white/5 p-4 rounded-xl border border-white/5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-white/5 p-4 rounded-xl border border-white/5">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" size={16} />
           <input
@@ -699,13 +697,6 @@ function ParticipantsPane({
             <option value="STARTUP">Startup</option>
           </select>
         </div>
-        <div>
-          <select value={filterDiscord} onChange={(e) => setFilterDiscord(e.target.value)} className="input-field text-sm h-full">
-            <option value="ALL">Discord Status</option>
-            <option value="YES">Joined Discord</option>
-            <option value="NO">Not Joined</option>
-          </select>
-        </div>
       </div>
 
       {/* Participants Table */}
@@ -718,7 +709,7 @@ function ParticipantsPane({
                 <th className="p-4">Team Name</th>
                 <th className="p-4">Category</th>
                 <th className="p-4 text-center">Payment Status</th>
-                <th className="p-4 text-center">Discord Joined</th>
+                <th className="p-4 text-center">Submitted</th>
                 <th className="p-4 text-center">Approval Status</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
@@ -726,7 +717,7 @@ function ParticipantsPane({
             <tbody className="divide-y divide-white/5 text-sm">
               {participants.length > 0 ? (
                 participants.map((team: any) => {
-                  const hasDiscord = team.members?.some((m: any) => m.user?.discordJoined);
+                  const hasSubmission = !!team.submission;
                   return (
                     <tr key={team.id} className="hover:bg-white/5 transition-colors">
                       <td className="p-4 text-text font-mono font-bold text-primary">{team.teamId}</td>
@@ -749,9 +740,9 @@ function ParticipantsPane({
                       </td>
                       <td className="p-4 text-center">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                          hasDiscord ? "bg-neon-blue/10 text-neon-blue" : "bg-white/5 text-text-dim"
+                          hasSubmission ? "bg-green-500/10 text-green-400" : "bg-white/5 text-text-dim"
                         }`}>
-                          {hasDiscord ? "Joined" : "No"}
+                          {hasSubmission ? "Yes ✓" : "Pending"}
                         </span>
                       </td>
                       <td className="p-4 text-center">
@@ -798,6 +789,83 @@ function ParticipantsPane({
         </div>
       </div>
     </motion.div>
+  );
+}
+
+/* ============================================================================
+   B2. SUBMISSIONS PANE
+   ============================================================================ */
+function SubmissionsPane({ submissions }: { submissions: any[] }) {
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <div>
+        <h2 className="font-display text-2xl font-bold text-text">Project Submissions</h2>
+        <p className="text-text-muted text-sm">{submissions.length} team(s) have submitted project links.</p>
+      </div>
+      <div className="glass-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-surface-light border-b border-white/5 text-text-muted text-xs font-semibold uppercase">
+              <tr>
+                <th className="p-4">Team</th>
+                <th className="p-4">Category</th>
+                <th className="p-4">GitHub</th>
+                <th className="p-4">Demo Video</th>
+                <th className="p-4">PPT</th>
+                <th className="p-4">APK</th>
+                <th className="p-4">Submitted At</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5 text-sm">
+              {submissions.length > 0 ? (
+                submissions.map((sub: any) => (
+                  <tr key={sub.id} className="hover:bg-white/5 transition-colors">
+                    <td className="p-4">
+                      <span className="text-text font-medium block">{sub.team?.name}</span>
+                      <span className="text-primary font-mono text-xs">{sub.team?.teamId}</span>
+                    </td>
+                    <td className="p-4 text-text-muted text-xs">{sub.team?.category}</td>
+                    <td className="p-4">
+                      {sub.githubLink ? <LinkBadge url={sub.githubLink} label="GitHub" /> : <span className="text-text-dim text-xs">—</span>}
+                    </td>
+                    <td className="p-4">
+                      {sub.demoVideo ? <LinkBadge url={sub.demoVideo} label="Video" color="text-neon-blue" /> : <span className="text-text-dim text-xs">—</span>}
+                    </td>
+                    <td className="p-4">
+                      {sub.pptLink ? <LinkBadge url={sub.pptLink} label="PPT" color="text-yellow-400" /> : <span className="text-text-dim text-xs">—</span>}
+                    </td>
+                    <td className="p-4">
+                      {sub.apkLink ? <LinkBadge url={sub.apkLink} label="APK" color="text-neon-green" /> : <span className="text-text-dim text-xs">—</span>}
+                    </td>
+                    <td className="p-4 text-text-muted text-xs">
+                      {sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-text-muted">No submissions yet</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function LinkBadge({ url, label, color = "text-primary" }: { url: string; label: string; color?: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex items-center gap-1 text-xs font-medium hover:underline ${color}`}
+    >
+      {label}
+      <ExternalLink size={10} />
+    </a>
   );
 }
 
