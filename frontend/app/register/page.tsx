@@ -101,6 +101,8 @@ export default function RegisterPage() {
     else if (!isValidEmail(leaderEmail)) errs.leaderEmail = "Enter a valid email address.";
     if (!leaderPassword) errs.leaderPassword = "Password is required.";
     else if (leaderPassword.length < 8) errs.leaderPassword = "Password must be at least 8 characters.";
+    else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(leaderPassword))
+      errs.leaderPassword = "Password must include uppercase, lowercase, number, and special character.";
     if (!confirmPassword) errs.confirmPassword = "Please confirm your password.";
     else if (leaderPassword !== confirmPassword) errs.confirmPassword = "Passwords do not match.";
     if (!leaderMobile.trim()) errs.leaderMobile = "Mobile number is required.";

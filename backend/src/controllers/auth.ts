@@ -5,15 +5,19 @@ import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
 import { sendEmail, getRegistrationEmailHtml } from '../services/email';
 
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(1, 'Password is required'),
 });
 
 const registerSchema = z.object({
   email: z.string().email(),
   name: z.string().min(2),
-  password: z.string().min(6),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(passwordRegex, 'Password must contain uppercase, lowercase, number, and special character'),
 });
 
 export const authController = {

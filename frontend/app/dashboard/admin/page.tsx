@@ -39,13 +39,13 @@ export default function AdminDashboard() {
 
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("ALL");
   const [filterCategory, setFilterCategory] = useState("ALL");
 
 
   // Selected Item Modals
   const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [selectedTeam, setSelectedTeam] = useState<any>(null);
   const [ticketResponse, setTicketResponse] = useState("");
 
   // New Sponsor Form
@@ -111,32 +111,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const handleApproveTeam = async (teamId: string) => {
-    try {
-      const res = await fetch("/api/admin/participants", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ teamId, status: "APPROVED" })
-      });
-      if (res.ok) fetchData();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleRejectTeam = async (teamId: string) => {
-    try {
-      const res = await fetch("/api/admin/participants", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ teamId, status: "REJECTED" })
-      });
-      if (res.ok) fetchData();
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   const handleToggleSponsorStatus = async (sponsorId: string, isActive: boolean) => {
     try {
@@ -296,9 +270,8 @@ export default function AdminDashboard() {
     const matchesSearch =
       team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       team.teamId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "ALL" || team.status === filterStatus;
     const matchesCategory = filterCategory === "ALL" || team.category === filterCategory;
-    return matchesSearch && matchesStatus && matchesCategory;
+    return matchesSearch && matchesCategory;
   });
 
   if (loading) {
@@ -359,14 +332,11 @@ export default function AdminDashboard() {
                   participants={filteredParticipants}
                   searchTerm={searchTerm}
                   setSearchTerm={setSearchTerm}
-                  filterStatus={filterStatus}
-                  setFilterStatus={setFilterStatus}
                   filterCategory={filterCategory}
                   setFilterCategory={setFilterCategory}
                   handleExportCSV={handleExportCSV}
-                  handleApproveTeam={handleApproveTeam}
-                  handleRejectTeam={handleRejectTeam}
                   setSelectedReceipt={setSelectedReceipt}
+                  setSelectedTeam={setSelectedTeam}
                 />
               )}
               {activeTab === "submissions" && (
@@ -487,6 +457,8 @@ export default function AdminDashboard() {
           </div>
         )}
       </AnimatePresence>
+
+      <TeamDetailsModal team={selectedTeam} onClose={() => setSelectedTeam(null)} />
     </div>
   );
 }
@@ -647,26 +619,54 @@ function ParticipantsPane({
   participants,
   searchTerm,
   setSearchTerm,
-  filterStatus,
-  setFilterStatus,
   filterCategory,
   setFilterCategory,
   handleExportCSV,
-  handleApproveTeam,
-  handleRejectTeam,
-  setSelectedReceipt
+  setSelectedReceipt,
+  setSelectedTeam
 }: any) {
+  const [isSendingCerts, setIsSendingCerts] = useState(false);
+
+  const handleSendCertificates = async () => {
+    if (!confirm("Are you sure you want to send Round 1 certificates to all participants? This will email every registered user.")) return;
+    
+    setIsSendingCerts(true);
+    try {
+      const res = await fetch("/api/admin/certificates", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        alert(`Successfully sent certificates to ${data.count} participants!`);
+      } else {
+        alert("Failed to send certificates.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error sending certificates.");
+    } finally {
+      setIsSendingCerts(false);
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="font-display text-2xl font-bold text-text">Participant Teams</h2>
-          <p className="text-text-muted text-sm">Approve/reject registration logs and verify payments.</p>
+          <p className="text-text-muted text-sm">View registration logs and verify payments.</p>
         </div>
-        <button onClick={handleExportCSV} className="btn-secondary inline-flex items-center gap-2 text-sm py-2">
-          <Download size={16} />
-          Export CSV
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={handleSendCertificates} 
+            disabled={isSendingCerts}
+            className="btn-primary inline-flex items-center gap-2 text-sm py-2 px-4 bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
+          >
+            {isSendingCerts ? "Sending..." : "Send Round 1 Certificates"}
+          </button>
+          <button onClick={handleExportCSV} className="btn-secondary inline-flex items-center gap-2 text-sm py-2">
+            <Download size={16} />
+            Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -680,14 +680,6 @@ function ParticipantsPane({
             placeholder="Search team ID/name..."
             className="input-field pl-10 text-sm"
           />
-        </div>
-        <div>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="input-field text-sm h-full">
-            <option value="ALL">All Approvals</option>
-            <option value="PENDING">Pending Approval</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
         </div>
         <div>
           <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="input-field text-sm h-full">
@@ -710,7 +702,6 @@ function ParticipantsPane({
                 <th className="p-4">Category</th>
                 <th className="p-4 text-center">Payment Status</th>
                 <th className="p-4 text-center">Submitted</th>
-                <th className="p-4 text-center">Approval Status</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -745,43 +736,20 @@ function ParticipantsPane({
                           {hasSubmission ? "Yes ✓" : "Pending"}
                         </span>
                       </td>
-                      <td className="p-4 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                          team.status === "APPROVED" ? "bg-green-500/10 text-green-400" :
-                          team.status === "REJECTED" ? "bg-red-500/10 text-red-400" :
-                          "bg-yellow-500/10 text-yellow-400"
-                        }`}>
-                          {team.status}
-                        </span>
-                      </td>
                       <td className="p-4 text-right">
-                        <div className="flex justify-end gap-1.5">
-                          {team.status !== "APPROVED" && (
-                            <button
-                              onClick={() => handleApproveTeam(team.teamId)}
-                              className="p-1 text-green-400 hover:bg-green-500/10 rounded"
-                              title="Approve Team"
-                            >
-                              <CheckCircle size={18} />
-                            </button>
-                          )}
-                          {team.status !== "REJECTED" && (
-                            <button
-                              onClick={() => handleRejectTeam(team.teamId)}
-                              className="p-1 text-red-400 hover:bg-red-500/10 rounded"
-                              title="Reject Team"
-                            >
-                              <XCircle size={18} />
-                            </button>
-                          )}
-                        </div>
+                        <button
+                          onClick={() => setSelectedTeam(team)}
+                          className="px-3 py-1 text-xs font-medium text-primary hover:bg-primary/10 rounded transition-colors"
+                        >
+                          View Details
+                        </button>
                       </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-text-muted">No teams match selected filters</td>
+                  <td colSpan={6} className="p-8 text-center text-text-muted">No teams match selected filters</td>
                 </tr>
               )}
             </tbody>
@@ -1396,5 +1364,90 @@ function SponsorsPane({
         ))}
       </div>
     </motion.div>
+  );
+}
+
+function TeamDetailsModal({ team, onClose }: { team: any; onClose: () => void }) {
+  if (!team) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
+      <div className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-text">{team.name}</h2>
+            <p className="text-primary font-mono text-sm">{team.teamId}</p>
+          </div>
+          <button onClick={onClose} className="text-text-muted hover:text-text p-1">
+            <XCircle size={24} />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Category</p>
+              <p className="text-text font-medium">{team.category}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Payment Status</p>
+              <p className="text-text font-medium">{team.payment?.status || "PENDING"}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Project Submitted</p>
+              <p className="text-text font-medium">{team.submission ? "Yes ✓" : "No"}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Registered At</p>
+              <p className="text-text font-medium">{new Date(team.createdAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          {team.leader && (
+            <div className="bg-white/5 p-4 rounded-xl">
+              <h3 className="font-bold text-text mb-3 flex items-center gap-2">
+                <Users size={16} className="text-primary" />
+                Team Leader
+              </h3>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div><span className="text-text-muted">Name:</span> <span className="text-text">{team.leader.name}</span></div>
+                <div><span className="text-text-muted">Email:</span> <span className="text-text">{team.leader.email}</span></div>
+                <div><span className="text-text-muted">Mobile:</span> <span className="text-text">{team.leader.mobile || "N/A"}</span></div>
+                <div><span className="text-text-muted">College/Company:</span> <span className="text-text">{team.leader.college || "N/A"}</span></div>
+                {team.leader.linkedin && <div className="col-span-2"><span className="text-text-muted">LinkedIn:</span> <a href={team.leader.linkedin} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{team.leader.linkedin}</a></div>}
+              </div>
+            </div>
+          )}
+
+          {team.members && team.members.length > 0 && (
+            <div className="bg-white/5 p-4 rounded-xl">
+              <h3 className="font-bold text-text mb-3">Team Members ({team.members.length})</h3>
+              <div className="space-y-2">
+                {team.members.map((m: any, i: number) => (
+                  <div key={i} className="flex justify-between text-sm border-b border-white/5 pb-2 last:border-0">
+                    <span className="text-text">{m.name}</span>
+                    <span className="text-text-muted">{m.email}</span>
+                    {m.skills && <span className="text-text-dim text-xs">{m.skills}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {team.submission && (
+            <div className="bg-white/5 p-4 rounded-xl">
+              <h3 className="font-bold text-text mb-3">Project Submission</h3>
+              <div className="space-y-2 text-sm">
+                {team.submission.theme && <div><span className="text-text-muted">Theme:</span> <span className="text-text">{team.submission.theme}</span></div>}
+                {team.submission.techStack && <div><span className="text-text-muted">Tech Stack:</span> <span className="text-text">{team.submission.techStack}</span></div>}
+                {team.submission.repoUrl && <div><span className="text-text-muted">Repo:</span> <a href={team.submission.repoUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{team.submission.repoUrl}</a></div>}
+                {team.submission.demoUrl && <div><span className="text-text-muted">Demo:</span> <a href={team.submission.demoUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{team.submission.demoUrl}</a></div>}
+                {team.submission.description && <div><span className="text-text-muted">Description:</span> <p className="text-text mt-1">{team.submission.description}</p></div>}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

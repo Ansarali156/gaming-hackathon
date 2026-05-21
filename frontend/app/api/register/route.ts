@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateTeamId } from "@/lib/utils";
 import bcrypt from "bcryptjs";
+import { sendEmail } from "@/lib/mailer";
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -123,6 +124,21 @@ export async function POST(request: Request) {
         members: { include: { user: true } },
         payment: true,
       },
+    });
+
+    // ── Send Registration Email ───────────────────────────────────────────
+    await sendEmail({
+      to: leader.email.toLowerCase(),
+      subject: "Welcome to IncuXai Gaming Hackathon! 🚀",
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; max-w-lg mx-auto">
+          <h2>Registration Successful, ${leader.name.trim()}!</h2>
+          <p>Your team <strong>${teamName.trim()}</strong> has been successfully registered.</p>
+          <p><strong>Team ID:</strong> ${team.teamId}</p>
+          <p>Please log in to your participant dashboard using your email and password to complete your payment and submit your project links.</p>
+          <a href="http://localhost:3000/login" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 20px;">Go to Dashboard</a>
+        </div>
+      `,
     });
 
     return NextResponse.json({

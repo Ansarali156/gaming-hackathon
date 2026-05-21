@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/mailer";
 
 export async function GET(request: Request) {
   try {
@@ -59,7 +60,30 @@ export async function PATCH(request: Request) {
     const team = await prisma.team.update({
       where: { teamId },
       data: { status },
+      include: {
+        members: {
+          include: { user: true }
+        }
+      }
     });
+
+    if (status === "APPROVED") {
+      const leader = team.members.find(m => m.role === "LEADER");
+      if (leader?.user?.email) {
+        await sendEmail({
+          to: leader.user.email,
+          subject: "🎉 Congratulations! Your team is selected for IncuXai Hackathon!",
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #333; max-w-lg mx-auto">
+              <h2>Congratulations, ${leader.user.name}!</h2>
+              <p>Your team <strong>${team.name}</strong> has been <strong>SELECTED</strong> for the next round of the IncuXai Gaming Hackathon.</p>
+              <p>Please log in to your dashboard to view the latest timeline and prepare for the next phase!</p>
+              <a href="http://localhost:3000/login" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 20px;">Go to Dashboard</a>
+            </div>
+          `
+        });
+      }
+    }
 
     return NextResponse.json({ success: true, team });
   } catch (error) {

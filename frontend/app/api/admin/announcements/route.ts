@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/mailer";
 
 export async function GET() {
   try {
@@ -31,8 +32,29 @@ export async function POST(request: Request) {
     const logs: string[] = ["Created announcement on platform dashboard."];
 
     if (channels?.email) {
-      // Simulation of Resend trigger
-      logs.push(`Simulated sending email announcement to all registered users via Resend API.`);
+      const users = await prisma.user.findMany({
+        where: { role: "PARTICIPANT" },
+        select: { email: true }
+      });
+      const emails = users.map(u => u.email).filter(Boolean);
+      
+      if (emails.length > 0) {
+        // Send email in background so it doesn't block request
+        sendEmail({
+          to: emails,
+          subject: title,
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #333; max-w-lg mx-auto">
+              <h2>IncuXai Hackathon Update</h2>
+              <p><strong>${title}</strong></p>
+              <p>${message.replace(/\n/g, '<br/>')}</p>
+              <br/>
+              <p>Best regards,<br/>The IncuXai Team</p>
+            </div>
+          `
+        }).catch(err => console.error("Broadcast email error:", err));
+        logs.push(`Sent email broadcast to ${emails.length} participants.`);
+      }
     }
 
     if (channels?.discord) {
