@@ -17,7 +17,7 @@ const navLinks = [
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -54,7 +54,9 @@ export function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            {session ? (
+            {status === "loading" ? (
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : session ? (
               <>
                 <Link
                   href={dashboardUrl}
@@ -116,7 +118,11 @@ export function Header() {
               </Link>
             ))}
             <div className="flex flex-col gap-3 pt-4 border-t border-white/5">
-              {session ? (
+              {status === "loading" ? (
+                <div className="flex justify-center py-2">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : session ? (
                 <>
                   <Link
                     href={dashboardUrl}

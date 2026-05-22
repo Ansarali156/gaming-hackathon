@@ -24,6 +24,16 @@ export async function POST(request: Request) {
       },
     });
 
+    // Create an admin-targeted pinned announcement to notify the admin
+    await prisma.announcement.create({
+      data: {
+        title: `🤝 New Sponsor Inquiry from ${name}`,
+        message: `A new sponsorship inquiry has been submitted.\n\nContact: ${name}\nEmail: ${email}\nPhone: ${phone}${company ? `\nCompany: ${company}` : ""}${message ? `\nMessage: ${message}` : ""}\n\nPlease review this inquiry in the Sponsors tab.`,
+        visibility: "ADMIN",
+        isPinned: true,
+      },
+    });
+
     return NextResponse.json({ success: true, inquiry });
   } catch (error) {
     console.error("Sponsor inquiry error:", error);

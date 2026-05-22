@@ -46,11 +46,11 @@ export default function LoginPage() {
     <div className="min-h-screen">
       <Header />
       <main className="pt-28 pb-16">
-        <div className="max-w-md mx-auto px-margin-mobile md:px-margin-desktop">
+        <div className="max-w-3xl mx-auto px-margin-mobile md:px-margin-desktop">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-8"
+            className="glass-card p-12 md:p-16"
           >
             <h1 className="font-display text-3xl font-bold gradient-text mb-2 text-center">Welcome Back</h1>
             <p className="text-text-muted text-center mb-8">Login to access your dashboard</p>

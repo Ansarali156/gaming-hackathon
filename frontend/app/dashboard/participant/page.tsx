@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ChatBot } from "@/components/ui/ChatBot";
 import {
   Users,
   CreditCard,
@@ -27,18 +26,23 @@ function isValidUrl(url: string) {
 }
 
 // ── Nav Item ─────────────────────────────────────────────────────────────────
-function NavItem({ icon, label, active, onClick }: {
-  icon: React.ReactNode; label: string; active: boolean; onClick: () => void;
+function NavItem({ icon, label, active, onClick, unread }: {
+  icon: React.ReactNode; label: string; active: boolean; onClick: () => void; unread?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-left ${
+      className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg transition-colors text-left ${
         active ? "bg-primary/10 text-primary" : "text-text-muted hover:text-text hover:bg-white/5"
       }`}
     >
-      {icon}
-      <span className="text-sm font-medium">{label}</span>
+      <div className="flex items-center gap-3">
+        {icon}
+        <span className="text-sm font-medium">{label}</span>
+      </div>
+      {unread && (
+        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+      )}
     </button>
   );
 }
@@ -50,6 +54,7 @@ export default function ParticipantDashboard() {
   const [teamData, setTeamData] = useState<any>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>("PENDING");
   const [loadingTeam, setLoadingTeam] = useState(true);
+  const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
 
   const fetchTeamData = async () => {
     try {
@@ -68,6 +73,24 @@ export default function ParticipantDashboard() {
 
   useEffect(() => {
     if (session) fetchTeamData();
+  }, [session]);
+
+  useEffect(() => {
+    async function checkNotifications() {
+      try {
+        const res = await fetch("/api/admin/announcements");
+        const data = await res.json();
+        if (data.success && data.announcements) {
+          const visibleAnnouncements = data.announcements.filter((a: any) => a.visibility !== "ADMIN");
+          const lastSeenTime = localStorage.getItem("incux_last_seen_notification_time") || "0";
+          const hasNew = visibleAnnouncements.some((a: any) => new Date(a.createdAt).getTime() > parseInt(lastSeenTime));
+          setHasUnreadNotification(hasNew);
+        }
+      } catch (err) {
+        console.error("Failed to check notifications", err);
+      }
+    }
+    if (session) checkNotifications();
   }, [session]);
 
   if (status === "loading") {
@@ -114,7 +137,17 @@ export default function ParticipantDashboard() {
                   <NavItem icon={<Users size={16} />} label="My Team" active={activeTab === "team"} onClick={() => setActiveTab("team")} />
                   <NavItem icon={<CreditCard size={16} />} label="Payment" active={activeTab === "payment"} onClick={() => setActiveTab("payment")} />
                   <NavItem icon={<FileText size={16} />} label="Submission" active={activeTab === "submission"} onClick={() => setActiveTab("submission")} />
-                  <NavItem icon={<Bell size={16} />} label="Notifications" active={activeTab === "notifications"} onClick={() => setActiveTab("notifications")} />
+                  <NavItem
+                    icon={<Bell size={16} />}
+                    label="Notifications"
+                    active={activeTab === "notifications"}
+                    unread={hasUnreadNotification}
+                    onClick={() => {
+                      setActiveTab("notifications");
+                      setHasUnreadNotification(false);
+                      localStorage.setItem("incux_last_seen_notification_time", Date.now().toString());
+                    }}
+                  />
                 </nav>
 
                 <button
@@ -159,7 +192,6 @@ export default function ParticipantDashboard() {
         </div>
       </main>
       <Footer />
-      <ChatBot />
     </div>
   );
 }
@@ -343,12 +375,34 @@ function PaymentTab({ teamData, paymentStatus, onPaymentComplete, session }: any
       <h2 className="font-display text-2xl font-bold text-text">Payment</h2>
 
       {paymentStatus === "SUCCESS" ? (
-        <div className="glass-card p-8 text-center">
-          <CheckCircle className="text-green-400 mx-auto mb-4" size={48} />
-          <h3 className="font-bold text-text text-xl mb-2">Payment Complete!</h3>
-          <p className="text-text-muted">
-            Your registration fee has been paid. You can now submit your project links.
-          </p>
+        <div className="glass-card p-8">
+          <div className="text-center mb-6">
+            <CheckCircle className="text-green-400 mx-auto mb-4" size={48} />
+            <h3 className="font-bold text-text text-xl mb-2">Payment Complete!</h3>
+            <p className="text-text-muted">
+              Your registration fee has been successfully paid. You can now submit your project links.
+            </p>
+          </div>
+          
+          <div className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-3 mt-6">
+            <h4 className="font-bold text-text mb-2 flex items-center gap-2">
+              <FileText size={16} className="text-primary" /> Transaction Details
+            </h4>
+            <InfoRow label="Status" value={<span className="text-green-400 font-bold text-xs uppercase px-2 py-0.5 bg-green-500/10 rounded-full">SUCCESS</span>} />
+            <InfoRow label="Transaction ID" value={teamData?.payment?.razorpayPaymentId || teamData?.payment?.razorpayOrderId || "N/A"} />
+            <InfoRow label="Amount Paid" value={`₹${teamData?.payment?.amount || 0}`} />
+            <InfoRow label="Date" value={teamData?.payment?.updatedAt ? new Date(teamData.payment.updatedAt).toLocaleString() : "N/A"} />
+            {teamData?.payment?.gstInvoice && (
+              <InfoRow 
+                label="Invoice" 
+                value={
+                  <a href={teamData.payment.gstInvoice} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-sm">
+                    View Invoice <ExternalLink size={12}/>
+                  </a>
+                } 
+              />
+            )}
+          </div>
         </div>
       ) : (
         <div className="glass-card p-6 space-y-6">
@@ -624,7 +678,7 @@ function MemberCard({ member, isLeader }: { member: any; isLeader?: boolean }) {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between text-sm">
       <span className="text-text-muted">{label}</span>

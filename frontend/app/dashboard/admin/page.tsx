@@ -15,14 +15,15 @@ import {
   Search,
   Filter,
   Megaphone,
-  LifeBuoy,
   Shield,
   Plus,
   Trash2,
   ExternalLink,
   DollarSign,
   AlertCircle,
-  LogOut
+  LogOut,
+  Bell,
+  Handshake
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -31,12 +32,12 @@ export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState<any>(null);
   const [participants, setParticipants] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
-  const [tickets, setTickets] = useState<any[]>([]);
   const [sponsors, setSponsors] = useState<any[]>([]);
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
 
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,9 +46,7 @@ export default function AdminDashboard() {
 
   // Selected Item Modals
   const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
-  const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [selectedTeam, setSelectedTeam] = useState<any>(null);
-  const [ticketResponse, setTicketResponse] = useState("");
 
   // New Sponsor Form
   const [showAddSponsor, setShowAddSponsor] = useState(false);
@@ -60,7 +59,6 @@ export default function AdminDashboard() {
     contact: "",
     isActive: true
   });
-
   // New Announcement Form
   const [announcementTitle, setAnnouncementTitle] = useState("");
   const [announcementMsg, setAnnouncementMsg] = useState("");
@@ -74,7 +72,6 @@ export default function AdminDashboard() {
         analyticsRes,
         participantsRes,
         paymentsRes,
-        ticketsRes,
         sponsorsRes,
         announcementsRes,
         submissionsRes
@@ -82,7 +79,6 @@ export default function AdminDashboard() {
         fetch("/api/admin/analytics"),
         fetch("/api/admin/participants"),
         fetch("/api/admin/payments"),
-        fetch("/api/admin/tickets"),
         fetch("/api/admin/sponsors"),
         fetch("/api/admin/announcements"),
         fetch("/api/admin/submissions")
@@ -91,7 +87,6 @@ export default function AdminDashboard() {
       const analyticsData = await analyticsRes.json();
       const participantsData = await participantsRes.json();
       const paymentsData = await paymentsRes.json();
-      const ticketsData = await ticketsRes.json();
       const sponsorsData = await sponsorsRes.json();
       const announcementsData = await announcementsRes.json();
       const submissionsData = await submissionsRes.json();
@@ -99,7 +94,6 @@ export default function AdminDashboard() {
       setAnalytics(analyticsData);
       setParticipants(participantsData.teams || []);
       setPayments(paymentsData.payments || []);
-      setTickets(ticketsData.tickets || []);
       setSponsors(sponsorsData.sponsors || []);
       setInquiries(sponsorsData.inquiries || []);
       setAnnouncements(announcementsData.announcements || []);
@@ -113,6 +107,15 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (announcements.length > 0) {
+      const lastSeenTime = localStorage.getItem("incux_admin_last_seen_notification_time") || "0";
+      const hasNew = announcements.some((a: any) => new Date(a.createdAt).getTime() > parseInt(lastSeenTime));
+      setHasUnreadNotification(hasNew);
+    }
+  }, [announcements]);
+
 
   const handleToggleSponsorStatus = async (sponsorId: string, isActive: boolean) => {
     try {
@@ -202,58 +205,9 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleReplyTicket = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedTicket) return;
-    try {
-      const res = await fetch("/api/admin/tickets", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ticketId: selectedTicket.id,
-          response: ticketResponse,
-          status: "RESOLVED"
-        })
-      });
-      if (res.ok) {
-        setTicketResponse("");
-        setSelectedTicket(null);
-        fetchData();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
-  const handleCloseTicket = async (ticketId: string) => {
-    try {
-      const res = await fetch("/api/admin/tickets", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticketId, status: "CLOSED" })
-      });
-      if (res.ok) {
-        setSelectedTicket(null);
-        fetchData();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
-  const handleProcessRefund = async (paymentId: string) => {
-    if (!confirm("Are you sure you want to process this refund?")) return;
-    try {
-      const res = await fetch("/api/admin/payments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentId, status: "REFUNDED" })
-      });
-      if (res.ok) fetchData();
-    } catch (e) {
-      console.error(e);
-    }
-  };
+
 
   // CSV Exporter for teams
   const handleExportCSV = () => {
@@ -323,7 +277,17 @@ export default function AdminDashboard() {
                   <NavItem icon={<CreditCard size={16} />} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
                   <NavItem icon={<ExternalLink size={16} />} label="Submissions" active={activeTab === "submissions"} onClick={() => setActiveTab("submissions")} />
                   <NavItem icon={<Megaphone size={16} />} label="Announcements" active={activeTab === "announcements"} onClick={() => setActiveTab("announcements")} />
-                  <NavItem icon={<LifeBuoy size={16} />} label="Support System" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
+                  <NavItem
+                    icon={<Bell size={16} />}
+                    label="Notifications"
+                    active={activeTab === "notifications"}
+                    unread={hasUnreadNotification}
+                    onClick={() => {
+                      setActiveTab("notifications");
+                      setHasUnreadNotification(false);
+                      localStorage.setItem("incux_admin_last_seen_notification_time", Date.now().toString());
+                    }}
+                  />
                 </nav>
 
                 <button
@@ -359,7 +323,6 @@ export default function AdminDashboard() {
               {activeTab === "payments" && (
                 <PaymentsPane
                   payments={payments}
-                  handleProcessRefund={handleProcessRefund}
                   setSelectedReceipt={setSelectedReceipt}
                 />
               )}
@@ -378,30 +341,8 @@ export default function AdminDashboard() {
                   announcementLogs={announcementLogs}
                 />
               )}
-              {activeTab === "support" && (
-                <SupportPane
-                  tickets={tickets}
-                  selectedTicket={selectedTicket}
-                  setSelectedTicket={setSelectedTicket}
-                  ticketResponse={ticketResponse}
-                  setTicketResponse={setTicketResponse}
-                  handleReplyTicket={handleReplyTicket}
-                  handleCloseTicket={handleCloseTicket}
-                />
-              )}
-              {activeTab === "sponsors" && (
-                <SponsorsPane
-                  sponsors={sponsors}
-                  inquiries={inquiries}
-                  showAddSponsor={showAddSponsor}
-                  setShowAddSponsor={setShowAddSponsor}
-                  newSponsor={newSponsor}
-                  setNewSponsor={setNewSponsor}
-                  handleAddSponsorSubmit={handleAddSponsorSubmit}
-                  handleToggleSponsorStatus={handleToggleSponsorStatus}
-                  handleDeleteSponsor={handleDeleteSponsor}
-                  handleUpdateInquiryStatus={handleUpdateInquiryStatus}
-                />
+              {activeTab === "notifications" && (
+                <AdminNotificationsPane announcements={announcements} />
               )}
             </div>
           </div>
@@ -479,16 +420,21 @@ export default function AdminDashboard() {
   );
 }
 
-function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
+function NavItem({ icon, label, active, onClick, unread }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void; unread?: boolean }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-left font-display font-medium ${
+      className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg transition-colors text-left font-display font-medium ${
         active ? "bg-secondary/10 text-secondary" : "text-text-muted hover:text-text hover:bg-white/5"
       }`}
     >
-      {icon}
-      <span className="text-sm">{label}</span>
+      <div className="flex items-center gap-3">
+        {icon}
+        <span className="text-sm">{label}</span>
+      </div>
+      {unread && (
+        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+      )}
     </button>
   );
 }
@@ -641,28 +587,6 @@ function ParticipantsPane({
   setSelectedReceipt,
   setSelectedTeam
 }: any) {
-  const [isSendingCerts, setIsSendingCerts] = useState(false);
-
-  const handleSendCertificates = async () => {
-    if (!confirm("Are you sure you want to send Round 1 certificates to all participants? This will email every registered user.")) return;
-    
-    setIsSendingCerts(true);
-    try {
-      const res = await fetch("/api/admin/certificates", { method: "POST" });
-      const data = await res.json();
-      if (data.success) {
-        alert(`Successfully sent certificates to ${data.count} participants!`);
-      } else {
-        alert("Failed to send certificates.");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Error sending certificates.");
-    } finally {
-      setIsSendingCerts(false);
-    }
-  };
-
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -671,13 +595,6 @@ function ParticipantsPane({
           <p className="text-text-muted text-sm">View registration logs and verify payments.</p>
         </div>
         <div className="flex gap-2">
-          <button 
-            onClick={handleSendCertificates} 
-            disabled={isSendingCerts}
-            className="btn-primary inline-flex items-center gap-2 text-sm py-2 px-4 bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
-          >
-            {isSendingCerts ? "Sending..." : "Send Round 1 Certificates"}
-          </button>
           <button onClick={handleExportCSV} className="btn-secondary inline-flex items-center gap-2 text-sm py-2">
             <Download size={16} />
             Export CSV
@@ -856,7 +773,7 @@ function LinkBadge({ url, label, color = "text-primary" }: { url: string; label:
 /* ============================================================================
    C. PAYMENT MANAGEMENT
    ============================================================================ */
-function PaymentsPane({ payments, handleProcessRefund, setSelectedReceipt }: any) {
+function PaymentsPane({ payments, setSelectedReceipt }: any) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
@@ -909,14 +826,7 @@ function PaymentsPane({ payments, handleProcessRefund, setSelectedReceipt }: any
                       }`}>{payment.status}</span>
                     </td>
                     <td className="p-4 text-right">
-                      {payment.status === "SUCCESS" && (
-                        <button
-                          onClick={() => handleProcessRefund(payment.id)}
-                          className="btn-secondary py-1 px-3 text-xs bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-purple-500/20"
-                        >
-                          Refund
-                        </button>
-                      )}
+                      {/* Refund option removed */}
                     </td>
                   </tr>
                 ))
@@ -1072,141 +982,161 @@ function AnnouncementsPane({
   );
 }
 
+
+
 /* ============================================================================
-   F. SUPPORT SYSTEM
+   G. ADMIN NOTIFICATIONS PANEL
    ============================================================================ */
-function SupportPane({
-  tickets,
-  selectedTicket,
-  setSelectedTicket,
-  ticketResponse,
-  setTicketResponse,
-  handleReplyTicket,
-  handleCloseTicket
-}: any) {
+function AdminNotificationsPane({ announcements }: { announcements: any[] }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-text">Support Tickets</h2>
-        <p className="text-text-muted text-sm">Assign, reply to, and resolve participant queries.</p>
+        <h2 className="font-display text-2xl font-bold text-text">Notifications</h2>
+        <p className="text-text-muted text-sm">Incoming alerts, sponsor inquiries, and system updates.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Ticket List Queue */}
-        <div className="lg:col-span-1 glass-card p-4 space-y-4 max-h-[500px] overflow-y-auto">
-          <h3 className="font-display font-bold text-sm text-text border-b border-white/5 pb-2">Ticket Queue</h3>
-          <div className="space-y-2">
-            {tickets.length > 0 ? (
-              tickets.map((t: any) => (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedTicket(t)}
-                  className={`w-full text-left p-3 rounded-lg transition-colors border ${
-                    selectedTicket?.id === t.id
-                      ? "bg-primary/10 border-primary/30"
-                      : "bg-white/5 border-transparent hover:bg-white/10"
-                  }`}
-                >
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-text-muted font-bold uppercase truncate max-w-[80px]">
-                      {t.category}
-                    </span>
-                    <span className={`text-[9px] font-extrabold uppercase ${
-                      t.status === "OPEN" ? "text-red-400" :
-                      t.status === "IN_PROGRESS" ? "text-yellow-400" :
-                      t.status === "RESOLVED" ? "text-green-400" :
-                      "text-text-dim"
-                    }`}>{t.status}</span>
-                  </div>
-                  <h4 className="text-text font-bold text-xs truncate">{t.subject}</h4>
-                  <p className="text-[10px] text-text-dim truncate">{t.user?.name || "Participant"}</p>
-                </button>
-              ))
-            ) : (
-              <p className="text-xs text-text-muted text-center py-8">No tickets raised yet.</p>
-            )}
+      <div className="glass-card p-6 space-y-3">
+        {announcements.length === 0 ? (
+          <div className="py-12 text-center space-y-3">
+            <Bell className="mx-auto text-text-dim" size={36} />
+            <p className="text-text-muted">No notifications yet.</p>
+            <p className="text-text-dim text-xs">Notifications from sponsor inquiries and system events will appear here.</p>
           </div>
-        </div>
-
-        {/* Ticket View/Reply Thread */}
-        <div className="lg:col-span-2">
-          {selectedTicket ? (
-            <div className="glass-card p-6 space-y-6">
-              <div className="flex justify-between items-start border-b border-white/5 pb-4">
-                <div>
-                  <span className="text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-bold uppercase">
-                    {selectedTicket.category}
-                  </span>
-                  <h3 className="font-display font-bold text-lg text-text mt-2">{selectedTicket.subject}</h3>
-                  <p className="text-xs text-text-muted mt-1">
-                    By {selectedTicket.user?.name} ({selectedTicket.user?.email})
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  {selectedTicket.status !== "CLOSED" && (
-                    <button
-                      onClick={() => handleCloseTicket(selectedTicket.id)}
-                      className="btn-secondary py-1 px-3 text-xs border-red-500/20 text-red-400 bg-red-500/5 hover:bg-red-500/10"
-                    >
-                      Close Ticket
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Message Details */}
-              <div className="space-y-4">
-                <div className="p-4 bg-white/5 border border-white/5 rounded-xl">
-                  <span className="text-[10px] text-text-dim block mb-1">
-                    Participant Message ({new Date(selectedTicket.createdAt).toLocaleString()}):
-                  </span>
-                  <p className="text-sm text-text leading-relaxed whitespace-pre-wrap">{selectedTicket.message}</p>
-                </div>
-
-                {selectedTicket.response && (
-                  <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl">
-                    <span className="text-[10px] text-primary block mb-1 font-bold">
-                      Admin Response ({new Date(selectedTicket.updatedAt).toLocaleString()}):
+        ) : (
+          announcements.map((a: any) => (
+            <div
+              key={a.id}
+              className={`p-4 rounded-xl transition-colors ${
+                a.isPinned
+                  ? "bg-primary/5 border border-primary/20"
+                  : "bg-white/5 border border-white/5 hover:bg-white/[0.07]"
+              }`}
+            >
+              <div className="flex justify-between items-start gap-4 mb-2">
+                <p className={`text-sm ${a.isPinned ? "text-text font-medium" : "text-text-muted"}`}>
+                  {a.isPinned && <span className="mr-2">📌</span>}
+                  {a.title}
+                </p>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {a.visibility === "ADMIN" && (
+                    <span className="px-1.5 py-0.5 bg-secondary/10 text-secondary text-[9px] font-bold rounded uppercase">
+                      Admin
                     </span>
-                    <p className="text-sm text-text leading-relaxed whitespace-pre-wrap">{selectedTicket.response}</p>
-                  </div>
-                )}
+                  )}
+                  <span className="text-text-dim text-xs whitespace-nowrap">
+                    {new Date(a.createdAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
               </div>
-
-              {/* Reply field */}
-              {selectedTicket.status !== "CLOSED" && (
-                <form onSubmit={handleReplyTicket} className="space-y-3 border-t border-white/5 pt-4">
-                  <label className="label-text text-sm">Write Response</label>
-                  <textarea
-                    value={ticketResponse}
-                    onChange={(e) => setTicketResponse(e.target.value)}
-                    className="input-field text-sm h-28"
-                    placeholder="Provide troubleshooting steps or resolving answer..."
-                    required
-                  />
-                  <button type="submit" className="btn-primary text-sm py-2">
-                    Send Response
-                  </button>
-                </form>
+              {a.message && (
+                <p className="text-text-muted text-sm whitespace-pre-wrap leading-relaxed">{a.message}</p>
               )}
             </div>
-          ) : (
-            <div className="glass-card p-12 text-center h-full flex flex-col justify-center items-center">
-              <LifeBuoy className="text-text-dim mb-4" size={48} />
-              <h3 className="font-display font-bold text-text mb-2">Select a Ticket</h3>
-              <p className="text-text-muted text-xs max-w-sm">
-                Click on any participant support ticket on the left pane to view details and response threads.
-              </p>
-            </div>
-          )}
-        </div>
+          ))
+        )}
       </div>
     </motion.div>
   );
 }
 
+
+function TeamDetailsModal({ team, onClose }: { team: any; onClose: () => void }) {
+  if (!team) return null;
+
+  // Extract leader and members correctly from Prisma structure
+  const leaderData = team.members?.find((m: any) => m.role === "LEADER");
+  const leader = leaderData?.user;
+  const regularMembers = team.members?.filter((m: any) => m.role !== "LEADER") || [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
+      <div className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-text">{team.name}</h2>
+            <p className="text-primary font-mono text-sm">{team.teamId}</p>
+          </div>
+          <button onClick={onClose} className="text-text-muted hover:text-text p-1">
+            <XCircle size={24} />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Category</p>
+              <p className="text-text font-medium">{team.category}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Payment Status</p>
+              <p className="text-text font-medium">{team.payment?.status || "PENDING"}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Project Submitted</p>
+              <p className="text-text font-medium">{team.submission ? "Yes ✓" : "No"}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Registered At</p>
+              <p className="text-text font-medium">{new Date(team.createdAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          {leader && (
+            <div className="bg-white/5 p-4 rounded-xl">
+              <h3 className="font-bold text-text mb-3 flex items-center gap-2">
+                <Users size={16} className="text-primary" />
+                Team Leader
+              </h3>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div><span className="text-text-muted">Name:</span> <span className="text-text">{leader.name}</span></div>
+                <div><span className="text-text-muted">Email:</span> <span className="text-text">{leader.email}</span></div>
+                <div><span className="text-text-muted">Mobile:</span> <span className="text-text">{leader.mobile || "N/A"}</span></div>
+                <div><span className="text-text-muted">College/Company:</span> <span className="text-text">{leaderData.college || "N/A"}</span></div>
+                {leaderData.linkedin && <div className="col-span-2"><span className="text-text-muted">LinkedIn:</span> <a href={leaderData.linkedin} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{leaderData.linkedin}</a></div>}
+              </div>
+            </div>
+          )}
+
+          {regularMembers.length > 0 && (
+            <div className="bg-white/5 p-4 rounded-xl">
+              <h3 className="font-bold text-text mb-3">Team Members ({regularMembers.length})</h3>
+              <div className="space-y-2">
+                {regularMembers.map((m: any, i: number) => (
+                  <div key={i} className="flex justify-between text-sm border-b border-white/5 pb-2 last:border-0">
+                    <span className="text-text">{m.user?.name || "Unknown"}</span>
+                    <span className="text-text-muted">{m.user?.email || "No Email"}</span>
+                    {m.skills && <span className="text-text-dim text-xs">{m.skills}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {team.submission && (
+            <div className="bg-white/5 p-4 rounded-xl">
+              <h3 className="font-bold text-text mb-3">Project Submission</h3>
+              <div className="space-y-2 text-sm">
+                {team.submission.theme && <div><span className="text-text-muted">Theme:</span> <span className="text-text">{team.submission.theme}</span></div>}
+                {team.submission.techStack && <div><span className="text-text-muted">Tech Stack:</span> <span className="text-text">{team.submission.techStack}</span></div>}
+                {team.submission.repoUrl && <div><span className="text-text-muted">Repo:</span> <a href={team.submission.repoUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{team.submission.repoUrl}</a></div>}
+                {team.submission.demoUrl && <div><span className="text-text-muted">Demo:</span> <a href={team.submission.demoUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{team.submission.demoUrl}</a></div>}
+                {team.submission.description && <div><span className="text-text-muted">Description:</span> <p className="text-text mt-1">{team.submission.description}</p></div>}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ============================================================================
-   G. SPONSOR MANAGEMENT
+   H. SPONSOR MANAGEMENT
    ============================================================================ */
 function SponsorsPane({
   sponsors,
@@ -1443,95 +1373,5 @@ function SponsorsPane({
         </div>
       </div>
     </motion.div>
-  );
-}
-
-function TeamDetailsModal({ team, onClose }: { team: any; onClose: () => void }) {
-  if (!team) return null;
-
-  // Extract leader and members correctly from Prisma structure
-  const leaderData = team.members?.find((m: any) => m.role === "LEADER");
-  const leader = leaderData?.user;
-  const regularMembers = team.members?.filter((m: any) => m.role !== "LEADER") || [];
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
-      <div className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h2 className="font-display text-2xl font-bold text-text">{team.name}</h2>
-            <p className="text-primary font-mono text-sm">{team.teamId}</p>
-          </div>
-          <button onClick={onClose} className="text-text-muted hover:text-text p-1">
-            <XCircle size={24} />
-          </button>
-        </div>
-
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/5 p-4 rounded-xl">
-              <p className="text-text-muted text-xs mb-1">Category</p>
-              <p className="text-text font-medium">{team.category}</p>
-            </div>
-            <div className="bg-white/5 p-4 rounded-xl">
-              <p className="text-text-muted text-xs mb-1">Payment Status</p>
-              <p className="text-text font-medium">{team.payment?.status || "PENDING"}</p>
-            </div>
-            <div className="bg-white/5 p-4 rounded-xl">
-              <p className="text-text-muted text-xs mb-1">Project Submitted</p>
-              <p className="text-text font-medium">{team.submission ? "Yes ✓" : "No"}</p>
-            </div>
-            <div className="bg-white/5 p-4 rounded-xl">
-              <p className="text-text-muted text-xs mb-1">Registered At</p>
-              <p className="text-text font-medium">{new Date(team.createdAt).toLocaleDateString()}</p>
-            </div>
-          </div>
-
-          {leader && (
-            <div className="bg-white/5 p-4 rounded-xl">
-              <h3 className="font-bold text-text mb-3 flex items-center gap-2">
-                <Users size={16} className="text-primary" />
-                Team Leader
-              </h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-text-muted">Name:</span> <span className="text-text">{leader.name}</span></div>
-                <div><span className="text-text-muted">Email:</span> <span className="text-text">{leader.email}</span></div>
-                <div><span className="text-text-muted">Mobile:</span> <span className="text-text">{leader.mobile || "N/A"}</span></div>
-                <div><span className="text-text-muted">College/Company:</span> <span className="text-text">{leaderData.college || "N/A"}</span></div>
-                {leaderData.linkedin && <div className="col-span-2"><span className="text-text-muted">LinkedIn:</span> <a href={leaderData.linkedin} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{leaderData.linkedin}</a></div>}
-              </div>
-            </div>
-          )}
-
-          {regularMembers.length > 0 && (
-            <div className="bg-white/5 p-4 rounded-xl">
-              <h3 className="font-bold text-text mb-3">Team Members ({regularMembers.length})</h3>
-              <div className="space-y-2">
-                {regularMembers.map((m: any, i: number) => (
-                  <div key={i} className="flex justify-between text-sm border-b border-white/5 pb-2 last:border-0">
-                    <span className="text-text">{m.user?.name || "Unknown"}</span>
-                    <span className="text-text-muted">{m.user?.email || "No Email"}</span>
-                    {m.skills && <span className="text-text-dim text-xs">{m.skills}</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {team.submission && (
-            <div className="bg-white/5 p-4 rounded-xl">
-              <h3 className="font-bold text-text mb-3">Project Submission</h3>
-              <div className="space-y-2 text-sm">
-                {team.submission.theme && <div><span className="text-text-muted">Theme:</span> <span className="text-text">{team.submission.theme}</span></div>}
-                {team.submission.techStack && <div><span className="text-text-muted">Tech Stack:</span> <span className="text-text">{team.submission.techStack}</span></div>}
-                {team.submission.repoUrl && <div><span className="text-text-muted">Repo:</span> <a href={team.submission.repoUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{team.submission.repoUrl}</a></div>}
-                {team.submission.demoUrl && <div><span className="text-text-muted">Demo:</span> <a href={team.submission.demoUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{team.submission.demoUrl}</a></div>}
-                {team.submission.description && <div><span className="text-text-muted">Description:</span> <p className="text-text mt-1">{team.submission.description}</p></div>}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
   );
 }

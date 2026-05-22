@@ -22,7 +22,7 @@ export function SponsorsSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <section id="sponsors" className="py-24 relative bg-gray-50 border-t border-b border-gray-200">
+    <section id="sponsors" className="py-24 relative bg-background border-t border-b border-border">
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -42,7 +42,7 @@ export function SponsorsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="glass-card w-full max-w-[340px] px-8 py-8 flex flex-col items-center justify-center border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white rounded-xl"
+              className="glass-card w-full max-w-[340px] px-8 py-8 flex flex-col items-center justify-center border border-border shadow-md bg-surface rounded-xl"
             >
               {sponsor.website ? (
                 <a
@@ -55,10 +55,10 @@ export function SponsorsSection() {
                     <img
                       src={sponsor.logo}
                       alt={sponsor.name}
-                      className="max-h-full max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
+                      className="max-h-full max-w-full object-contain transition-all duration-300"
                     />
                   </div>
-                  <span className="text-gray-800 font-semibold group-hover:text-primary transition-colors text-base">
+                  <span className="text-text font-semibold group-hover:text-primary transition-colors text-base">
                     {sponsor.name}
                   </span>
                 </a>
@@ -68,10 +68,10 @@ export function SponsorsSection() {
                     <img
                       src={sponsor.logo}
                       alt={sponsor.name}
-                      className="max-h-full max-w-full object-contain filter grayscale"
+                      className="max-h-full max-w-full object-contain"
                     />
                   </div>
-                  <span className="text-gray-800 font-semibold text-base">{sponsor.name}</span>
+                  <span className="text-text font-semibold text-base">{sponsor.name}</span>
                 </div>
               )}
             </motion.div>
