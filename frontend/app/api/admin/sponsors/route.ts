@@ -6,7 +6,10 @@ export async function GET() {
     const sponsors = await prisma.sponsor.findMany({
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json({ success: true, sponsors });
+    const inquiries = await prisma.sponsorshipInquiry.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json({ success: true, sponsors, inquiries });
   } catch (error) {
     console.error("Fetch sponsors error:", error);
     return NextResponse.json({ error: "Failed to fetch sponsors" }, { status: 500 });
@@ -40,6 +43,17 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
+    
+    // Handle Inquiry updates
+    if (body.inquiryId !== undefined) {
+      const inquiry = await prisma.sponsorshipInquiry.update({
+        where: { id: body.inquiryId },
+        data: { status: body.status },
+      });
+      return NextResponse.json({ success: true, inquiry });
+    }
+
+    // Handle Sponsor updates
     const { sponsorId, name, tier, logo, website, description, contact, isActive } = body;
 
     const data: any = {};

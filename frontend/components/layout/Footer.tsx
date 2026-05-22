@@ -11,12 +11,7 @@ const footerLinks: Record<string, { label: string; href: string }[]> = {
     { label: "Prizes", href: "/#prizes" },
     { label: "FAQ", href: "/#faq" },
   ],
-  Community: [
-    { label: "Discord", href: "" },
-    { label: "Campus Ambassadors", href: "" },
-    { label: "Mentors", href: "" },
-    { label: "Judges", href: "" },
-  ],
+
   Legal: [
     { label: "Terms of Service", href: "" },
     { label: "Privacy Policy", href: "" },
@@ -73,7 +68,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/5 text-center text-text-muted">
-          <p className="mb-2">Website: incuxai.com | Phone: +91 795061289 | Email: info@incuxai.com</p>
+          <p className="mb-2">Website : <a href ="https://incuxai.com"> incuxai.com </a> | Phone: +91 795061289 | Email:Incuxaigamming@gmail</p>
           <p>© 2026 IncuXai AI Gaming Hackathon. All rights reserved.</p>
         </div>
       </div>

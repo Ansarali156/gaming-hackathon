@@ -6,54 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Building2, Users, Trophy, Megaphone, Code, Globe, Check } from "lucide-react";
 
-const tiers = [
-  {
-    name: "Title Sponsor",
-    price: "₹5,00,000",
-    benefits: [
-      "Logo on all marketing materials",
-      "Keynote speaking slot",
-      "Dedicated booth space",
-      "Access to all participant resumes",
-      "Workshop/session hosting",
-      "Social media mentions",
-      "Judging panel seat",
-    ],
-    featured: true,
-  },
-  {
-    name: "Gold Sponsor",
-    price: "₹2,50,000",
-    benefits: [
-      "Logo on event website",
-      "Booth space",
-      "Access to participant resumes",
-      "Social media mentions",
-      "Workshop hosting",
-    ],
-    featured: false,
-  },
-  {
-    name: "Silver Sponsor",
-    price: "₹1,00,000",
-    benefits: [
-      "Logo on event website",
-      "Social media mentions",
-      "Participant database access",
-    ],
-    featured: false,
-  },
-  {
-    name: "Community Partner",
-    price: "Free",
-    benefits: [
-      "Logo on partner page",
-      "Social media shoutout",
-      "Community channel access",
-    ],
-    featured: false,
-  },
-];
+// Tiers removed
 
 const stats = [
   { icon: Users, value: "500+", label: "Expected Participants" },
@@ -97,54 +50,7 @@ export default function SponsorsPage() {
             ))}
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="section-title">Sponsorship Packages</h2>
-            <p className="section-subtitle">Choose the perfect partnership tier for your brand.</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            {tiers.map((tier, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className={`glass-card p-6 card-hover ${tier.featured ? "border-primary/30 relative" : ""}`}
-              >
-                {tier.featured && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-background text-xs font-bold rounded-full">
-                    RECOMMENDED
-                  </div>
-                )}
-                <h3 className="font-display text-xl font-bold text-text mb-2">{tier.name}</h3>
-                <p className="text-3xl font-bold gradient-text mb-6">{tier.price}</p>
-                <ul className="space-y-3 mb-8">
-                  {tier.benefits.map((benefit, j) => (
-                    <li key={j} className="flex items-start gap-2 text-sm text-text-muted">
-                      <Check className="text-primary flex-shrink-0 mt-0.5" size={14} />
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="mailto:sponsors@incuxai.com"
-                  className={`w-full text-center py-3 rounded-lg font-bold transition-all ${
-                    tier.featured
-                      ? "bg-primary text-background hover:neon-glow"
-                      : "border border-white/10 text-text hover:border-primary/50 hover:text-primary"
-                  }`}
-                >
-                  Get Started
-                </a>
-              </motion.div>
-            ))}
-          </div>
+          {/* Packages removed */}
 
           <motion.div
             initial={{ opacity: 0 }}

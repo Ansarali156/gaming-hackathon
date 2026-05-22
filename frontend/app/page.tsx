@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/sections/HeroSection";
+import { WelcomeSection } from "@/components/sections/WelcomeSection";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { TracksSection } from "@/components/sections/TracksSection";
 import { WhyParticipateSection } from "@/components/sections/WhyParticipateSection";
@@ -15,6 +16,7 @@ export default function Home() {
       <Header />
       <main>
         <HeroSection />
+        <WelcomeSection />
         <AboutSection />
         <TracksSection />
         <WhyParticipateSection />

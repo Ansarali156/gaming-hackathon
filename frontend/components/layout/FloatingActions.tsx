@@ -6,9 +6,9 @@ import { Instagram, MessageCircle, Mail, UserPlus } from "lucide-react";
 
 const actions = [
   { icon: <UserPlus size={20} />, href: "/register", label: "Register", color: "bg-primary text-background" },
-  { icon: <Instagram size={20} />, href: "#", label: "Instagram", color: "bg-pink-600 text-white" },
-  { icon: <MessageCircle size={20} />, href: "#", label: "Discord", color: "bg-indigo-600 text-white" },
-  { icon: <Mail size={20} />, href: "mailto:hello@incuxai.com", label: "Email", color: "bg-secondary text-white" },
+  { icon: <Instagram size={20} />, href: "https://www.instagram.com/incuxai", label: "Instagram", color: "bg-pink-600 text-white" },
+  { icon: <MessageCircle size={20} />, href: "https://discord.gg/8gaK52vEs", label: "Discord", color: "bg-indigo-600 text-white" },
+  { icon: <Mail size={20} />, href: "mailto:incuxaigamming@gmail.com", label: "Email", color: "bg-secondary text-white" },
 ];
 
 export function FloatingActions() {

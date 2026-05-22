@@ -33,6 +33,7 @@ export default function AdminDashboard() {
   const [payments, setPayments] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
   const [sponsors, setSponsors] = useState<any[]>([]);
+  const [inquiries, setInquiries] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,6 +101,7 @@ export default function AdminDashboard() {
       setPayments(paymentsData.payments || []);
       setTickets(ticketsData.tickets || []);
       setSponsors(sponsorsData.sponsors || []);
+      setInquiries(sponsorsData.inquiries || []);
       setAnnouncements(announcementsData.announcements || []);
       setSubmissions(submissionsData.submissions || []);
     } catch (error) {
@@ -129,6 +131,19 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(`/api/admin/sponsors?sponsorId=${sponsorId}`, {
         method: "DELETE"
+      });
+      if (res.ok) fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleUpdateInquiryStatus = async (inquiryId: string, status: string) => {
+    try {
+      const res = await fetch("/api/admin/sponsors", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inquiryId, status })
       });
       if (res.ok) fetchData();
     } catch (e) {
@@ -378,6 +393,7 @@ export default function AdminDashboard() {
               {activeTab === "sponsors" && (
                 <SponsorsPane
                   sponsors={sponsors}
+                  inquiries={inquiries}
                   showAddSponsor={showAddSponsor}
                   setShowAddSponsor={setShowAddSponsor}
                   newSponsor={newSponsor}
@@ -385,6 +401,7 @@ export default function AdminDashboard() {
                   handleAddSponsorSubmit={handleAddSponsorSubmit}
                   handleToggleSponsorStatus={handleToggleSponsorStatus}
                   handleDeleteSponsor={handleDeleteSponsor}
+                  handleUpdateInquiryStatus={handleUpdateInquiryStatus}
                 />
               )}
             </div>
@@ -1194,13 +1211,15 @@ function SupportPane({
    ============================================================================ */
 function SponsorsPane({
   sponsors,
+  inquiries,
   showAddSponsor,
   setShowAddSponsor,
   newSponsor,
   setNewSponsor,
   handleAddSponsorSubmit,
   handleToggleSponsorStatus,
-  handleDeleteSponsor
+  handleDeleteSponsor,
+  handleUpdateInquiryStatus
 }: any) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -1362,6 +1381,67 @@ function SponsorsPane({
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Sponsorship Inquiries */}
+      <div className="mt-12 space-y-4">
+        <div>
+          <h3 className="font-display text-xl font-bold text-text">Sponsorship Inquiries</h3>
+          <p className="text-text-muted text-sm">Review applications submitted from the landing page.</p>
+        </div>
+        <div className="glass-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-surface-light border-b border-white/5 text-text-muted text-xs font-semibold uppercase">
+                <tr>
+                  <th className="p-4">Contact</th>
+                  <th className="p-4">Company</th>
+                  <th className="p-4">Message</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-sm">
+                {inquiries?.length > 0 ? (
+                  inquiries.map((inq: any) => (
+                    <tr key={inq.id} className="hover:bg-white/5 transition-colors">
+                      <td className="p-4">
+                        <span className="text-text font-medium block">{inq.name}</span>
+                        <span className="text-xs text-text-muted block">{inq.email}</span>
+                        <span className="text-xs text-text-dim block">{inq.phone}</span>
+                      </td>
+                      <td className="p-4 text-text">{inq.company || "—"}</td>
+                      <td className="p-4 text-text-muted text-xs max-w-xs truncate" title={inq.message}>
+                        {inq.message || "—"}
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                          inq.status === "REVIEWED" ? "bg-green-500/10 text-green-400" : "bg-yellow-500/10 text-yellow-400"
+                        }`}>
+                          {inq.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        {inq.status === "PENDING" && (
+                          <button
+                            onClick={() => handleUpdateInquiryStatus(inq.id, "REVIEWED")}
+                            className="btn-secondary py-1 px-3 text-xs"
+                          >
+                            Mark Reviewed
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="p-8 text-center text-text-muted">No pending inquiries</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </motion.div>
   );

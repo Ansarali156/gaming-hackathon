@@ -260,3 +260,14 @@ model EventStats {
 
   @@index([key])
 }
+
+model SponsorshipInquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  company   String?
+  message   String?
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+}

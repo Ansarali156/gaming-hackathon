@@ -99,14 +99,14 @@ export function HeroSection() {
             <Link href="/register" className="btn-primary btn-glow">
               Register Now
             </Link>
-            <a href="#" className="btn-secondary">
+            <a href="https://discord.gg/8gaK52vEs" className="btn-secondary">
               <MessageCircle className="inline mr-2" size={18} />
               Join Discord
             </a>
             <Link href="/sponsors" className="btn-secondary">
               Become Sponsor
             </Link>
-            <a href="#" className="btn-secondary">
+            <a href="https://www.instagram.com/incuxai" className="btn-secondary">
               <Instagram className="inline mr-2" size={18} />
               Instagram
             </a>
