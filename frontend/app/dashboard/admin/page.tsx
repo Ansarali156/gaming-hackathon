@@ -324,7 +324,6 @@ export default function AdminDashboard() {
                   <NavItem icon={<ExternalLink size={16} />} label="Submissions" active={activeTab === "submissions"} onClick={() => setActiveTab("submissions")} />
                   <NavItem icon={<Megaphone size={16} />} label="Announcements" active={activeTab === "announcements"} onClick={() => setActiveTab("announcements")} />
                   <NavItem icon={<LifeBuoy size={16} />} label="Support System" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
-                  <NavItem icon={<Plus size={16} />} label="Sponsor Hub" active={activeTab === "sponsors"} onClick={() => setActiveTab("sponsors")} />
                 </nav>
 
                 <button
@@ -600,7 +599,7 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-white/5 rounded-lg text-center">
                 <span className="text-xs text-text-muted">Total Sponsors</span>
-                <p className="text-2xl font-display font-bold text-secondary mt-1">{sponsors?.length || 0}</p>
+                <p className="text-2xl font-display font-bold text-secondary mt-1">2</p>
               </div>
               <div className="p-4 bg-white/5 rounded-lg text-center">
                 <span className="text-xs text-text-muted">Referrals Points</span>
@@ -1450,6 +1449,11 @@ function SponsorsPane({
 function TeamDetailsModal({ team, onClose }: { team: any; onClose: () => void }) {
   if (!team) return null;
 
+  // Extract leader and members correctly from Prisma structure
+  const leaderData = team.members?.find((m: any) => m.role === "LEADER");
+  const leader = leaderData?.user;
+  const regularMembers = team.members?.filter((m: any) => m.role !== "LEADER") || [];
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8" onClick={(e) => e.stopPropagation()}>
@@ -1483,30 +1487,30 @@ function TeamDetailsModal({ team, onClose }: { team: any; onClose: () => void })
             </div>
           </div>
 
-          {team.leader && (
+          {leader && (
             <div className="bg-white/5 p-4 rounded-xl">
               <h3 className="font-bold text-text mb-3 flex items-center gap-2">
                 <Users size={16} className="text-primary" />
                 Team Leader
               </h3>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-text-muted">Name:</span> <span className="text-text">{team.leader.name}</span></div>
-                <div><span className="text-text-muted">Email:</span> <span className="text-text">{team.leader.email}</span></div>
-                <div><span className="text-text-muted">Mobile:</span> <span className="text-text">{team.leader.mobile || "N/A"}</span></div>
-                <div><span className="text-text-muted">College/Company:</span> <span className="text-text">{team.leader.college || "N/A"}</span></div>
-                {team.leader.linkedin && <div className="col-span-2"><span className="text-text-muted">LinkedIn:</span> <a href={team.leader.linkedin} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{team.leader.linkedin}</a></div>}
+                <div><span className="text-text-muted">Name:</span> <span className="text-text">{leader.name}</span></div>
+                <div><span className="text-text-muted">Email:</span> <span className="text-text">{leader.email}</span></div>
+                <div><span className="text-text-muted">Mobile:</span> <span className="text-text">{leader.mobile || "N/A"}</span></div>
+                <div><span className="text-text-muted">College/Company:</span> <span className="text-text">{leaderData.college || "N/A"}</span></div>
+                {leaderData.linkedin && <div className="col-span-2"><span className="text-text-muted">LinkedIn:</span> <a href={leaderData.linkedin} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{leaderData.linkedin}</a></div>}
               </div>
             </div>
           )}
 
-          {team.members && team.members.length > 0 && (
+          {regularMembers.length > 0 && (
             <div className="bg-white/5 p-4 rounded-xl">
-              <h3 className="font-bold text-text mb-3">Team Members ({team.members.length})</h3>
+              <h3 className="font-bold text-text mb-3">Team Members ({regularMembers.length})</h3>
               <div className="space-y-2">
-                {team.members.map((m: any, i: number) => (
+                {regularMembers.map((m: any, i: number) => (
                   <div key={i} className="flex justify-between text-sm border-b border-white/5 pb-2 last:border-0">
-                    <span className="text-text">{m.name}</span>
-                    <span className="text-text-muted">{m.email}</span>
+                    <span className="text-text">{m.user?.name || "Unknown"}</span>
+                    <span className="text-text-muted">{m.user?.email || "No Email"}</span>
                     {m.skills && <span className="text-text-dim text-xs">{m.skills}</span>}
                   </div>
                 ))}

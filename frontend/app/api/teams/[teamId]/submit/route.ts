@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // Submit or update project links — payment must be SUCCESS first
-export async function POST(request: Request, { params }: { params: { teamId: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
   try {
-    const { teamId } = params;
+    const { teamId } = await params;
     const body = await request.json();
     const { pptLink, demoVideo, githubLink, apkLink } = body;
 
@@ -56,9 +56,9 @@ export async function POST(request: Request, { params }: { params: { teamId: str
 }
 
 // GET current submission for a team
-export async function GET(request: Request, { params }: { params: { teamId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
   try {
-    const { teamId } = params;
+    const { teamId } = await params;
 
     const team = await prisma.team.findUnique({
       where: { teamId },

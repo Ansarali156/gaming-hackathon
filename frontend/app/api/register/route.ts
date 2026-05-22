@@ -111,7 +111,7 @@ export async function POST(request: Request) {
               skills: m.skills || null,
               position: m.role || null,
             })),
-          ],
+          ] as any,
         },
         payment: {
           create: {

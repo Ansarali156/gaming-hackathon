@@ -154,10 +154,67 @@ export default function RegisterPage() {
       }
 
       setRegisteredTeamId(data.teamId);
-      setSuccess(true);
+
+      // Now trigger Razorpay Payment
+      const payRes = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create-order", teamId: data.teamId }),
+      });
+      const payData = await payRes.json();
+
+      if (!payRes.ok || !payData.orderId) {
+        setSubmitError(payData.error || "Team created, but failed to start payment. Login to your dashboard to pay.");
+        setSubmitting(false);
+        return;
+      }
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
+        amount: payData.amount,
+        currency: payData.currency,
+        name: "IncuXAI Hackathon",
+        description: "Registration Fee",
+        order_id: payData.orderId,
+        handler: async (rpResponse: any) => {
+          const verifyRes = await fetch("/api/payments", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "verify",
+              paymentId: rpResponse.razorpay_payment_id,
+              orderId: rpResponse.razorpay_order_id,
+              signature: rpResponse.razorpay_signature,
+              teamId: data.teamId,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyRes.ok && verifyData.success) {
+            setSuccess(true);
+          } else {
+            setSubmitError("Payment verification failed. Your team is registered, login to dashboard to retry.");
+          }
+          setSubmitting(false);
+        },
+        prefill: {
+          name: leaderName,
+          email: leaderEmail,
+          contact: leaderMobile,
+        },
+        theme: { color: "#a855f7" },
+        modal: { 
+          ondismiss: () => {
+            setSubmitError("Payment was cancelled. Your team is saved but payment is pending. Login to your dashboard to complete it.");
+            setSubmitting(false);
+          }
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+
     } catch (err) {
       setSubmitError("Network error. Please try again.");
-    } finally {
       setSubmitting(false);
     }
   };
@@ -222,7 +279,7 @@ export default function RegisterPage() {
             </h1>
             <p className="text-text-muted">
               Join India's Ultimate AI Gaming Hackathon —{" "}
-              <span className="text-primary font-semibold">Registration is FREE</span>
+              <span className="text-primary font-semibold">Secure Your Spot</span>
             </p>
           </motion.div>
 
@@ -276,7 +333,7 @@ export default function RegisterPage() {
                     Select Your Category
                   </h2>
                   <p className="text-text-muted text-sm mb-6">
-                    Registration is free. Payment fee is collected only when submitting project links.
+                    Registration requires a mandatory payment fee based on your category and team size.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {(Object.entries(PRICING) as [Category, typeof PRICING.STUDENT][]).map(
@@ -303,7 +360,7 @@ export default function RegisterPage() {
                           <p className="text-2xl font-bold text-primary mb-1">
                             ₹{value.price}
                           </p>
-                          <p className="text-text-muted text-xs">per person (paid at submission)</p>
+                          <p className="text-text-muted text-xs">per person (paid upon registration)</p>
                           <p className="text-text-muted text-xs mt-2">
                             Team: {value.minTeam}–{value.maxTeam} members
                           </p>
@@ -633,9 +690,7 @@ export default function RegisterPage() {
                     Review & Register
                   </h2>
                   <p className="text-text-muted text-sm mb-6">
-                    Please verify your details before registering. Registration is{" "}
-                    <span className="text-primary font-semibold">completely free</span>. Payment
-                    is only collected when you submit your project links.
+                    Please verify your details before registering. You will be prompted to complete the mandatory payment fee upon clicking register.
                   </p>
 
                   {/* Summary card */}
@@ -689,10 +744,9 @@ export default function RegisterPage() {
                     <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-start gap-3">
                       <AlertCircle size={18} className="text-primary mt-0.5 flex-shrink-0" />
                       <p className="text-sm text-text-muted">
-                        After registration, log in with{" "}
+                        After payment, log in with{" "}
                         <span className="text-text font-semibold">{leaderEmail}</span> and the
-                        password you set. Complete payment from your dashboard before the submission
-                        deadline.
+                        password you set. You can then access your dashboard and submit project links.
                       </p>
                     </div>
                   </div>
@@ -716,10 +770,10 @@ export default function RegisterPage() {
                       {submitting ? (
                         <span className="flex items-center justify-center gap-2">
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Registering...
+                          Processing...
                         </span>
                       ) : (
-                        "Register for Free 🚀"
+                        "Proceed to Payment 💳"
                       )}
                     </button>
                   </div>

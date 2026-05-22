@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
-import { Orbitron, Poppins } from "next/font/google";
+import { Poppins } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { FloatingActions } from "@/components/layout/FloatingActions";
 import { ParticleBackground } from "@/components/ui/ParticleBackground";
-
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  variable: "--font-orbitron",
-  display: "swap",
-});
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -30,13 +25,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${orbitron.variable} ${poppins.variable}`}>
+    <html lang="en" className={`${poppins.variable}`}>
       <body className="bg-background text-text">
         <Providers>
           <ParticleBackground />
           {children}
           <FloatingActions />
         </Providers>
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
     </html>
   );

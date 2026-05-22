@@ -5,11 +5,24 @@ import { motion } from "motion/react";
 import { Building2 } from "lucide-react";
 import { SponsorInquiryModal } from "@/components/ui/SponsorInquiryModal";
 
+const SPONSORS = [
+  {
+    name: "Ratan Tata Innovation Hub (RTIH)",
+    logo: "https://www.incuxai.com/hackathon/assets/images/rtih.jpeg",
+    website: "https://rtih.co.in"
+  },
+  {
+    name: "IncuXai",
+    logo: "https://www.incuxai.com/assets/img/logo/incuxai.jpg",
+    website: "https://incuxai.com"
+  }
+];
+
 export function SponsorsSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <section id="sponsors" className="py-24 relative overflow-hidden">
+    <section id="sponsors" className="py-24 relative bg-gray-50 border-t border-b border-gray-200">
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -18,44 +31,52 @@ export function SponsorsSection() {
           className="text-center mb-16"
         >
           <h2 className="section-title">Sponsors & Partners</h2>
-          <p className="section-subtitle">Join our ecosystem of innovation. Partner with India's brightest minds.</p>
+          <p className="section-subtitle">Collaborating with industry pioneers to power the next generation of AI Gaming Innovation.</p>
         </motion.div>
 
-        {/* Scrolling or Static Grid of the two sponsors */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex flex-wrap gap-8 justify-center items-center mb-16"
-        >
-          <a
-            href="https://incuxai.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="glass-card px-8 py-6 min-w-[200px] flex flex-col items-center justify-center hover:bg-white/10 transition-colors"
-          >
-            <img
-              src="https://incuxai.com/assets/img/logo/incuxai.jpg"
-              alt="IncuXai"
-              className="h-16 w-auto object-contain mb-3 rounded"
-            />
-            <span className="text-text-muted hover:text-white font-medium">IncuXai</span>
-          </a>
-
-          <a
-            href="https://incuxai.com/hackathon/index.php"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="glass-card px-8 py-6 min-w-[200px] flex flex-col items-center justify-center hover:bg-white/10 transition-colors"
-          >
-            <img
-              src="https://incuxai.com/hackathon/assets/images/rtih.jpeg"
-              alt="IncuXai Hackathon"
-              className="h-16 w-auto object-contain mb-3 rounded"
-            />
-            <span className="text-text-muted hover:text-white font-medium">Hackathon Portal</span>
-          </a>
-        </motion.div>
+        <div className="flex flex-wrap gap-8 justify-center items-center">
+          {SPONSORS.map((sponsor, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="glass-card w-full max-w-[340px] px-8 py-8 flex flex-col items-center justify-center border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white rounded-xl"
+            >
+              {sponsor.website ? (
+                <a
+                  href={sponsor.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-4 text-center group w-full"
+                >
+                  <div className="h-24 w-full flex items-center justify-center mb-2 p-2">
+                    <img
+                      src={sponsor.logo}
+                      alt={sponsor.name}
+                      className="max-h-full max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
+                    />
+                  </div>
+                  <span className="text-gray-800 font-semibold group-hover:text-primary transition-colors text-base">
+                    {sponsor.name}
+                  </span>
+                </a>
+              ) : (
+                <div className="flex flex-col items-center gap-4 text-center w-full">
+                  <div className="h-24 w-full flex items-center justify-center mb-2 p-2">
+                    <img
+                      src={sponsor.logo}
+                      alt={sponsor.name}
+                      className="max-h-full max-w-full object-contain filter grayscale"
+                    />
+                  </div>
+                  <span className="text-gray-800 font-semibold text-base">{sponsor.name}</span>
+                </div>
+              )}
+            </motion.div>
+          ))}
+        </div>
 
         <motion.div
           initial={{ opacity: 0 }}
