@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Orbitron, Poppins } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { FloatingActions } from "@/components/layout/FloatingActions";
@@ -37,6 +38,7 @@ export default function RootLayout({
           {children}
           <FloatingActions />
         </Providers>
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
     </html>
   );
