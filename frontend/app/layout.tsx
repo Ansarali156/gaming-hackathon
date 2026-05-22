@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Orbitron, Poppins } from "next/font/google";
+import { Fredoka, Poppins } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { FloatingActions } from "@/components/layout/FloatingActions";
 import { ParticleBackground } from "@/components/ui/ParticleBackground";
 
-const orbitron = Orbitron({
+const fredoka = Fredoka({
   subsets: ["latin"],
-  variable: "--font-orbitron",
+  variable: "--font-fredoka",
   display: "swap",
 });
 
@@ -31,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${orbitron.variable} ${poppins.variable}`}>
+    <html lang="en" className={`${fredoka.variable} ${poppins.variable}`}>
       <body className="bg-background text-text">
         <Providers>
           <ParticleBackground />
