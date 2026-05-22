@@ -309,7 +309,6 @@ export default function AdminDashboard() {
                   <NavItem icon={<ExternalLink size={16} />} label="Submissions" active={activeTab === "submissions"} onClick={() => setActiveTab("submissions")} />
                   <NavItem icon={<Megaphone size={16} />} label="Announcements" active={activeTab === "announcements"} onClick={() => setActiveTab("announcements")} />
                   <NavItem icon={<LifeBuoy size={16} />} label="Support System" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
-                  <NavItem icon={<Plus size={16} />} label="Sponsor Hub" active={activeTab === "sponsors"} onClick={() => setActiveTab("sponsors")} />
                 </nav>
 
                 <button
@@ -373,18 +372,6 @@ export default function AdminDashboard() {
                   setTicketResponse={setTicketResponse}
                   handleReplyTicket={handleReplyTicket}
                   handleCloseTicket={handleCloseTicket}
-                />
-              )}
-              {activeTab === "sponsors" && (
-                <SponsorsPane
-                  sponsors={sponsors}
-                  showAddSponsor={showAddSponsor}
-                  setShowAddSponsor={setShowAddSponsor}
-                  newSponsor={newSponsor}
-                  setNewSponsor={setNewSponsor}
-                  handleAddSponsorSubmit={handleAddSponsorSubmit}
-                  handleToggleSponsorStatus={handleToggleSponsorStatus}
-                  handleDeleteSponsor={handleDeleteSponsor}
                 />
               )}
             </div>
@@ -583,7 +570,7 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-white/5 rounded-lg text-center">
                 <span className="text-xs text-text-muted">Total Sponsors</span>
-                <p className="text-2xl font-display font-bold text-secondary mt-1">{sponsors?.length || 0}</p>
+                <p className="text-2xl font-display font-bold text-secondary mt-1">2</p>
               </div>
               <div className="p-4 bg-white/5 rounded-lg text-center">
                 <span className="text-xs text-text-muted">Referrals Points</span>
