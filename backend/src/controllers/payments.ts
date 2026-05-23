@@ -35,7 +35,7 @@ export const paymentController = {
       // Get team info for email
       const team = await prisma.team.findUnique({
         where: { teamId: teamId },
-        include: { members: { include: { user: true } } },
+        include: { members: { include: { user: true } }, payment: true },
       });
 
       // Send success email

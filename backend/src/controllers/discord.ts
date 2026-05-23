@@ -33,7 +33,7 @@ export const discordController = {
         throw new Error('Failed to exchange code for token');
       }
 
-      const tokenData = await tokenResponse.json();
+      const tokenData = await tokenResponse.json() as { access_token: string };
       const accessToken = tokenData.access_token;
 
       // Get user info from Discord
@@ -45,7 +45,7 @@ export const discordController = {
         throw new Error('Failed to fetch Discord user info');
       }
 
-      const discordUser = await userResponse.json();
+      const discordUser = await userResponse.json() as { id: string; username: string };
 
       // Update user in database
       await prisma.user.updateMany({
