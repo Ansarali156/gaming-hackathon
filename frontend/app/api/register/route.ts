@@ -15,7 +15,7 @@ function isValidPhone(phone: string) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { category, teamName, leader, members, projectTheme, techStack } = body;
+    const { category, teamName, leader, members, projectTheme, techStack, validateOnly, paymentDetails } = body;
 
     // ── Required field checks ──────────────────────────────────────────────
     if (!category || !teamName?.trim()) {
@@ -62,18 +62,49 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "An account with this email already exists. Please login." }, { status: 409 });
     }
 
+    // If this is only a validation request, return early and succeed
+    if (validateOnly) {
+      return NextResponse.json({ success: true, message: "Validation successful." });
+    }
+
+    // ── Payment details verification ─────────────────────────────────────
+    if (!paymentDetails || !paymentDetails.paymentId || !paymentDetails.orderId || !paymentDetails.signature) {
+      return NextResponse.json({ error: "Payment verification details are missing." }, { status: 400 });
+    }
+
+    const { paymentId, orderId, signature } = paymentDetails;
+
+    // Verify signature securely
+    const crypto = require("crypto");
+    const generated_signature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "test_secret")
+      .update(orderId + "|" + paymentId)
+      .digest("hex");
+
+    if (generated_signature !== signature) {
+      return NextResponse.json({ error: "Payment verification failed. Invalid signature." }, { status: 400 });
+    }
+
+    // Prevent Replay Attacks: Check if the payment ID has already been registered
+    const existingPayment = await prisma.payment.findFirst({
+      where: { razorpayPaymentId: paymentId }
+    });
+    if (existingPayment) {
+      return NextResponse.json({ error: "This payment transaction has already been used for registration." }, { status: 409 });
+    }
+
     // ── Hash password ─────────────────────────────────────────────────────
     const hashedPassword = await bcrypt.hash(leader.password, 10);
 
     // ── Generate unique team ID ───────────────────────────────────────────
     const teamId = await generateTeamId();
 
-    // ── Pricing (needed for payment amount later) ──────────────────────
+    // ── Pricing calculation ──────────────────────────────────────────────
     const PRICING: Record<string, number> = { STUDENT: 300, IT_PROFESSIONAL: 1000, STARTUP: 1000 };
     const pricePerPerson = PRICING[category] ?? 300;
     const totalAmount = pricePerPerson * (members.length + 1);
 
-    // ── Create team + users in DB ─────────────────────────────────────────
+    // ── Create team + users + payment atomically in DB ────────────────────
     const team = await prisma.team.create({
       data: {
         teamId,
@@ -81,6 +112,7 @@ export async function POST(request: Request) {
         category,
         projectTheme: projectTheme || null,
         techStack: techStack || null,
+        status: "APPROVED", // Set directly to approved upon verified payment
         members: {
           create: [
             {
@@ -116,7 +148,10 @@ export async function POST(request: Request) {
         payment: {
           create: {
             amount: totalAmount,
-            status: "PENDING",
+            status: "SUCCESS",
+            razorpayOrderId: orderId,
+            razorpayPaymentId: paymentId,
+            razorpaySignature: signature,
           },
         },
       },
@@ -126,17 +161,21 @@ export async function POST(request: Request) {
       },
     });
 
-    // ── Send Registration Email ───────────────────────────────────────────
+    // ── Send Welcome Registration & Payment Email ────────────────────────
     await sendEmail({
       to: leader.email.toLowerCase(),
       subject: "Welcome to IncuXai Gaming Hackathon! 🚀",
       html: `
-        <div style="font-family: Arial, sans-serif; color: #333; max-w-lg mx-auto">
-          <h2>Registration Successful, ${leader.name.trim()}!</h2>
-          <p>Your team <strong>${teamName.trim()}</strong> has been successfully registered.</p>
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #a855f7;">Registration & Payment Successful! 🎉</h2>
+          <p>Hi <strong>${leader.name.trim()}</strong>,</p>
+          <p>Your team <strong>${teamName.trim()}</strong> has been successfully registered and your payment of <strong>₹${totalAmount}</strong> was verified.</p>
           <p><strong>Team ID:</strong> ${team.teamId}</p>
-          <p>Please log in to your participant dashboard using your email and password to complete your payment and submit your project links.</p>
-          <a href="http://localhost:3000/login" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 20px;">Go to Dashboard</a>
+          <p><strong>Payment Transaction ID:</strong> ${paymentId}</p>
+          <p>You can now log in to your participant dashboard using your email and password to access resources, connect with mentors, and submit your project links.</p>
+          <div style="margin-top: 30px; text-align: center;">
+            <a href="http://localhost:3000/login" style="display: inline-block; padding: 12px 24px; background-color: #a855f7; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
+          </div>
         </div>
       `,
     });
@@ -144,7 +183,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       teamId: team.teamId,
-      message: "Registration successful! You can now log in and complete your payment from the dashboard.",
+      message: "Registration and payment successful! You can now log in to your dashboard.",
     });
   } catch (error: any) {
     console.error("Registration error:", error);

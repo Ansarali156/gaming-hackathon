@@ -1,41 +1,49 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { prisma } from '../../lib/prisma';
 
 export interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
+  dbUser?: any; // Prisma User object
+  user?: any;
 }
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization?.split(' ')[1];
+export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ error: 'Authentication required' });
+    res.status(401).json({ error: 'Access denied. No token provided.' });
+    return;
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as {
-      id: string;
-      email: string;
-      role: string;
-    };
+    const secret = process.env.JWT_SECRET || 'secret';
+    const decoded = jwt.verify(token, secret) as { userId: string };
     req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid or expired token' });
-  }
-};
 
+    // Fetch user from DB based on userId from token
+    if (req.user && req.user.userId) {
+      const user = await prisma.user.findUnique({
+        where: { clerkUserId: req.user.userId },
+      });
+      if (user) {
+        req.dbUser = user;
+      }
+    } catch (error) {
+      console.error('Error fetching user from DB:', error);
+      next(); // Proceed anyway, or fail securely depending on requirements
+    }
+  }
+];
+
+// Authorize roles (requires authenticate to run first)
 export const authorize = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' });
+    if (!req.dbUser) {
+      return res.status(401).json({ error: 'User not found in database' });
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(req.dbUser.role)) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 

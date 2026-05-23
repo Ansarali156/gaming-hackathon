@@ -89,7 +89,7 @@ async function processEmailQueue() {
 
       for (const job of jobs) {
         // Mark as processing
-        await tx.emailOutbox.update({
+        await (tx as any).emailOutbox.update({
           where: { id: job.id },
           data: { deliveryStatus: 'PROCESSING' },
         });
@@ -98,7 +98,7 @@ async function processEmailQueue() {
           await sendEmail(job.recipientEmail, job.emailType, job.contextPayload);
 
           // Mark as sent
-          await tx.emailOutbox.update({
+          await (tx as any).emailOutbox.update({
             where: { id: job.id },
             data: { deliveryStatus: 'SENT' },
           });
@@ -111,7 +111,7 @@ async function processEmailQueue() {
           const backoffMinutes = Math.pow(2, newRetryCount); // Exponential backoff: 2, 4, 8, 16 mins
           const nextAttempt = new Date(Date.now() + backoffMinutes * 60000);
 
-          await tx.emailOutbox.update({
+          await (tx as any).emailOutbox.update({
             where: { id: job.id },
             data: {
               deliveryStatus: 'FAILED',
@@ -140,13 +140,12 @@ async function cleanupAbandonedRegistrations() {
       },
       include: {
         payment: true,
-        paymentTransactions: true,
         members: true
       }
     });
 
     for (const team of abandonedTeams) {
-      const isPaid = team.paymentTransactions.some(t => t.paymentStatus === 'SUCCESSFUL') || team.payment?.status === 'SUCCESS';
+      const isPaid = team.payment?.status === 'SUCCESS';
       
       if (!isPaid) {
         console.log(`[CLEANUP WORKER] Deleting abandoned unpaid team: ${team.name}`);
@@ -154,7 +153,6 @@ async function cleanupAbandonedRegistrations() {
 
         await prisma.$transaction([
           prisma.teamMember.deleteMany({ where: { teamId: team.id } }),
-          prisma.paymentTransaction.deleteMany({ where: { teamId: team.id } }),
           ...(team.payment ? [prisma.payment.delete({ where: { id: team.payment.id } })] : []),
           prisma.team.delete({ where: { id: team.id } }),
           prisma.user.deleteMany({ where: { id: { in: userIds as string[] }, role: "PARTICIPANT" } })

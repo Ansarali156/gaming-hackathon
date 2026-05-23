@@ -1,66 +1,58 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
+import { sendEmail } from "@/lib/mailer";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { action, teamId } = body;
+    const { action, teamId, category, memberCount } = body;
 
     if (action === "create-order") {
-      if (!teamId) {
-        return NextResponse.json({ error: "teamId is required." }, { status: 400 });
+      let amount = 999;
+
+      if (teamId) {
+        // Find the team
+        const team = await prisma.team.findUnique({
+          where: { teamId },
+          include: { payment: true },
+        });
+
+        if (!team) {
+          return NextResponse.json({ error: "Team not found." }, { status: 404 });
+        }
+
+        // Check if already paid
+        const existingSuccess = team.payment?.status === "SUCCESS";
+        if (existingSuccess) {
+          return NextResponse.json({ error: "Payment already completed." }, { status: 400 });
+        }
+
+        amount = team.payment?.amount || 999;
+      } else {
+        // Creating order without a teamId (pre-registration flow)
+        if (!category || typeof memberCount !== "number") {
+          return NextResponse.json({ error: "Category and memberCount are required to create order." }, { status: 400 });
+        }
+
+        const PRICING: Record<string, number> = { STUDENT: 300, IT_PROFESSIONAL: 1000, STARTUP: 1000 };
+        const pricePerPerson = PRICING[category] ?? 300;
+        amount = pricePerPerson * (memberCount + 1);
       }
 
-      // Find the team
-      const team = await prisma.team.findUnique({
-        where: { teamId },
-        include: { payment: true, paymentTransactions: true, members: { include: { user: true } } },
-      });
-
-      if (!team) {
-        return NextResponse.json({ error: "Team not found." }, { status: 404 });
-      }
-
-      // Check if already paid
-      const existingSuccess = team.paymentTransactions.find(t => t.paymentStatus === "SUCCESSFUL");
-      if (existingSuccess) {
-        return NextResponse.json({ error: "Payment already completed." }, { status: 400 });
-      }
-
-      const amount = team.payment?.amount || 999;
-      const user = team.members[0]?.user;
-
-      // 1. Create PENDING internal transaction
-      const transaction = await prisma.paymentTransaction.create({
-        data: {
-          teamId: team.id,
-          amount,
-          currency: "INR",
-          paymentStatus: "PENDING",
-        },
-      });
-
-      // 2. Initialize Razorpay Order securely directly from this serverless function
+      // Initialize Razorpay Order securely
       const Razorpay = require("razorpay");
       const razorpay = new Razorpay({
-        key_id: process.env.RAZORPAY_KEY_ID || "test_key",
+        key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_SDJLxYQuOsRKMU",
         key_secret: process.env.RAZORPAY_KEY_SECRET || "test_secret",
       });
 
       const orderOptions = {
         amount: Math.round(amount * 100),
         currency: "INR",
-        receipt: `rcpt_${transaction.id}`.substring(0, 40),
+        receipt: `rcpt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`.substring(0, 40),
       };
 
       const order = await razorpay.orders.create(orderOptions);
-
-      // 3. Update internal transaction with Razorpay Order ID
-      await prisma.paymentTransaction.update({
-        where: { id: transaction.id },
-        data: { razorpayOrderId: order.id },
-      });
 
       // Return order to frontend for checkout
       return NextResponse.json({
@@ -73,6 +65,10 @@ export async function POST(request: Request) {
 
     if (action === "verify") {
       const { paymentId, orderId, signature, teamId } = body;
+
+      if (!paymentId || !orderId || !signature || !teamId) {
+        return NextResponse.json({ error: "Missing required verification parameters." }, { status: 400 });
+      }
       
       const crypto = require("crypto");
       const generated_signature = crypto
@@ -113,20 +109,7 @@ export async function POST(request: Request) {
         });
       }
 
-      // Create successful payment transaction
-      await prisma.paymentTransaction.create({
-        data: {
-          teamId: team.id,
-          paymentStatus: "SUCCESSFUL",
-          amount: team.payment?.amount || 999,
-          currency: "INR",
-          razorpayOrderId: orderId,
-          razorpayPaymentId: paymentId,
-          verifiedAt: new Date()
-        }
-      });
-
-      // Queue confirmation email to the Team Lead
+      // Send payment confirmation email directly
       const teamWithMembers = await prisma.team.findUnique({
         where: { id: team.id },
         include: { members: { include: { user: true } } },
@@ -134,23 +117,32 @@ export async function POST(request: Request) {
 
       if (teamWithMembers && teamWithMembers.members.length > 0) {
         const leaderEmail = teamWithMembers.members[0].user.email;
+        const leaderName = teamWithMembers.members[0].user.name || "Participant";
         if (leaderEmail) {
-          await prisma.emailOutbox.create({
-            data: {
-              recipientEmail: leaderEmail,
-              emailType: 'PAYMENT_SUCCESS',
-              contextPayload: {
-                teamName: teamWithMembers.name,
-                amount: team.payment?.amount || 999,
-                transactionId: paymentId,
-              },
-              deliveryStatus: 'QUEUED',
-            }
-          });
+          try {
+            await sendEmail({
+              to: leaderEmail,
+              subject: "Payment Success - IncuXai Gaming Hackathon! 🚀",
+              html: `
+                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+                  <h2 style="color: #22c55e;">Payment Verified Successfully! 🎉</h2>
+                  <p>Hi <strong>${leaderName}</strong>,</p>
+                  <p>We are excited to confirm that your payment for team <strong>${teamWithMembers.name}</strong> has been successfully received.</p>
+                  <p><strong>Team ID:</strong> ${teamWithMembers.teamId}</p>
+                  <p><strong>Amount Paid:</strong> ₹${team.payment?.amount || 999}</p>
+                  <p><strong>Razorpay Payment ID:</strong> ${paymentId}</p>
+                  <p>Your team's registration status has been upgraded to <strong>APPROVED</strong>. You now have full access to the participant dashboard.</p>
+                  <div style="margin-top: 30px; text-align: center;">
+                    <a href="http://localhost:3000/login" style="display: inline-block; padding: 12px 24px; background-color: #22c55e; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
+                  </div>
+                </div>
+              `
+            });
+          } catch (emailErr) {
+            console.error("Failed to send payment verification email:", emailErr);
+          }
         }
       }
-
-      // Removed sync to sun backend as we are using direct razorpay integration
 
       return NextResponse.json({ success: true });
     }

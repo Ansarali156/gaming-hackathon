@@ -24,7 +24,6 @@ export async function GET() {
                     },
                   },
                 },
-                paymentTransactions: true,
                 payment: true,
                 submission: true,
               },

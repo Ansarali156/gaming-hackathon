@@ -17,7 +17,6 @@ export async function GET() {
       where: {
         OR: [
           { status: { not: "PENDING" } },
-          { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
           { payment: { status: "SUCCESS" } }
         ]
       }
@@ -37,7 +36,6 @@ export async function GET() {
       where: {
         OR: [
           { status: { not: "PENDING" } },
-          { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
           { payment: { status: "SUCCESS" } }
         ]
       },
@@ -48,7 +46,6 @@ export async function GET() {
       where: {
         OR: [
           { status: { not: "PENDING" } },
-          { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
           { payment: { status: "SUCCESS" } }
         ]
       },

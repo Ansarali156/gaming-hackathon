@@ -1,0 +1,114 @@
+"use client";
+
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "motion/react";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
+
+    if (res?.error) {
+      setError(res.error);
+      setLoading(false);
+    } else {
+      try {
+        const sessionRes = await fetch("/api/auth/session");
+        const sessionData = await sessionRes.json();
+        const role = sessionData?.user?.role;
+        
+        if (role === "ADMIN") {
+          router.push("/dashboard/admin");
+        } else {
+          router.push("/dashboard/participant");
+        }
+      } catch (err) {
+        router.push("/dashboard/participant");
+      }
+      router.refresh();
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-card w-full max-w-md p-8 relative overflow-hidden"
+      >
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary" />
+
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-block font-display text-2xl font-bold gradient-text mb-2">
+            IncuXai
+          </Link>
+          <h1 className="text-xl font-bold text-text">Welcome Back</h1>
+          <p className="text-text-muted text-sm mt-1">Sign in to manage your team and projects.</p>
+        </div>
+
+        {error && (
+          <div className="p-3 mb-6 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm text-center">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="label-text">Email Address</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input-field"
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div>
+            <label className="label-text">Password</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input-field"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full mt-6 flex justify-center"
+          >
+            {loading ? <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" /> : "Sign In"}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center text-sm text-text-muted">
+          Don't have an account?{" "}
+          <Link href="/register" className="text-primary hover:underline font-medium">
+            Register here
+          </Link>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

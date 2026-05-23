@@ -21,12 +21,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en" className={`${poppins.variable}`}>
-      <body className="bg-background text-text">
+    <html lang="en" className={`${poppins.variable} dark`}>
+      <body className="bg-background text-text antialiased min-h-screen">
         <Providers>
           <ParticleBackground />
           {children}

@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
-import { sendEmail, getRegistrationEmailHtml } from '../services/email';
 
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -21,7 +20,7 @@ const registerSchema = z.object({
 });
 
 export const authController = {
-  async login(req: Request, res: Response) {
+  async login(req: Request, res: Response): Promise<any> {
     try {
       const { email, password } = loginSchema.parse(req.body);
 
@@ -41,7 +40,7 @@ export const authController = {
         { expiresIn: '7d' }
       );
 
-      res.json({
+      return res.json({
         success: true,
         token,
         user: {
@@ -55,11 +54,11 @@ export const authController = {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
-      res.status(500).json({ error: 'Login failed' });
+      return res.status(500).json({ error: 'Login failed' });
     }
   },
 
-  async register(req: Request, res: Response) {
+  async register(req: Request, res: Response): Promise<any> {
     try {
       const { email, name, password } = registerSchema.parse(req.body);
 
@@ -85,13 +84,7 @@ export const authController = {
         { expiresIn: '7d' }
       );
 
-      await sendEmail(
-        email,
-        'Welcome to IncuXAI Gaming Hackathon!',
-        getRegistrationEmailHtml(name, user.id)
-      );
-
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         token,
         user: {
@@ -105,11 +98,11 @@ export const authController = {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
-      res.status(500).json({ error: 'Registration failed' });
+      return res.status(500).json({ error: 'Registration failed' });
     }
   },
 
-  async getSession(req: Request, res: Response) {
+  async getSession(req: Request, res: Response): Promise<any> {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
       return res.status(401).json({ error: 'No token provided' });
@@ -126,9 +119,9 @@ export const authController = {
         return res.status(401).json({ error: 'User not found' });
       }
 
-      res.json({ success: true, user });
+      return res.json({ success: true, user });
     } catch (error) {
-      res.status(401).json({ error: 'Invalid token' });
+      return res.status(401).json({ error: 'Invalid token' });
     }
   },
 };

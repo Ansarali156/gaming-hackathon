@@ -42,3 +42,10 @@ dev.db
 dev.db-journal
 *.db
 *.db-journal
+
+# TS Build Cache & Utility Scripts
+*.tsbuildinfo
+check_db.ts
+check_status.ts
+create-admin.js
+create-test-user.ts

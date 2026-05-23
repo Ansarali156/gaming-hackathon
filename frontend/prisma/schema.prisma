@@ -24,7 +24,6 @@ enum Category {
 enum PaymentStatus {
   PENDING
   SUCCESS
-  SUCCESSFUL
   FAILED
   REFUNDED
 }
@@ -42,22 +41,15 @@ enum TicketStatus {
   CLOSED
 }
 
-enum EmailDeliveryStatus {
-  QUEUED
-  PROCESSING
-  SENT
-  FAILED
-}
-
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
+  emailVerified DateTime?
+  password      String?
   name          String?
   mobile        String?
-  password      String?
   role          Role      @default(PARTICIPANT)
   image         String?
-  emailVerified DateTime?
   discordId     String?
   discordJoined Boolean   @default(false)
   createdAt     DateTime  @default(now())
@@ -76,18 +68,18 @@ model User {
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -110,6 +102,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+
 model Team {
   id              String     @id @default(cuid())
   teamId          String     @unique
@@ -126,10 +119,9 @@ model Team {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
-  members              TeamMember[]
-  payment              Payment?
-  paymentTransactions  PaymentTransaction[]
-  submission           Submission?
+  members         TeamMember[]
+  payment         Payment?
+  submission      Submission?
 
   @@index([teamId])
   @@index([category])
@@ -169,40 +161,6 @@ model Payment {
 
   @@index([teamId])
   @@index([status])
-}
-
-model PaymentTransaction {
-  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  teamId            String
-  razorpayOrderId   String?
-  razorpayPaymentId String?
-  paymentStatus     PaymentStatus @default(PENDING)
-  currency          String        @default("INR")
-  amount            Float
-  createdAt         DateTime      @default(now())
-  verifiedAt        DateTime?
-
-  team              Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
-
-  @@index([teamId])
-  @@index([paymentStatus])
-  @@map("payment_transactions")
-}
-
-model EmailOutbox {
-  id              String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  recipientEmail  String
-  emailType       String
-  contextPayload  Json
-  deliveryStatus  EmailDeliveryStatus @default(QUEUED)
-  retryCount      Int                 @default(0)
-  nextAttemptAt   DateTime?
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-
-  @@index([deliveryStatus])
-  @@index([nextAttemptAt])
-  @@map("email_outbox")
 }
 
 model Submission {

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
-
+import { sendEmail } from '@/lib/mailer';
 
 export async function POST(request: Request) {
   try {
@@ -31,70 +31,74 @@ export async function POST(request: Request) {
       const orderId = paymentEntity.order_id;
       const paymentId = paymentEntity.id;
 
-      // 3. Pessimistic locking to prevent race conditions via Prisma $transaction
+      // 3. Update DB atomically
       await prisma.$transaction(async (tx) => {
-        // Fetch transaction and lock the row
-        const transactions = await tx.$queryRaw<any[]>`
-          SELECT * FROM payment_transactions 
-          WHERE "razorpayOrderId" = ${orderId} 
-          FOR UPDATE
-        `;
+        const payment = await tx.payment.findFirst({
+          where: { razorpayOrderId: orderId },
+          include: { team: true }
+        });
 
-        if (transactions.length === 0) {
-          console.warn(`Webhook: Order ${orderId} not found in DB`);
+        if (!payment) {
+          console.warn(`Webhook: Payment order ${orderId} not found in DB`);
           return;
         }
 
-        const transaction = transactions[0];
-
-        // 5. If already successful, ignore
-        if (transaction.paymentStatus === 'SUCCESSFUL') {
+        // If already successful, ignore
+        if (payment.status === 'SUCCESS') {
           return;
         }
 
-        // 6. Update to SUCCESSFUL
-        await tx.paymentTransaction.update({
-          where: { id: transaction.id },
+        // Update payment to SUCCESS
+        await tx.payment.update({
+          where: { id: payment.id },
           data: {
-            paymentStatus: 'SUCCESSFUL',
+            status: 'SUCCESS',
             razorpayPaymentId: paymentId,
-            verifiedAt: new Date(),
+            razorpaySignature: signature
           },
         });
 
-        // 7. Activate Team Registration (Optional: depend on schema)
-        // Here we ensure the team status is APPROVED if it was PENDING
-        await tx.team.updateMany({
-          where: { id: transaction.teamId, status: 'PENDING' },
+        // Update team status to APPROVED
+        await tx.team.update({
+          where: { id: payment.teamId },
           data: { status: 'APPROVED' },
         });
 
         // Fetch team members to send email
         const team = await tx.team.findUnique({
-          where: { id: transaction.teamId },
+          where: { id: payment.teamId },
           include: { members: { include: { user: true } } },
         });
 
-        // 8. Queue confirmation email
+        // Queue confirmation email
         if (team && team.members.length > 0) {
           const leaderEmail = team.members[0].user.email;
+          const leaderName = team.members[0].user.name || "Participant";
           if (leaderEmail) {
-            await tx.emailOutbox.create({
-              data: {
-                recipientEmail: leaderEmail,
-                emailType: 'PAYMENT_SUCCESS',
-                contextPayload: {
-                  teamName: team.name,
-                  amount: transaction.amount,
-                  transactionId: paymentId,
-                },
-                deliveryStatus: 'QUEUED',
-              },
-            });
+            try {
+              await sendEmail({
+                to: leaderEmail,
+                subject: "Payment Success - IncuXai Gaming Hackathon! 🚀",
+                html: `
+                  <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #22c55e;">Payment Verified Successfully! 🎉</h2>
+                    <p>Hi <strong>${leaderName}</strong>,</p>
+                    <p>We are excited to confirm that your payment for team <strong>${team.name}</strong> has been successfully received and verified via webhook.</p>
+                    <p><strong>Team ID:</strong> ${team.teamId}</p>
+                    <p><strong>Amount Paid:</strong> ₹${payment.amount}</p>
+                    <p><strong>Razorpay Payment ID:</strong> ${paymentId}</p>
+                    <p>Your team's registration status has been upgraded to <strong>APPROVED</strong>. You now have full access to the participant dashboard.</p>
+                    <div style="margin-top: 30px; text-align: center;">
+                      <a href="http://localhost:3000/login" style="display: inline-block; padding: 12px 24px; background-color: #22c55e; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
+                    </div>
+                  </div>
+                `
+              });
+            } catch (emailErr) {
+              console.error("Failed to send webhook confirmation email:", emailErr);
+            }
           }
         }
-
-        // Removed sync to Sun Backend because we are using direct razorpay integration now
       });
     }
 

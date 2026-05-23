@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -50,11 +51,18 @@ function NavItem({ icon, label, active, onClick, unread }: {
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function ParticipantDashboard() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [teamData, setTeamData] = useState<any>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>("PENDING");
   const [loadingTeam, setLoadingTeam] = useState(true);
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
+
+  useEffect(() => {
+    if (status === "authenticated" && (session as any)?.user?.role === "ADMIN") {
+      router.push("/dashboard/admin");
+    }
+  }, [session, status, router]);
 
   const fetchTeamData = async () => {
     try {
@@ -335,26 +343,30 @@ function PaymentTab({ teamData, paymentStatus, onPaymentComplete, session }: any
         description: "Registration Fee",
         order_id: data.orderId,
         handler: async (rpResponse: any) => {
-          // Webhook is the single source of truth. We just show a loading state and poll.
-          let attempts = 0;
-          const pollInterval = setInterval(async () => {
-            attempts++;
-            const res = await fetch("/api/teams/me");
-            const data = await res.json();
-            
-            const transactions = data.team?.paymentTransactions || [];
-            const isSuccess = transactions.some((t: any) => t.paymentStatus === "SUCCESSFUL");
-            
-            if (isSuccess) {
-              clearInterval(pollInterval);
+          try {
+            setLoading(true);
+            const verifyRes = await fetch("/api/payments", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "verify",
+                paymentId: rpResponse.razorpay_payment_id,
+                orderId: rpResponse.razorpay_order_id,
+                signature: rpResponse.razorpay_signature,
+                teamId: teamData.teamId,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok && verifyData.success) {
               onPaymentComplete();
-              setLoading(false);
-            } else if (attempts >= 10) {
-              clearInterval(pollInterval);
-              setError("Payment verification is taking longer than expected. Please check back in a few minutes.");
-              setLoading(false);
+            } else {
+              setError("Payment verification failed. Please contact support.");
             }
-          }, 3000);
+          } catch (err) {
+            setError("Failed to verify payment.");
+          } finally {
+            setLoading(false);
+          }
         },
         prefill: {
           name: session?.user?.name || "",
@@ -372,7 +384,7 @@ function PaymentTab({ teamData, paymentStatus, onPaymentComplete, session }: any
     }
   };
 
-  const successfulPayment = teamData?.paymentTransactions?.find((t: any) => t.paymentStatus === "SUCCESSFUL");
+  const successfulPayment = teamData?.payment;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -595,7 +607,8 @@ function NotificationsTab() {
         const res = await fetch("/api/admin/announcements");
         const data = await res.json();
         if (data.success && data.announcements) {
-          setAnnouncements(data.announcements);
+          const visible = data.announcements.filter((a: any) => a.visibility !== "ADMIN");
+          setAnnouncements(visible);
         }
       } catch (error) {
         console.error("Failed to load announcements:", error);

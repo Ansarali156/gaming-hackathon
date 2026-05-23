@@ -9,7 +9,6 @@ async function main() {
   const allTeams = await prisma.team.findMany({
     include: {
       payment: true,
-      paymentTransactions: true,
       members: {
         include: { user: true }
       }
@@ -19,7 +18,7 @@ async function main() {
   let deletedCount = 0;
 
   for (const team of allTeams) {
-    const isPaid = team.paymentTransactions.some(t => t.paymentStatus === 'SUCCESSFUL') || team.payment?.status === 'SUCCESS';
+    const isPaid = team.payment?.status === 'SUCCESS';
     
     if (!isPaid) {
       console.log(`Deleting team: ${team.name} (Payment not done)`);
@@ -28,11 +27,6 @@ async function main() {
 
       // Delete team members
       await prisma.teamMember.deleteMany({
-        where: { teamId: team.id }
-      });
-
-      // Delete payment transactions
-      await prisma.paymentTransaction.deleteMany({
         where: { teamId: team.id }
       });
 

@@ -19,7 +19,6 @@ export async function GET(request: Request) {
       // Hide PENDING teams that haven't paid from the main list to prevent clutter
       where.OR = [
         { status: { not: "PENDING" } },
-        { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
         { payment: { status: "SUCCESS" } }
       ];
     }

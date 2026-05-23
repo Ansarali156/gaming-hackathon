@@ -124,51 +124,57 @@ export default function RegisterPage() {
     setSubmitting(true);
     setSubmitError(null);
 
+    const payload = {
+      category,
+      teamName,
+      leader: {
+        name: leaderName,
+        email: leaderEmail,
+        password: leaderPassword,
+        mobile: leaderMobile,
+        linkedin: leaderLinkedin,
+        college: leaderCollege,
+      },
+      members,
+      projectTheme,
+      techStack,
+    };
+
     try {
-      const response = await fetch("/api/register", {
+      // 1. Validate fields and uniqueness via validateOnly: true
+      const validateResponse = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category,
-          teamName,
-          leader: {
-            name: leaderName,
-            email: leaderEmail,
-            password: leaderPassword,
-            mobile: leaderMobile,
-            linkedin: leaderLinkedin,
-            college: leaderCollege,
-          },
-          members,
-          projectTheme,
-          techStack,
-        }),
+        body: JSON.stringify({ ...payload, validateOnly: true }),
       });
 
-      const data = await response.json();
+      const validateData = await validateResponse.json();
 
-      if (!response.ok || !data.success) {
-        setSubmitError(data.error || "Registration failed. Please try again.");
+      if (!validateResponse.ok || !validateData.success) {
+        setSubmitError(validateData.error || "Validation failed. Please check your inputs.");
         setSubmitting(false);
         return;
       }
 
-      setRegisteredTeamId(data.teamId);
-
-      // Now trigger Razorpay Payment
+      // 2. Initialize Razorpay Payment Order
       const payRes = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "create-order", teamId: data.teamId }),
+        body: JSON.stringify({ 
+          action: "create-order", 
+          category, 
+          memberCount: members.length 
+        }),
       });
       const payData = await payRes.json();
 
       if (!payRes.ok || !payData.orderId) {
-        setSubmitError(payData.error || "Team created, but failed to start payment. Login to your dashboard to pay.");
+        setSubmitError(payData.error || "Failed to initialize payment. Please try again.");
         setSubmitting(false);
         return;
       }
 
+      // 3. Open Razorpay Checkout Modal
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SDJLxYQuOsRKMU",
         amount: payData.amount,
@@ -177,25 +183,37 @@ export default function RegisterPage() {
         description: "Registration Fee",
         order_id: payData.orderId,
         handler: async (rpResponse: any) => {
-          const verifyRes = await fetch("/api/payments", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "verify",
-              paymentId: rpResponse.razorpay_payment_id,
-              orderId: rpResponse.razorpay_order_id,
-              signature: rpResponse.razorpay_signature,
-              teamId: data.teamId,
-            }),
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyRes.ok && verifyData.success) {
-            setSuccess(true);
-          } else {
-            fetch("/api/register/cleanup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ teamId: data.teamId }) });
-            setSubmitError("Payment verification failed. Please try registering again.");
+          try {
+            setSubmitting(true);
+            setSubmitError(null);
+
+            // 4. Send payment verification + registration details to perform atomic DB insertion
+            const registerRes = await fetch("/api/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                ...payload,
+                paymentDetails: {
+                  paymentId: rpResponse.razorpay_payment_id,
+                  orderId: rpResponse.razorpay_order_id,
+                  signature: rpResponse.razorpay_signature,
+                }
+              }),
+            });
+
+            const registerData = await registerRes.json();
+
+            if (registerRes.ok && registerData.success) {
+              setRegisteredTeamId(registerData.teamId);
+              setSuccess(true);
+            } else {
+              setSubmitError(registerData.error || "Registration failed during payment verification. Please contact support.");
+            }
+          } catch (err) {
+            setSubmitError("Failed to complete registration after payment. Please contact support.");
+          } finally {
+            setSubmitting(false);
           }
-          setSubmitting(false);
         },
         prefill: {
           name: leaderName,
@@ -205,7 +223,6 @@ export default function RegisterPage() {
         theme: { color: "#a855f7" },
         modal: { 
           ondismiss: () => {
-            fetch("/api/register/cleanup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ teamId: data.teamId }) });
             setSubmitError("Payment was cancelled. Registration aborted. Please try again.");
             setSubmitting(false);
           }

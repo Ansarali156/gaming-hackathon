@@ -4,6 +4,8 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import { prisma } from '../lib/prisma';
+import { createServer } from 'http';
+import { initializeSocket } from './socket/socket';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -17,6 +19,8 @@ import discordRoutes from './routes/discord';
 
 
 const app = express();
+const httpServer = createServer(app);
+initializeSocket(httpServer);
 const PORT = process.env.BACKEND_PORT || 4000;
 
 // Middleware
@@ -49,7 +53,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // Start server
-app.listen(PORT, async () => {
+httpServer.listen(PORT, async () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
   
   // Retry DB connection (Render free-tier databases wake up slowly)

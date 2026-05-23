@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/mailer";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    const userRole = (session?.user as any)?.role;
+
+    // Only allow admin to see admin announcements
+    const whereClause = userRole === "ADMIN"
+      ? {}
+      : { visibility: { not: "ADMIN" } };
+
     const announcements = await prisma.announcement.findMany({
+      where: whereClause,
       orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
     });
     return NextResponse.json({ success: true, announcements });

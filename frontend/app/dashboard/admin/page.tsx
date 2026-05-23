@@ -25,9 +25,12 @@ import {
   Bell,
   Handshake
 } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [analytics, setAnalytics] = useState<any>({});
   const [participants, setParticipants] = useState<any[]>([]);
@@ -39,6 +42,12 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (status === "authenticated" && (session as any)?.user?.role !== "ADMIN") {
+      router.push("/dashboard/participant");
+    }
+  }, [session, status, router]);
 
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");

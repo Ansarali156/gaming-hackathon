@@ -25,7 +25,7 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const dashboardUrl = session?.user?.role === "ADMIN" ? "/dashboard/admin" : "/dashboard/participant";
+  const dashboardUrl = (session as any)?.user?.role === "ADMIN" ? "/dashboard/admin" : "/dashboard/participant";
 
   return (
     <motion.header
