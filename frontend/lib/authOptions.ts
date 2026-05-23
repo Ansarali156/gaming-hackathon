@@ -25,7 +25,12 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+        const formattedApiUrl = rawApiUrl.startsWith('http://') || rawApiUrl.startsWith('https://')
+          ? rawApiUrl
+          : `https://${rawApiUrl}`;
+
+        const res = await fetch(`${formattedApiUrl}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

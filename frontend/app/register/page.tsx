@@ -760,6 +760,19 @@ export default function RegisterPage() {
                       ))}
                     </div>
 
+                    {/* Beautiful Payment Summary Panel */}
+                    <div className="glass-panel p-5 rounded-xl bg-primary/5 border border-primary/20 space-y-3">
+                      <h3 className="font-bold text-text border-b border-primary/20 pb-2">
+                        💳 Payment Summary
+                      </h3>
+                      <Row label="Category Fee" value={`₹${pricing?.price || 0} per person`} />
+                      <Row label="Total Members" value={`${members.length + 1} (Leader + ${members.length} Members)`} />
+                      <div className="border-t border-primary/25 pt-2 flex justify-between items-center">
+                        <span className="text-text font-bold">Total Amount to Pay</span>
+                        <span className="text-primary font-bold text-xl">₹{pricing ? pricing.price * (members.length + 1) : 0}</span>
+                      </div>
+                    </div>
+
                     <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-start gap-3">
                       <AlertCircle size={18} className="text-primary mt-0.5 flex-shrink-0" />
                       <p className="text-sm text-text-muted">
@@ -792,7 +805,7 @@ export default function RegisterPage() {
                           Processing...
                         </span>
                       ) : (
-                        "Proceed to Payment 💳"
+                        `Proceed to Pay ₹${pricing ? pricing.price * (members.length + 1) : 0} 💳`
                       )}
                     </button>
                   </div>
