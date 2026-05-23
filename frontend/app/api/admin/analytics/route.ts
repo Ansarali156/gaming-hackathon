@@ -13,62 +13,58 @@ export async function GET() {
       return d;
     }).reverse();
 
-    const [
-      totalRegistrations,
-      totalRevenue,
-      discordJoins,
-      pendingPayments,
-      categoryDistribution,
-      allTeams,
-      allPayments,
-      referralsCount,
-      referralPointsAggregate
-    ] = await Promise.all([
-      prisma.team.count({
-        where: {
-          OR: [
-            { status: { not: "PENDING" } },
-            { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
-            { payment: { status: "SUCCESS" } }
-          ]
-        }
-      }),
-      prisma.payment.aggregate({
-        where: { status: "SUCCESS" },
-        _sum: { amount: true },
-      }),
-      prisma.user.count({ where: { discordJoined: true } }),
-      prisma.payment.count({ where: { status: "PENDING" } }),
-      prisma.team.groupBy({
-        by: ["category"],
-        where: {
-          OR: [
-            { status: { not: "PENDING" } },
-            { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
-            { payment: { status: "SUCCESS" } }
-          ]
-        },
-        _count: true,
-      }),
-      prisma.team.findMany({
-        where: {
-          OR: [
-            { status: { not: "PENDING" } },
-            { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
-            { payment: { status: "SUCCESS" } }
-          ]
-        },
-        select: { createdAt: true },
-      }),
-      prisma.payment.findMany({
-        where: { status: "SUCCESS" },
-        select: { amount: true, createdAt: true },
-      }),
-      prisma.referral.count(),
-      prisma.referral.aggregate({
-        _sum: { points: true },
-      })
-    ]);
+    const totalRegistrations = await prisma.team.count({
+      where: {
+        OR: [
+          { status: { not: "PENDING" } },
+          { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
+          { payment: { status: "SUCCESS" } }
+        ]
+      }
+    });
+
+    const totalRevenue = await prisma.payment.aggregate({
+      where: { status: "SUCCESS" },
+      _sum: { amount: true },
+    });
+
+    const discordJoins = await prisma.user.count({ where: { discordJoined: true } });
+
+    const pendingPayments = await prisma.payment.count({ where: { status: "PENDING" } });
+
+    const categoryDistribution = await prisma.team.groupBy({
+      by: ["category"],
+      where: {
+        OR: [
+          { status: { not: "PENDING" } },
+          { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
+          { payment: { status: "SUCCESS" } }
+        ]
+      },
+      _count: true,
+    });
+
+    const allTeams = await prisma.team.findMany({
+      where: {
+        OR: [
+          { status: { not: "PENDING" } },
+          { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
+          { payment: { status: "SUCCESS" } }
+        ]
+      },
+      select: { createdAt: true },
+    });
+
+    const allPayments = await prisma.payment.findMany({
+      where: { status: "SUCCESS" },
+      select: { amount: true, createdAt: true },
+    });
+
+    const referralsCount = await prisma.referral.count();
+
+    const referralPointsAggregate = await prisma.referral.aggregate({
+      _sum: { points: true },
+    });
 
     // Build 7-day registration trends
     const dailyRegistrations = past7Days.map(date => {

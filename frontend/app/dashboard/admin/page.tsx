@@ -29,7 +29,7 @@ import { signOut } from "next-auth/react";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<any>({});
   const [participants, setParticipants] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [sponsors, setSponsors] = useState<any[]>([]);
@@ -68,36 +68,28 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [
-        analyticsRes,
-        participantsRes,
-        paymentsRes,
-        sponsorsRes,
-        announcementsRes,
-        submissionsRes
-      ] = await Promise.all([
-        fetch("/api/admin/analytics"),
-        fetch("/api/admin/participants"),
-        fetch("/api/admin/payments"),
-        fetch("/api/admin/sponsors"),
-        fetch("/api/admin/announcements"),
-        fetch("/api/admin/submissions")
-      ]);
+      // Fetch sequentially to prevent Vercel/Render connection pool exhaustion
+      const analyticsRes = await fetch("/api/admin/analytics");
+      if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
 
-      const analyticsData = await analyticsRes.json();
-      const participantsData = await participantsRes.json();
-      const paymentsData = await paymentsRes.json();
-      const sponsorsData = await sponsorsRes.json();
-      const announcementsData = await announcementsRes.json();
-      const submissionsData = await submissionsRes.json();
+      const participantsRes = await fetch("/api/admin/participants");
+      if (participantsRes.ok) setParticipants((await participantsRes.json()).teams || []);
 
-      setAnalytics(analyticsData);
-      setParticipants(participantsData.teams || []);
-      setPayments(paymentsData.payments || []);
-      setSponsors(sponsorsData.sponsors || []);
-      setInquiries(sponsorsData.inquiries || []);
-      setAnnouncements(announcementsData.announcements || []);
-      setSubmissions(submissionsData.submissions || []);
+      const paymentsRes = await fetch("/api/admin/payments");
+      if (paymentsRes.ok) setPayments((await paymentsRes.json()).payments || []);
+
+      const sponsorsRes = await fetch("/api/admin/sponsors");
+      if (sponsorsRes.ok) {
+        const sData = await sponsorsRes.json();
+        setSponsors(sData.sponsors || []);
+        setInquiries(sData.inquiries || []);
+      }
+
+      const announcementsRes = await fetch("/api/admin/announcements");
+      if (announcementsRes.ok) setAnnouncements((await announcementsRes.json()).announcements || []);
+
+      const submissionsRes = await fetch("/api/admin/submissions");
+      if (submissionsRes.ok) setSubmissions((await submissionsRes.json()).submissions || []);
     } catch (error) {
       console.error("Failed to fetch admin data:", error);
     }
