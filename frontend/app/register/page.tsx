@@ -170,7 +170,7 @@ export default function RegisterPage() {
       }
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SDJLxYQuOsRKMU",
         amount: payData.amount,
         currency: payData.currency,
         name: "IncuXAI Hackathon",
@@ -192,7 +192,8 @@ export default function RegisterPage() {
           if (verifyRes.ok && verifyData.success) {
             setSuccess(true);
           } else {
-            setSubmitError("Payment verification failed. Your team is registered, login to dashboard to retry.");
+            fetch("/api/register/cleanup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ teamId: data.teamId }) });
+            setSubmitError("Payment verification failed. Please try registering again.");
           }
           setSubmitting(false);
         },
@@ -204,7 +205,8 @@ export default function RegisterPage() {
         theme: { color: "#a855f7" },
         modal: { 
           ondismiss: () => {
-            setSubmitError("Payment was cancelled. Your team is saved but payment is pending. Login to your dashboard to complete it.");
+            fetch("/api/register/cleanup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ teamId: data.teamId }) });
+            setSubmitError("Payment was cancelled. Registration aborted. Please try again.");
             setSubmitting(false);
           }
         },
@@ -240,8 +242,8 @@ export default function RegisterPage() {
               Your Team ID: <span className="text-primary font-bold font-mono">{registeredTeamId}</span>
             </p>
             <p className="text-text-muted mb-8 text-sm">
-              You can now login with your email and password. Complete your payment
-              from the dashboard before submitting project links.
+              You can now login with your email and password. Access your dashboard
+              to submit your project links and manage your team.
             </p>
             <div className="flex flex-col gap-3">
               <a href="/login" className="btn-primary w-full text-center">

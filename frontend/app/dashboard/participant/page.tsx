@@ -328,31 +328,33 @@ function PaymentTab({ teamData, paymentStatus, onPaymentComplete, session }: any
       }
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SDJLxYQuOsRKMU",
         amount: data.amount,
         currency: data.currency,
         name: "IncuXAI Hackathon",
         description: "Registration Fee",
         order_id: data.orderId,
         handler: async (rpResponse: any) => {
-          const verifyRes = await fetch("/api/payments", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "verify",
-              paymentId: rpResponse.razorpay_payment_id,
-              orderId: rpResponse.razorpay_order_id,
-              signature: rpResponse.razorpay_signature,
-              teamId: teamData.teamId,
-            }),
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyRes.ok && verifyData.success) {
-            onPaymentComplete();
-          } else {
-            setError("Payment verification failed. Contact support.");
-          }
-          setLoading(false);
+          // Webhook is the single source of truth. We just show a loading state and poll.
+          let attempts = 0;
+          const pollInterval = setInterval(async () => {
+            attempts++;
+            const res = await fetch("/api/teams/me");
+            const data = await res.json();
+            
+            const transactions = data.team?.paymentTransactions || [];
+            const isSuccess = transactions.some((t: any) => t.paymentStatus === "SUCCESSFUL");
+            
+            if (isSuccess) {
+              clearInterval(pollInterval);
+              onPaymentComplete();
+              setLoading(false);
+            } else if (attempts >= 10) {
+              clearInterval(pollInterval);
+              setError("Payment verification is taking longer than expected. Please check back in a few minutes.");
+              setLoading(false);
+            }
+          }, 3000);
         },
         prefill: {
           name: session?.user?.name || "",
@@ -369,6 +371,8 @@ function PaymentTab({ teamData, paymentStatus, onPaymentComplete, session }: any
       setLoading(false);
     }
   };
+
+  const successfulPayment = teamData?.paymentTransactions?.find((t: any) => t.paymentStatus === "SUCCESSFUL");
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -389,19 +393,9 @@ function PaymentTab({ teamData, paymentStatus, onPaymentComplete, session }: any
               <FileText size={16} className="text-primary" /> Transaction Details
             </h4>
             <InfoRow label="Status" value={<span className="text-green-400 font-bold text-xs uppercase px-2 py-0.5 bg-green-500/10 rounded-full">SUCCESS</span>} />
-            <InfoRow label="Transaction ID" value={teamData?.payment?.razorpayPaymentId || teamData?.payment?.razorpayOrderId || "N/A"} />
-            <InfoRow label="Amount Paid" value={`₹${teamData?.payment?.amount || 0}`} />
-            <InfoRow label="Date" value={teamData?.payment?.updatedAt ? new Date(teamData.payment.updatedAt).toLocaleString() : "N/A"} />
-            {teamData?.payment?.gstInvoice && (
-              <InfoRow 
-                label="Invoice" 
-                value={
-                  <a href={teamData.payment.gstInvoice} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-sm">
-                    View Invoice <ExternalLink size={12}/>
-                  </a>
-                } 
-              />
-            )}
+            <InfoRow label="Transaction ID" value={successfulPayment?.razorpayPaymentId || successfulPayment?.razorpayOrderId || "N/A"} />
+            <InfoRow label="Amount Paid" value={`₹${successfulPayment?.amount || 0}`} />
+            <InfoRow label="Date" value={successfulPayment?.verifiedAt ? new Date(successfulPayment.verifiedAt).toLocaleString() : (successfulPayment?.createdAt ? new Date(successfulPayment.createdAt).toLocaleString() : "N/A")} />
           </div>
         </div>
       ) : (

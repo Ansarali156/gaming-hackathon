@@ -22,7 +22,15 @@ export async function GET() {
       referralsCount,
       referralPointsAggregate
     ] = await Promise.all([
-      prisma.team.count(),
+      prisma.team.count({
+        where: {
+          OR: [
+            { status: { not: "PENDING" } },
+            { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
+            { payment: { status: "SUCCESS" } }
+          ]
+        }
+      }),
       prisma.payment.aggregate({
         where: { status: "SUCCESS" },
         _sum: { amount: true },
@@ -31,9 +39,23 @@ export async function GET() {
       prisma.payment.count({ where: { status: "PENDING" } }),
       prisma.team.groupBy({
         by: ["category"],
+        where: {
+          OR: [
+            { status: { not: "PENDING" } },
+            { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
+            { payment: { status: "SUCCESS" } }
+          ]
+        },
         _count: true,
       }),
       prisma.team.findMany({
+        where: {
+          OR: [
+            { status: { not: "PENDING" } },
+            { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
+            { payment: { status: "SUCCESS" } }
+          ]
+        },
         select: { createdAt: true },
       }),
       prisma.payment.findMany({

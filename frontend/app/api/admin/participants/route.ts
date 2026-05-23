@@ -11,7 +11,16 @@ export async function GET(request: Request) {
     const category = searchParams.get("category");
 
     const where: any = {};
-    if (status) where.status = status;
+    if (status) {
+      where.status = status;
+    } else {
+      // Hide PENDING teams that haven't paid from the main list to prevent clutter
+      where.OR = [
+        { status: { not: "PENDING" } },
+        { paymentTransactions: { some: { paymentStatus: "SUCCESSFUL" } } },
+        { payment: { status: "SUCCESS" } }
+      ];
+    }
     if (category) where.category = category;
 
     const [teams, total] = await Promise.all([

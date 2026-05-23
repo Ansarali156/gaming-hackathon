@@ -24,6 +24,7 @@ enum Category {
 enum PaymentStatus {
   PENDING
   SUCCESS
+  SUCCESSFUL
   FAILED
   REFUNDED
 }
@@ -39,6 +40,13 @@ enum TicketStatus {
   IN_PROGRESS
   RESOLVED
   CLOSED
+}
+
+enum EmailDeliveryStatus {
+  QUEUED
+  PROCESSING
+  SENT
+  FAILED
 }
 
 model User {
@@ -118,9 +126,10 @@ model Team {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
-  members         TeamMember[]
-  payment         Payment?
-  submission      Submission?
+  members              TeamMember[]
+  payment              Payment?
+  paymentTransactions  PaymentTransaction[]
+  submission           Submission?
 
   @@index([teamId])
   @@index([category])
@@ -160,6 +169,40 @@ model Payment {
 
   @@index([teamId])
   @@index([status])
+}
+
+model PaymentTransaction {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  teamId            String
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  paymentStatus     PaymentStatus @default(PENDING)
+  currency          String        @default("INR")
+  amount            Float
+  createdAt         DateTime      @default(now())
+  verifiedAt        DateTime?
+
+  team              Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([paymentStatus])
+  @@map("payment_transactions")
+}
+
+model EmailOutbox {
+  id              String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipientEmail  String
+  emailType       String
+  contextPayload  Json
+  deliveryStatus  EmailDeliveryStatus @default(QUEUED)
+  retryCount      Int                 @default(0)
+  nextAttemptAt   DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([deliveryStatus])
+  @@index([nextAttemptAt])
+  @@map("email_outbox")
 }
 
 model Submission {

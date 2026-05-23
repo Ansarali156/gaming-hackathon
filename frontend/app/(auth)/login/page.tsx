@@ -29,7 +29,15 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setError("Invalid email or password");
+      if (result.error.startsWith("PAYMENT_INCOMPLETE:")) {
+        const userEmail = result.error.split(":")[1];
+        setError("Payment incomplete! Redirecting to payment page...");
+        setTimeout(() => {
+          router.push(`/pay?email=${encodeURIComponent(userEmail)}`);
+        }, 1500);
+      } else {
+        setError("Invalid email or password");
+      }
     } else {
       const sessionRes = await fetch("/api/auth/session");
       const session = await sessionRes.json();

@@ -1,71 +1,146 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
+import { sendToSunBackend } from "@/lib/hmac";
 
-// Create a Razorpay order for a team
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { action, teamId, paymentId, orderId, signature } = body;
+    const { action, teamId } = body;
 
     if (action === "create-order") {
       if (!teamId) {
         return NextResponse.json({ error: "teamId is required." }, { status: 400 });
       }
 
-      const payment = await prisma.payment.findFirst({
-        where: { team: { teamId } },
+      // Find the team
+      const team = await prisma.team.findUnique({
+        where: { teamId },
+        include: { payment: true, paymentTransactions: true, members: { include: { user: true } } },
       });
 
-      if (!payment) {
-        return NextResponse.json({ error: "No payment record found for this team." }, { status: 404 });
+      if (!team) {
+        return NextResponse.json({ error: "Team not found." }, { status: 404 });
       }
 
-      if (payment.status === "SUCCESS") {
+      // Check if already paid
+      const existingSuccess = team.paymentTransactions.find(t => t.paymentStatus === "SUCCESSFUL");
+      if (existingSuccess) {
         return NextResponse.json({ error: "Payment already completed." }, { status: 400 });
       }
 
-      const order = await createRazorpayOrder(payment.amount);
+      const amount = team.payment?.amount || 999;
+      const user = team.members[0]?.user;
 
-      // Update the payment record with the new order ID
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: { razorpayOrderId: order.id },
+      // 1. Create PENDING internal transaction
+      const transaction = await prisma.paymentTransaction.create({
+        data: {
+          teamId: team.id,
+          amount,
+          currency: "INR",
+          paymentStatus: "PENDING",
+        },
       });
 
+      // 2. Call Sun Backend to initialize Razorpay Order securely
+      const sunResponse = await sendToSunBackend('/api/internal/orders', {
+        transactionId: transaction.id,
+        amount,
+        currency: "INR",
+        userDetails: {
+          name: user?.name || "Participant",
+          email: user?.email || "",
+          phone: user?.mobile || "",
+        }
+      });
+
+      // 3. Update internal transaction with Razorpay Order ID
+      await prisma.paymentTransaction.update({
+        where: { id: transaction.id },
+        data: { razorpayOrderId: sunResponse.orderId },
+      });
+
+      // Return order to frontend for checkout
       return NextResponse.json({
         success: true,
-        orderId: order.id,
-        amount: order.amount,
-        currency: order.currency,
+        orderId: sunResponse.orderId,
+        amount: sunResponse.amount,
+        currency: sunResponse.currency,
       });
     }
 
     if (action === "verify") {
-      if (!paymentId || !orderId || !signature || !teamId) {
-        return NextResponse.json({ error: "Missing verification fields." }, { status: 400 });
+      const { paymentId, orderId, signature, teamId } = body;
+      
+      const crypto = require("crypto");
+      const generated_signature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "test_secret")
+        .update(orderId + "|" + paymentId)
+        .digest("hex");
+
+      if (generated_signature !== signature) {
+        return NextResponse.json({ error: "Verification failed. Invalid signature." }, { status: 400 });
       }
 
-      const isValid = await verifyRazorpayPayment(paymentId, orderId, signature);
-      if (!isValid) {
-        return NextResponse.json({ error: "Invalid payment signature." }, { status: 400 });
-      }
-
-      await prisma.payment.updateMany({
-        where: { razorpayOrderId: orderId },
-        data: {
-          razorpayPaymentId: paymentId,
-          razorpaySignature: signature,
-          status: "SUCCESS",
-        },
+      // Find the team
+      const team = await prisma.team.findUnique({
+        where: { teamId },
+        include: { payment: true }
       });
 
-      return NextResponse.json({ success: true, message: "Payment verified successfully." });
+      if (!team) {
+        return NextResponse.json({ error: "Team not found." }, { status: 404 });
+      }
+
+      // Update team status to APPROVED
+      await prisma.team.update({
+        where: { id: team.id },
+        data: { status: "APPROVED" }
+      });
+
+      // Update payment status to SUCCESS
+      if (team.payment) {
+        await prisma.payment.update({
+          where: { id: team.payment.id },
+          data: {
+            status: "SUCCESS",
+            razorpayOrderId: orderId,
+            razorpayPaymentId: paymentId,
+            razorpaySignature: signature
+          }
+        });
+      }
+
+      // Create successful payment transaction
+      await prisma.paymentTransaction.create({
+        data: {
+          teamId: team.id,
+          paymentStatus: "SUCCESSFUL",
+          amount: team.payment?.amount || 999,
+          currency: "INR",
+          razorpayOrderId: orderId,
+          razorpayPaymentId: paymentId,
+          verifiedAt: new Date()
+        }
+      });
+
+      // Sync to Sun Backend
+      try {
+        await sendToSunBackend('/api/internal/sync', {
+          transactionId: orderId,
+          razorpayOrderId: orderId,
+          razorpayPaymentId: paymentId,
+          status: "SUCCESSFUL"
+        });
+      } catch (err) {
+        console.error("Sun Backend sync error during verify:", err);
+      }
+
+      return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({ error: "Invalid action." }, { status: 400 });
   } catch (error: any) {
     console.error("Payment API error:", error);
-    return NextResponse.json({ error: "Payment operation failed." }, { status: 500 });
+    return NextResponse.json({ error: `Payment operation failed: ${error.message}` }, { status: 500 });
   }
 }

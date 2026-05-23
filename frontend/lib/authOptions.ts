@@ -21,6 +21,18 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
+          include: {
+            teamMembers: {
+              include: {
+                team: {
+                  include: {
+                    paymentTransactions: true,
+                    payment: true
+                  }
+                }
+              }
+            }
+          }
         });
 
         if (!user || !user.password) {
@@ -34,6 +46,16 @@ export const authOptions: NextAuthOptions = {
 
         if (!isCorrectPassword) {
           throw new Error("Invalid credentials");
+        }
+
+        // Only enforce payment requirement for PARTICIPANT roles
+        if (user.role === "PARTICIPANT" && user.teamMembers.length > 0) {
+          const team = user.teamMembers[0].team;
+          const isPaid = team.paymentTransactions.some(t => t.paymentStatus === "SUCCESSFUL") || team.payment?.status === "SUCCESS";
+          
+          if (!isPaid) {
+            throw new Error(`PAYMENT_INCOMPLETE:${user.email}`);
+          }
         }
 
         return {
