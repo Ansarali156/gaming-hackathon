@@ -57,9 +57,9 @@ export async function GET(request: Request) {
       page,
       totalPages: Math.ceil(total / limit),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Fetch participants error:", error);
-    return NextResponse.json({ error: "Failed to fetch participants" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch participants", details: error?.message || String(error) }, { status: 500 });
   }
 }
 

@@ -106,9 +106,9 @@ export async function GET() {
       revenueTrends,
       referralAnalytics
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Analytics error:", error);
-    return NextResponse.json({ error: "Failed to fetch analytics" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch analytics", details: error?.message || String(error) }, { status: 500 });
   }
 }
 
