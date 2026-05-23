@@ -21,7 +21,7 @@ import discordRoutes from './routes/discord';
 const app = express();
 const httpServer = createServer(app);
 initializeSocket(httpServer);
-const PORT = process.env.BACKEND_PORT || 4000;
+const PORT = process.env.PORT || process.env.BACKEND_PORT || 4000;
 
 // Middleware
 app.use(cors({
