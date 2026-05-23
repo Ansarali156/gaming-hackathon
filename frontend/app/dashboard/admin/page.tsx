@@ -38,6 +38,7 @@ export default function AdminDashboard() {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,10 +71,20 @@ export default function AdminDashboard() {
     try {
       // Fetch sequentially to prevent Vercel/Render connection pool exhaustion
       const analyticsRes = await fetch("/api/admin/analytics");
-      if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
+      if (analyticsRes.ok) {
+        setAnalytics(await analyticsRes.json());
+      } else {
+        const txt = await analyticsRes.text();
+        setApiError(`Analytics API Error (${analyticsRes.status}): ${txt.substring(0, 100)}`);
+      }
 
       const participantsRes = await fetch("/api/admin/participants");
-      if (participantsRes.ok) setParticipants((await participantsRes.json()).teams || []);
+      if (participantsRes.ok) {
+        setParticipants((await participantsRes.json()).teams || []);
+      } else {
+        const txt = await participantsRes.text();
+        setApiError(prev => (prev ? prev + " | " : "") + `Participants API Error (${participantsRes.status}): ${txt.substring(0, 100)}`);
+      }
 
       const paymentsRes = await fetch("/api/admin/payments");
       if (paymentsRes.ok) setPayments((await paymentsRes.json()).payments || []);
@@ -407,6 +418,14 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
 
+      {apiError && (
+        <div className="fixed bottom-4 right-4 max-w-sm bg-red-900/90 text-white p-4 rounded-xl shadow-2xl border border-red-500/50 z-50">
+          <h3 className="font-bold mb-1 flex items-center gap-2"><AlertCircle size={16}/> API Error Detected</h3>
+          <p className="text-sm font-mono text-red-200">{apiError}</p>
+          <button onClick={() => setApiError(null)} className="absolute top-2 right-2 text-white/50 hover:text-white"><XCircle size={16}/></button>
+        </div>
+      )}
+
       <TeamDetailsModal team={selectedTeam} onClose={() => setSelectedTeam(null)} />
     </div>
   );
@@ -440,6 +459,11 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
       <div>
         <h2 className="font-display text-2xl font-bold text-text">Overview Analytics</h2>
         <p className="text-text-muted text-sm">Visual tracking for registrations, financials, and community metrics.</p>
+        {analytics?.error && (
+          <div className="bg-red-500/10 text-red-400 p-4 rounded mt-4 border border-red-500/20">
+            <strong>API Internal Error:</strong> {analytics.error}
+          </div>
+        )}
       </div>
 
       {/* Analytics Cards */}
