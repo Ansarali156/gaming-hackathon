@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/mailer";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const announcements = await prisma.announcement.findMany({
@@ -68,3 +70,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to create announcement" }, { status: 500 });
   }
 }
+

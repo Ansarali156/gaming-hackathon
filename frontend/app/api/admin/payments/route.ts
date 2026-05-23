@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PaymentStatus } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -49,3 +51,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to update payment" }, { status: 500 });
   }
 }
+

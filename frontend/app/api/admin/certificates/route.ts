@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/mailer";
 
+export const dynamic = "force-dynamic";
+
 export async function POST() {
   try {
     const users = await prisma.user.findMany({
@@ -56,3 +58,4 @@ export async function POST() {
     return NextResponse.json({ error: "Failed to send certificates" }, { status: 500 });
   }
 }
+

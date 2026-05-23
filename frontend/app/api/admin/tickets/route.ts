@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { TicketStatus } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const tickets = await prisma.ticket.findMany({
@@ -44,3 +46,4 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Failed to update ticket" }, { status: 500 });
   }
 }
+

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/mailer";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -100,3 +102,4 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Failed to update team" }, { status: 500 });
   }
 }
+

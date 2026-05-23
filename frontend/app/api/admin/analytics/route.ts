@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const today = new Date();
@@ -113,3 +115,4 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch analytics" }, { status: 500 });
   }
 }
+

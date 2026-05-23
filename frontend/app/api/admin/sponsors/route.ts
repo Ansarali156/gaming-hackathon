@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const sponsors = await prisma.sponsor.findMany({
@@ -96,3 +98,4 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Failed to delete sponsor" }, { status: 500 });
   }
 }
+

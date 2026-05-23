@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 // GET all submissions for admin view
 export async function GET() {
   try {
@@ -28,3 +30,4 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch submissions" }, { status: 500 });
   }
 }
+
