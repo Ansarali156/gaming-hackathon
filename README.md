@@ -1,6 +1,6 @@
 # 🎮 IncuXAI — India's Ultimate AI Gaming Hackathon Platform
 
-> **Build. Battle. Innovate & Conquer**
+> **Build. Battle. Innovate & Conquer.**
 
 A full-stack AI Gaming Hackathon platform with separate frontend and backend, featuring payment integration, Discord verification, admin dashboard, and community tools.
 
