@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
 const INTERNAL_SERVICE_SECRET = process.env.INTERNAL_SERVICE_SECRET || 'super-secret-key-for-local';
-const SUN_BACKEND_URL = process.env.SUN_BACKEND_URL || 'https://ai-gaming-hackthon.up.railway.app';
+const SUN_BACKEND_URL = process.env.SUN_BACKEND_URL || 'http://localhost:5000';
 
 /**
  * Sends a secure POST request to the Sun Backend using HMAC signature.
