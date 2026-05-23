@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
-import { sendToSunBackend } from '@/lib/hmac';
+
 
 export async function POST(request: Request) {
   try {
@@ -94,13 +94,7 @@ export async function POST(request: Request) {
           }
         }
 
-        // 9. Sync final status to Sun Backend
-        await sendToSunBackend('/api/internal/sync', {
-          transactionId: transaction.id,
-          razorpayOrderId: orderId,
-          razorpayPaymentId: paymentId,
-          status: 'CAPTURED',
-        });
+        // Removed sync to Sun Backend because we are using direct razorpay integration now
       });
     }
 

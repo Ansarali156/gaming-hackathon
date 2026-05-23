@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendToSunBackend } from "@/lib/hmac";
+
 
 export async function POST(request: Request) {
   try {
@@ -41,30 +41,33 @@ export async function POST(request: Request) {
         },
       });
 
-      // 2. Call Sun Backend to initialize Razorpay Order securely
-      const sunResponse = await sendToSunBackend('/api/internal/orders', {
-        transactionId: transaction.id,
-        amount,
-        currency: "INR",
-        userDetails: {
-          name: user?.name || "Participant",
-          email: user?.email || "",
-          phone: user?.mobile || "",
-        }
+      // 2. Initialize Razorpay Order securely directly from this serverless function
+      const Razorpay = require("razorpay");
+      const razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID || "test_key",
+        key_secret: process.env.RAZORPAY_KEY_SECRET || "test_secret",
       });
+
+      const orderOptions = {
+        amount: Math.round(amount * 100),
+        currency: "INR",
+        receipt: `rcpt_${transaction.id}`.substring(0, 40),
+      };
+
+      const order = await razorpay.orders.create(orderOptions);
 
       // 3. Update internal transaction with Razorpay Order ID
       await prisma.paymentTransaction.update({
         where: { id: transaction.id },
-        data: { razorpayOrderId: sunResponse.orderId },
+        data: { razorpayOrderId: order.id },
       });
 
       // Return order to frontend for checkout
       return NextResponse.json({
         success: true,
-        orderId: sunResponse.orderId,
-        amount: sunResponse.amount,
-        currency: sunResponse.currency,
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
       });
     }
 
@@ -147,17 +150,7 @@ export async function POST(request: Request) {
         }
       }
 
-      // Sync to Sun Backend
-      try {
-        await sendToSunBackend('/api/internal/sync', {
-          transactionId: orderId,
-          razorpayOrderId: orderId,
-          razorpayPaymentId: paymentId,
-          status: "SUCCESSFUL"
-        });
-      } catch (err) {
-        console.error("Sun Backend sync error during verify:", err);
-      }
+      // Removed sync to sun backend as we are using direct razorpay integration
 
       return NextResponse.json({ success: true });
     }
