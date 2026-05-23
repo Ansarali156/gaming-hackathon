@@ -123,6 +123,30 @@ export async function POST(request: Request) {
         }
       });
 
+      // Queue confirmation email to the Team Lead
+      const teamWithMembers = await prisma.team.findUnique({
+        where: { id: team.id },
+        include: { members: { include: { user: true } } },
+      });
+
+      if (teamWithMembers && teamWithMembers.members.length > 0) {
+        const leaderEmail = teamWithMembers.members[0].user.email;
+        if (leaderEmail) {
+          await prisma.emailOutbox.create({
+            data: {
+              recipientEmail: leaderEmail,
+              emailType: 'PAYMENT_SUCCESS',
+              contextPayload: {
+                teamName: teamWithMembers.name,
+                amount: team.payment?.amount || 999,
+                transactionId: paymentId,
+              },
+              deliveryStatus: 'QUEUED',
+            }
+          });
+        }
+      }
+
       // Sync to Sun Backend
       try {
         await sendToSunBackend('/api/internal/sync', {
