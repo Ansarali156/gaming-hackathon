@@ -148,6 +148,7 @@ export const registerController = {
             amount: baseAmount,
             gst: gst,
             finalAmount: finalAmount,
+            payableAmount: finalAmount,
             teamId: team.teamId,
             teamName: team.name,
           };

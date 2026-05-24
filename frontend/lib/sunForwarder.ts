@@ -9,6 +9,7 @@ type Payload = {
   amount: number;
   gst: number;
   finalAmount: number;
+  payableAmount?: number;
 };
 
 export async function forwardToSun(payload: Payload) {

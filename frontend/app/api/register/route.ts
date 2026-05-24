@@ -157,6 +157,7 @@ export async function POST(request: Request) {
           amount: baseAmount,
           gst: gst,
           finalAmount: finalAmount,
+          payableAmount: finalAmount,
           teamId: team.teamId,
           teamName: team.name,
         };
