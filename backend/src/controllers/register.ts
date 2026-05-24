@@ -13,7 +13,7 @@ function isValidEmail(email: any) {
 export const registerController = {
   async createRegistration(req: Request, res: Response) {
     try {
-      const { category, teamName, leader, members, projectTheme, techStack, totalAmount, validateOnly } = req.body;
+      const { category, teamName, leader, members, projectTheme, techStack, validateOnly } = req.body;
       const normalizedTeamName = String(teamName || '').trim();
       const normalizedLeaderEmail = String(leader?.email || '').toLowerCase();
       const normalizedLeaderName = String(leader?.name || '').trim();
@@ -56,8 +56,7 @@ export const registerController = {
 
       const pricingCategory = category as keyof typeof PRICING;
       const pricePerPerson = PRICING[pricingCategory]?.price ?? 300;
-      const computedAmount = pricePerPerson * (members.length + 1);
-      const baseAmount = typeof totalAmount === 'number' && totalAmount > 0 ? totalAmount : computedAmount;
+      const baseAmount = pricePerPerson * (members.length + 1);
       const gst = Number((baseAmount * 0.02).toFixed(2));
       const finalAmount = Number((baseAmount + gst).toFixed(2));
 

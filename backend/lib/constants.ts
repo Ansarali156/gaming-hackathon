@@ -10,8 +10,8 @@ export const EVENT_DATES = {
 
 export const PRICING = {
   STUDENT: { price: 300, minTeam: 2, maxTeam: 5 },
-  IT_PROFESSIONAL: { price: 1000, minTeam: 2, maxTeam: 3 },
-  STARTUP: { price: 5000, minTeam: 2, maxTeam: 2 },
+  IT_PROFESSIONAL: { price: 1000, minTeam: 2, maxTeam: 4 },
+  STARTUP: { price: 1000, minTeam: 2, maxTeam: 4 },
 };
 
 export const TRACKS = [
@@ -79,11 +79,11 @@ export const PRIZE_POOL = [
 export const FAQS = [
   {
     question: "What is the team size?",
-    answer: "Teams can have 2-5 members for students, 2-3 for IT professionals, and 2 members for startups.",
+    answer: "Teams can have 2-5 members for students and 2-4 members for IT professionals and startups.",
   },
   {
     question: "Is there a registration fee?",
-    answer: "Yes: ₹300/person for students, ₹1000/person for IT professionals, and ₹5000/company for startups.",
+    answer: "Yes: ₹300/person for students, ₹1000/person for IT professionals, and ₹1000/person for startups.",
   },
   {
     question: "Is the event online or offline?",
