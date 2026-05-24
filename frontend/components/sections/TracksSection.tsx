@@ -1,18 +1,10 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Brain, Box as Cube, TestTube, Glasses, Trophy, Heart, Globe } from "lucide-react";
+import { Swords, Shapes, Car, Castle, Crosshair, Moon, Calculator, Music, Paintbrush } from "lucide-react";
 import { TRACKS } from "@/lib/constants";
 
-const iconMap: Record<string, React.ElementType> = {
-  Brain,
-  Cube,
-  TestTube,
-  Glasses,
-  Trophy,
-  Heart,
-  Globe,
-};
+const iconList = [Swords, Shapes, Car, Castle, Crosshair, Moon, Calculator, Music, Paintbrush];
 
 export function TracksSection() {
   return (
@@ -26,13 +18,13 @@ export function TracksSection() {
         >
           <h2 className="section-title">Challenge Tracks</h2>
           <p className="section-subtitle">
-            Choose your battlefield. Seven specialized tracks for innovation in AI and gaming.
+            Choose your battlefield. Nine game genres to build and conquer.
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {TRACKS.map((track, i) => {
-            const Icon = iconMap[track.icon] || Brain;
+            const Icon = iconList[i] || iconList[0];
             return (
               <motion.div
                 key={track.id}

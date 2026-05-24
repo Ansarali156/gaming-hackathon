@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { PRICING } from "@/lib/constants";
+import { PRICING, TRACKS } from "@/lib/constants";
 import {
   Users,
   CheckCircle,
@@ -608,17 +608,11 @@ export default function RegisterPage() {
                           className="input-field"
                         >
                           <option value="">Select a theme</option>
-                          <option value="AI NPC Systems">AI NPC Systems</option>
-                          <option value="Procedural Content Generation">
-                            Procedural Content Generation
-                          </option>
-                          <option value="AI for Game Testing">
-                            AI for Game Testing & Balancing
-                          </option>
-                          <option value="AR/VR Gaming">AR/VR Gaming Experience</option>
-                          <option value="Esports Analytics">Esports Analytics & AI</option>
-                          <option value="Serious Games">Serious Games for Social Impact</option>
-                          <option value="Metaverse/Web3">Metaverse and Web3 Gaming</option>
+                          {TRACKS.map((track) => (
+                            <option key={track.id} value={track.title}>
+                              {track.title}
+                            </option>
+                          ))}
                         </select>
                       </div>
                       <div>
