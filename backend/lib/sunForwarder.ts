@@ -3,6 +3,9 @@ type Payload = {
   email: string | null;
   name: string | null;
   mobile: string | null;
+  category?: string;
+  teamSize?: number;
+  baseAmount?: number;
   amount: number;
   gst: number;
   finalAmount: number;
