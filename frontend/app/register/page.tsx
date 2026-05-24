@@ -140,8 +140,7 @@ export default function RegisterPage() {
       techStack,
     };
 
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001";
-    const registerEndpoint = `${apiBase}/api/register`;
+    const registerEndpoint = "/api/register";
 
     try {
       // 1. Validate fields and uniqueness via validateOnly: true
