@@ -24,7 +24,7 @@ export const authController = {
     try {
       const { email, password } = loginSchema.parse(req.body);
 
-      const user = await prisma.user.findUnique({ where: { email } });
+      const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
       if (!user || !user.password) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
@@ -62,7 +62,7 @@ export const authController = {
     try {
       const { email, name, password } = registerSchema.parse(req.body);
 
-      const existingUser = await prisma.user.findUnique({ where: { email } });
+      const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
       if (existingUser) {
         return res.status(400).json({ error: 'User already exists' });
       }
@@ -71,7 +71,7 @@ export const authController = {
 
       const user = await prisma.user.create({
         data: {
-          email,
+          email: email.toLowerCase(),
           name,
           password: hashedPassword,
           role: 'PARTICIPANT',
