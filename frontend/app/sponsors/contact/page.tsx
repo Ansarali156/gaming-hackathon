@@ -214,22 +214,25 @@ export default function SponsorContactPage() {
           {/* Quick Channels Grid below form */}
           <div className="max-w-3xl mx-auto mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
             <a 
-              href="mailto:sponsors@incuxai.com" 
+              href="mailto:incuxgaming@gmail.com" 
               className="flex flex-col items-center p-5 bg-surface-light/35 border border-white/5 rounded-2xl hover:border-primary/20 hover:bg-surface-light/50 transition-all duration-300 group"
             >
               <Mail className="text-primary mb-3" size={24} />
               <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Email Us</span>
               <span className="text-xs font-semibold text-white group-hover:text-primary transition-colors mt-1.5">
-                sponsors@incuxai.com
+                incuxgaming@gmail.com
               </span>
             </a>
-            <div className="flex flex-col items-center p-5 bg-surface-light/35 border border-white/5 rounded-2xl">
+            <a 
+              href="tel:+917995061289"
+              className="flex flex-col items-center p-5 bg-surface-light/35 border border-white/5 rounded-2xl hover:border-primary/20 hover:bg-surface-light/50 transition-all duration-300 group"
+            >
               <Phone className="text-primary mb-3" size={24} />
               <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Call Us</span>
-              <span className="text-xs font-semibold text-white mt-1.5">
-                +91 795061289
+              <span className="text-xs font-semibold text-white group-hover:text-primary transition-colors mt-1.5">
+                +91 7995061289
               </span>
-            </div>
+            </a>
             <div className="flex flex-col items-center p-5 bg-surface-light/35 border border-white/5 rounded-2xl">
               <MapPin className="text-primary mb-3" size={24} />
               <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Location</span>

@@ -36,6 +36,8 @@ export async function GET(request: Request) {
                   name: true,
                   email: true,
                   mobile: true,
+                  college: true,
+                  linkedin: true,
                 },
               },
             },

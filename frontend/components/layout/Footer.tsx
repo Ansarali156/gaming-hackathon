@@ -23,7 +23,7 @@ const socialLinks = [
   { icon: <Instagram size={20} />, href: "https://instagram.com/incuxai" },
   { icon: <Linkedin size={20} />, href: "https://www.linkedin.com/company/incuxai/" },
   { icon: <MessageCircle size={20} />, href: "https://discord.gg/incuxai" },
-  { icon: <Mail size={20} />, href: "mailto:Incuxaigamming@gmail.com" },
+  { icon: <Mail size={20} />, href: "mailto:incuxgaming@gmail.com" },
 ];
 
 export function Footer() {
@@ -33,7 +33,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="space-y-4">
             <Link href="/" className="font-display text-2xl font-bold gradient-text">
-              IncuXai
+              Ai gaming hackathon
             </Link>
             <p className="text-text-muted">
               India&apos;s Ultimate AI Gaming Hackathon. Build. Battle. Innovate & Conquer.
@@ -68,7 +68,11 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/5 text-center text-text-muted">
-          <p className="mb-2">Website : <a href ="https://incuxai.com"> incuxai.com </a> | Phone: +91 795061289 | Email:Incuxaigamming@gmail</p>
+          <p className="mb-2">
+            Website: <a href="https://incuxai.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">incuxai.com</a> | 
+            Phone: <a href="tel:+917995061289" className="hover:text-primary transition-colors">+91 7995061289</a> | 
+            Email: <a href="mailto:incuxgaming@gmail.com" className="hover:text-primary transition-colors">incuxgaming@gmail.com</a>
+          </p>
           <p>© 2026 IncuXai AI Gaming Hackathon. All rights reserved.</p>
         </div>
       </div>

@@ -104,7 +104,7 @@ export const FAQS = [
 
 export const CONTACT_INFO = {
   website: "https://incuxai.com",
-  phone: "+91 795061289",
-  email: "info@incuxai.com",
+  phone: "+91 7995061289",
+  email: "incuxgaming@gmail.com",
   instagram: "@incuxai",
 };

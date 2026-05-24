@@ -476,12 +476,11 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
       </div>
 
       {/* Analytics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <OverviewCard icon={<Users className="text-primary" />} label="Total Teams" value={analytics.totalRegistrations || 0} />
         <OverviewCard icon={<DollarSign className="text-neon-green" />} label="Total Revenue" value={`₹${analytics.totalRevenue || 0}`} />
         <OverviewCard icon={<CreditCard className="text-yellow-400" />} label="Pending Payments" value={analytics.pendingPayments || 0} />
         <OverviewCard icon={<MessageCircle className="text-neon-blue" />} label="Discord Joins" value={analytics.discordJoins || 0} />
-        <OverviewCard icon={<TrendingUp className="text-neon-purple" />} label="Referrals Made" value={analytics.referralAnalytics?.totalReferrals || 0} />
       </div>
 
       {/* Charts & Trends Grid */}
@@ -563,23 +562,17 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
           </div>
         </div>
 
-        {/* Lead Analytics / Referral points */}
+        {/* Sponsorship Stats */}
         <div className="glass-card p-6 flex flex-col justify-between">
           <div>
-            <h3 className="font-display font-bold text-text mb-4">Sponsorship & Referral Stats</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-white/5 rounded-lg text-center">
-                <span className="text-xs text-text-muted">Total Sponsors</span>
-                <p className="text-2xl font-display font-bold text-secondary mt-1">2</p>
-              </div>
-              <div className="p-4 bg-white/5 rounded-lg text-center">
-                <span className="text-xs text-text-muted">Referrals Points</span>
-                <p className="text-2xl font-display font-bold text-neon-purple mt-1">{analytics.referralAnalytics?.totalPoints || 0}</p>
-              </div>
+            <h3 className="font-display font-bold text-text mb-4">Sponsorship Stats</h3>
+            <div className="p-4 bg-white/5 rounded-lg text-center">
+              <span className="text-xs text-text-muted">Total Active Sponsors</span>
+              <p className="text-2xl font-display font-bold text-secondary mt-1">{sponsors.filter(s => s.isActive).length || 0}</p>
             </div>
           </div>
           <div className="mt-4 pt-4 border-t border-white/5">
-            <p className="text-xs text-text-dim italic">Referral analytics reflect registered ambassadors and organic user links.</p>
+            <p className="text-xs text-text-dim italic">Manage active sponsors under the Sponsors tab.</p>
           </div>
         </div>
       </div>
@@ -988,13 +981,15 @@ function AnnouncementsPane({
         <h3 className="font-display font-bold text-lg text-text">Broadcast Log</h3>
         <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
           {announcements.map((ann: any) => (
-            <div key={ann.id} className="p-4 bg-white/5 border border-white/5 rounded-xl space-y-2 relative">
-              {ann.isPinned && (
-                <span className="absolute top-4 right-4 bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold">
-                  PINNED
-                </span>
-              )}
-              <h4 className="text-text font-bold text-sm leading-snug">{ann.title}</h4>
+            <div key={ann.id} className="p-4 bg-white/5 border border-white/5 rounded-xl space-y-2">
+              <div className="flex justify-between items-start gap-4">
+                <h4 className="text-text font-bold text-sm leading-snug">{ann.title}</h4>
+                {ann.isPinned && (
+                  <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold flex-shrink-0">
+                    PINNED
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-text-muted line-clamp-3">{ann.message}</p>
               <span className="text-[10px] text-text-dim block">
                 {new Date(ann.createdAt).toLocaleDateString()}
@@ -1121,8 +1116,8 @@ function TeamDetailsModal({ team, onClose }: { team: any; onClose: () => void })
                 <div><span className="text-text-muted">Name:</span> <span className="text-text">{leader.name}</span></div>
                 <div><span className="text-text-muted">Email:</span> <span className="text-text">{leader.email}</span></div>
                 <div><span className="text-text-muted">Mobile:</span> <span className="text-text">{leader.mobile || "N/A"}</span></div>
-                <div><span className="text-text-muted">College/Company:</span> <span className="text-text">{leaderData.college || "N/A"}</span></div>
-                {leaderData.linkedin && <div className="col-span-2"><span className="text-text-muted">LinkedIn:</span> <a href={leaderData.linkedin} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{leaderData.linkedin}</a></div>}
+                <div><span className="text-text-muted">College/Company:</span> <span className="text-text">{leader.college || "N/A"}</span></div>
+                {leader.linkedin && <div className="col-span-2"><span className="text-text-muted">LinkedIn:</span> <a href={leader.linkedin} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">{leader.linkedin}</a></div>}
               </div>
             </div>
           )}

@@ -201,16 +201,16 @@ export default function SponsorsPage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <a href="mailto:sponsors@incuxai.com" className="flex flex-col p-5 bg-[#0a091c] rounded-xl border border-white/5 hover:border-primary/30 transition-all group">
+                  <a href="mailto:incuxgaming@gmail.com" className="flex flex-col p-5 bg-[#0a091c] rounded-xl border border-white/5 hover:border-primary/30 transition-all group">
                     <Mail size={22} className="text-primary mb-3" />
                     <span className="text-[10px] font-bold uppercase text-text-muted tracking-wider">Email Us</span>
-                    <span className="text-sm font-semibold text-white group-hover:text-primary transition-colors truncate mt-1">sponsors@incuxai.com</span>
+                    <span className="text-sm font-semibold text-white group-hover:text-primary transition-colors truncate mt-1">incuxgaming@gmail.com</span>
                   </a>
-                  <div className="flex flex-col p-5 bg-[#0a091c] rounded-xl border border-white/5">
+                  <a href="tel:+917995061289" className="flex flex-col p-5 bg-[#0a091c] rounded-xl border border-white/5 hover:border-primary/30 transition-all group">
                     <Phone size={22} className="text-primary mb-3" />
                     <span className="text-[10px] font-bold uppercase text-text-muted tracking-wider">Call Directly</span>
-                    <span className="text-sm font-semibold text-white mt-1">+91 795061289</span>
-                  </div>
+                    <span className="text-sm font-semibold text-white group-hover:text-primary transition-colors truncate mt-1">+91 7995061289</span>
+                  </a>
                   <div className="flex flex-col p-5 bg-[#0a091c] rounded-xl border border-white/5">
                     <MapPin size={22} className="text-primary mb-3" />
                     <span className="text-[10px] font-bold uppercase text-text-muted tracking-wider">Headquarters</span>

@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { FloatingActions } from "@/components/layout/FloatingActions";
+import { Chatbot } from "@/components/layout/Chatbot";
 import { ParticleBackground } from "@/components/ui/ParticleBackground";
 
 const poppins = Poppins({
@@ -31,6 +32,7 @@ export default function RootLayout({
           <ParticleBackground />
           {children}
           <FloatingActions />
+          <Chatbot />
         </Providers>
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>

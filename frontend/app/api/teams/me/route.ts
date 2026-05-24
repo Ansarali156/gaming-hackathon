@@ -20,7 +20,7 @@ export async function GET() {
                 members: {
                   include: {
                     user: {
-                      select: { id: true, name: true, email: true, mobile: true },
+                      select: { id: true, name: true, email: true, mobile: true, college: true, linkedin: true },
                     },
                   },
                 },

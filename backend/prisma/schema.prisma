@@ -48,6 +48,8 @@ model User {
   password      String?
   name          String?
   mobile        String?
+  college       String?
+  linkedin      String?
   role          Role      @default(PARTICIPANT)
   image         String?
   discordId     String?

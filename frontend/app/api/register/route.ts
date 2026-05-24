@@ -121,6 +121,8 @@ export async function POST(request: Request) {
                   email: leader.email.toLowerCase(),
                   name: leader.name.trim(),
                   mobile: leader.mobile || null,
+                  college: leader.college || null,
+                  linkedin: leader.linkedin || null,
                   password: hashedPassword,
                   role: "PARTICIPANT",
                 },
