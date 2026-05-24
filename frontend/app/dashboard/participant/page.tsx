@@ -70,7 +70,12 @@ export default function ParticipantDashboard() {
       if (res.ok) {
         const data = await res.json();
         setTeamData(data.team);
-        setPaymentStatus(data.team?.payment?.status || "PENDING");
+        const status = data.team?.payment?.status || "PENDING";
+        setPaymentStatus(status);
+        
+        if (status !== "SUCCESS" && session?.user?.email) {
+          router.push(`/pay?email=${encodeURIComponent(session.user.email)}`);
+        }
       }
     } catch (e) {
       console.error("Failed to load team data", e);

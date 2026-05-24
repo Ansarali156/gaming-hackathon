@@ -36,6 +36,17 @@ export default function LoginPage() {
         if (role === "ADMIN") {
           router.push("/dashboard/admin");
         } else {
+          // Check if team payment is complete
+          const teamRes = await fetch("/api/teams/me");
+          if (teamRes.ok) {
+            const teamData = await teamRes.json();
+            const paymentStatus = teamData.team?.payment?.status || "PENDING";
+            if (paymentStatus !== "SUCCESS") {
+              router.push(`/pay?email=${encodeURIComponent(email)}`);
+              router.refresh();
+              return;
+            }
+          }
           router.push("/dashboard/participant");
         }
       } catch (err) {
