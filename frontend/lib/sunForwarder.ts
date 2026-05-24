@@ -27,11 +27,7 @@ export async function forwardToSun(payload: Payload) {
 }
 
 export function makeSunPayload(payload: Payload) {
-  return {
-    data: JSON.stringify(payload),
-    timestamp: Math.floor(Date.now() / 1000),
-    sender: "sun",
-  };
+  return payload;
 }
 
 export function makeSunRedirectUrl(payload: Payload) {
@@ -45,17 +41,4 @@ export function makeSunRedirectUrl(payload: Payload) {
   });
 
   return url.toString();
-}
-
-export function decryptSunPayload(params: {
-  data: string;
-  timestamp: string;
-  sender: string;
-}) {
-  try {
-    return JSON.parse(params.data);
-  } catch {
-    const decoded = Buffer.from(params.data, "base64").toString("utf8");
-    return JSON.parse(decoded);
-  }
 }

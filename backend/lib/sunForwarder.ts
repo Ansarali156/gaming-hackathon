@@ -10,8 +10,6 @@ type Payload = {
 
 export async function forwardToSun(payload: Payload) {
   const endpoint = process.env.SUN_ENDPOINT_URL || 'http://localhost/sun/public/gaminghackathon/create-order.php';
-  const sharedKey = process.env.SUN_SHARED_KEY;
-  if (!sharedKey) throw new Error('SUN_SHARED_KEY not configured in env');
   const body = makeSunPayload(payload);
 
   const res = await fetch(endpoint, {
@@ -29,9 +27,5 @@ export async function forwardToSun(payload: Payload) {
 }
 
 export function makeSunPayload(payload: Payload) {
-  return {
-    data: JSON.stringify(payload),
-    timestamp: Math.floor(Date.now() / 1000),
-    sender: 'gaming-hackathon',
-  };
+  return payload;
 }

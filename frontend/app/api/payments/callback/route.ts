@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { decryptSunPayload } from "@/lib/sunForwarder";
 import { sendEmail } from "@/lib/mailer";
 
 export const dynamic = "force-dynamic";
@@ -64,33 +63,7 @@ function getConfirmationEmailHtml(teamName: string, teamId: string, amount: numb
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { data, timestamp, sender } = body;
-
-    if (!data || !timestamp || !sender) {
-      return NextResponse.json({ error: "Missing required callback parameters." }, { status: 400 });
-    }
-
-    // 1. Verify freshness (within 5 minutes / 300 seconds)
-    const ts = parseInt(timestamp, 10);
-    const now = Math.floor(Date.now() / 1000);
-    if (Math.abs(now - ts) > 300) {
-      return NextResponse.json({ error: "Timestamp is outside the allowed window." }, { status: 400 });
-    }
-
-    // 2. Verify sender is 'sun'
-    if (sender !== "sun") {
-      return NextResponse.json({ error: "Invalid sender source." }, { status: 400 });
-    }
-
-    // 3. Parse payload from SUN
-    let decrypted: any;
-    try {
-      decrypted = decryptSunPayload({ data, timestamp, sender });
-    } catch (decryptErr: any) {
-      console.error("Callback payload parse failed:", decryptErr);
-      return NextResponse.json({ error: "Payload parsing failed." }, { status: 401 });
-    }
+    const decrypted = await request.json();
 
     const { email, payment_id, order_id, status } = decrypted;
     if (!email || !payment_id || status !== "SUCCESS") {

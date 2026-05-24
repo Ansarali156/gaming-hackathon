@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
@@ -10,7 +10,6 @@ import { CheckCircle2, AlertCircle, Loader2, ArrowRight, ShieldCheck } from "luc
 
 function CallbackContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,39 +17,15 @@ function CallbackContent() {
   const [emailStatus, setEmailStatus] = useState<string>("sent");
 
   useEffect(() => {
-    const data = searchParams.get("data");
-    const timestamp = searchParams.get("timestamp");
-    const sender = searchParams.get("sender");
+    const teamName = searchParams.get("teamName") || "";
+    const teamId = searchParams.get("teamId") || "";
+    const emailStatus = searchParams.get("emailStatus") || "sent";
 
-    if (!data || !timestamp || !sender) {
-      setError("Invalid payment callback parameters. If your payment was successful, please contact support.");
-      setLoading(false);
-      return;
+    if (teamName || teamId) {
+      setTeamDetails({ teamName, teamId });
+      setEmailStatus(emailStatus);
     }
-
-    // Call the internal payments callback API to decrypt & update database
-    fetch("/api/payments/callback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data, timestamp, sender })
-    })
-      .then(async (res) => {
-        const payload = await res.json();
-        if (!res.ok) {
-          throw new Error(payload.error || "Failed to verify transaction details.");
-        }
-        return payload;
-      })
-      .then((payload) => {
-        setTeamDetails({ teamName: payload.teamName, teamId: payload.teamId });
-        setEmailStatus(payload.emailStatus || "sent");
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Verification error:", err);
-        setError(err.message || "Cryptographic signature verification failed.");
-        setLoading(false);
-      });
+    setLoading(false);
   }, [searchParams]);
 
   if (loading) {
@@ -135,7 +110,7 @@ function CallbackContent() {
 
       <div className="mt-8 flex justify-center items-center gap-2 text-xs text-text-dim text-center">
         <ShieldCheck size={14} className="text-neon-green" />
-        Decrypted & verified securely via AES-256-GCM symmetric signature
+        Payment callback processed without transport encryption
       </div>
     </motion.div>
   );
@@ -150,7 +125,7 @@ export default function PayCallbackPage() {
           <Suspense fallback={
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="animate-spin text-primary mb-4" size={48} />
-              <p className="text-text-muted">Loading secure callback verification...</p>
+              <p className="text-text-muted">Loading payment callback...</p>
             </div>
           }>
             <CallbackContent />
