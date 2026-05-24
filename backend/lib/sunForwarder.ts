@@ -10,13 +10,19 @@ type Payload = {
   finalAmount: number;
 };
 
-export async function forwardToSun(payload: Payload) {
+function getAesKey(): Buffer {
   const sharedKey = process.env.SUN_SHARED_KEY;
+  if (!sharedKey) throw new Error('SUN_SHARED_KEY not configured in env');
+  if (/^[0-9a-f]{64}$/i.test(sharedKey)) {
+    return Buffer.from(sharedKey, 'hex');
+  }
+  return crypto.createHash('sha256').update(sharedKey).digest();
+}
+
+export async function forwardToSun(payload: Payload) {
   const endpoint = process.env.SUN_ENDPOINT_URL || 'http://localhost/sun/public/gaminghackathon/create-order.php';
 
-  if (!sharedKey) throw new Error('SUN_SHARED_KEY not configured in env');
-
-  const key = crypto.createHash('sha256').update(sharedKey).digest();
+  const key = getAesKey();
   const iv = crypto.randomBytes(12);
 
   const plaintext = JSON.stringify(payload);
@@ -44,10 +50,7 @@ export async function forwardToSun(payload: Payload) {
 }
 
 export function makeSunPayload(payload: Payload) {
-  const sharedKey = process.env.SUN_SHARED_KEY;
-  if (!sharedKey) throw new Error('SUN_SHARED_KEY not configured in env');
-
-  const key = crypto.createHash('sha256').update(sharedKey).digest();
+  const key = getAesKey();
   const iv = crypto.randomBytes(12);
 
   const plaintext = JSON.stringify(payload);
