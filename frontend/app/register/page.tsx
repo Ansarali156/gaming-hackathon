@@ -140,9 +140,12 @@ export default function RegisterPage() {
       techStack,
     };
 
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001";
+    const registerEndpoint = `${apiBase}/api/register`;
+
     try {
       // 1. Validate fields and uniqueness via validateOnly: true
-      const validateResponse = await fetch("/api/register", {
+      const validateResponse = await fetch(registerEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...payload, validateOnly: true }),
@@ -156,81 +159,32 @@ export default function RegisterPage() {
         return;
       }
 
-      // 2. Initialize Razorpay Payment Order
-      const payRes = await fetch("/api/payments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          action: "create-order", 
-          category, 
-          memberCount: members.length 
-        }),
-      });
-      const payData = await payRes.json();
+      // 2. Submit registration (payments are handled by SUN)
+      try {
+        const registerRes = await fetch(registerEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...payload, returnSunRedirect: true }),
+        });
 
-      if (!payRes.ok || !payData.orderId) {
-        setSubmitError(payData.error || "Failed to initialize payment. Please try again.");
+        const registerData = await registerRes.json();
+
+        if (registerRes.ok && registerData.success) {
+          setRegisteredTeamId(registerData.teamId);
+          // If backend returned a SUN redirect URL, navigate there to complete payment
+          if (registerData.sunRedirectUrl) {
+            window.location.href = registerData.sunRedirectUrl;
+            return;
+          }
+          setSuccess(true);
+        } else {
+          setSubmitError(registerData.error || registerData.warning || "Registration failed. Please contact support.");
+        }
+      } catch (err) {
+        setSubmitError("Network error. Please try again.");
+      } finally {
         setSubmitting(false);
-        return;
       }
-
-      // 3. Open Razorpay Checkout Modal
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SDJLxYQuOsRKMU",
-        amount: payData.amount,
-        currency: payData.currency,
-        name: "IncuXAI Hackathon",
-        description: "Registration Fee",
-        order_id: payData.orderId,
-        handler: async (rpResponse: any) => {
-          try {
-            setSubmitting(true);
-            setSubmitError(null);
-
-            // 4. Send payment verification + registration details to perform atomic DB insertion
-            const registerRes = await fetch("/api/register", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                ...payload,
-                paymentDetails: {
-                  paymentId: rpResponse.razorpay_payment_id,
-                  orderId: rpResponse.razorpay_order_id,
-                  signature: rpResponse.razorpay_signature,
-                }
-              }),
-            });
-
-            const registerData = await registerRes.json();
-
-            if (registerRes.ok && registerData.success) {
-              setRegisteredTeamId(registerData.teamId);
-              setSuccess(true);
-            } else {
-              setSubmitError(registerData.error || "Registration failed during payment verification. Please contact support.");
-            }
-          } catch (err) {
-            setSubmitError("Failed to complete registration after payment. Please contact support.");
-          } finally {
-            setSubmitting(false);
-          }
-        },
-        prefill: {
-          name: leaderName,
-          email: leaderEmail,
-          contact: leaderMobile,
-        },
-        theme: { color: "#a855f7" },
-        modal: { 
-          ondismiss: () => {
-            setSubmitError("Payment was cancelled. Registration aborted. Please try again.");
-            setSubmitting(false);
-          }
-        },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
 
     } catch (err) {
       setSubmitError("Network error. Please try again.");
@@ -767,9 +721,11 @@ export default function RegisterPage() {
                       </h3>
                       <Row label="Category Fee" value={`₹${pricing?.price || 0} per person`} />
                       <Row label="Total Members" value={`${members.length + 1} (Leader + ${members.length} Members)`} />
+                      <Row label="Base Fee" value={`₹${pricing ? pricing.price * (members.length + 1) : 0}`} />
+                      <Row label="GST (2%)" value={`₹${pricing ? Number((pricing.price * (members.length + 1) * 0.02).toFixed(2)) : 0}`} />
                       <div className="border-t border-primary/25 pt-2 flex justify-between items-center">
                         <span className="text-text font-bold">Total Amount to Pay</span>
-                        <span className="text-primary font-bold text-xl">₹{pricing ? pricing.price * (members.length + 1) : 0}</span>
+                        <span className="text-primary font-bold text-xl">₹{pricing ? Number((pricing.price * (members.length + 1) * 1.02).toFixed(2)) : 0}</span>
                       </div>
                     </div>
 
@@ -805,7 +761,7 @@ export default function RegisterPage() {
                           Processing...
                         </span>
                       ) : (
-                        `Proceed to Pay ₹${pricing ? pricing.price * (members.length + 1) : 0} 💳`
+                        `Proceed to Pay ₹${pricing ? Number((pricing.price * (members.length + 1) * 1.02).toFixed(2)) : 0} 💳`
                       )}
                     </button>
                   </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import Script from "next/script";
+// Script intentionally removed: Razorpay checkout was removed
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { FloatingActions } from "@/components/layout/FloatingActions";
@@ -34,7 +34,7 @@ export default function RootLayout({
           <FloatingActions />
           <Chatbot />
         </Providers>
-        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+        {/* Razorpay checkout removed — payments handled by external SUN endpoint */}
       </body>
     </html>
   );

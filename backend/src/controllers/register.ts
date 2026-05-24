@@ -1,27 +1,77 @@
 import { Request, Response } from 'express';
 import { prisma } from '../../lib/prisma';
-import { createRazorpayOrder } from '../../lib/razorpay';
+import { PRICING } from '../../lib/constants';
+import { forwardToSun, makeSunPayload } from '../../lib/sunForwarder';
 import { generateTeamId } from '../../utils';
 import { sendEmail, getRegistrationEmailHtml } from '../services/email';
+import bcrypt from 'bcryptjs';
+
+function isValidEmail(email: any) {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 export const registerController = {
   async createRegistration(req: Request, res: Response) {
     try {
-      const { category, teamName, leader, members, projectTheme, techStack, totalAmount } = req.body;
+      const { category, teamName, leader, members, projectTheme, techStack, totalAmount, validateOnly } = req.body;
+      const normalizedTeamName = String(teamName || '').trim();
+      const normalizedLeaderEmail = String(leader?.email || '').toLowerCase();
+      const normalizedLeaderName = String(leader?.name || '').trim();
 
-      if (!category || !teamName || !leader?.email) {
+      if (!category || !normalizedTeamName || !normalizedLeaderEmail || !normalizedLeaderName) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
+      if (!isValidEmail(normalizedLeaderEmail)) {
+        return res.status(400).json({ error: 'Leader email is invalid' });
+      }
+      if (!Array.isArray(members) || members.length < 1) {
+        return res.status(400).json({ error: 'At least one team member is required' });
+      }
+      for (const [index, member] of members.entries()) {
+        if (!member?.name || !member?.email) {
+          return res.status(400).json({ error: `Member ${index + 1} requires name and email` });
+        }
+        if (!isValidEmail(member.email)) {
+          return res.status(400).json({ error: `Member ${index + 1} email is invalid` });
+        }
+      }
 
+      if (!leader?.password) {
+        return res.status(400).json({ error: 'Leader password is required' });
+      }
+      if (leader.password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters' });
+      }
+
+      const existingTeam = await prisma.team.findFirst({
+        where: { name: { equals: normalizedTeamName, mode: 'insensitive' } },
+      });
+      if (existingTeam) {
+        return res.status(409).json({ error: 'A team with this name already exists.' });
+      }
+      const existingUser = await prisma.user.findUnique({ where: { email: normalizedLeaderEmail } });
+      if (existingUser) {
+        return res.status(409).json({ error: 'An account with this email already exists.' });
+      }
+
+      const pricingCategory = category as keyof typeof PRICING;
+      const pricePerPerson = PRICING[pricingCategory]?.price ?? 300;
+      const computedAmount = pricePerPerson * (members.length + 1);
+      const baseAmount = typeof totalAmount === 'number' && totalAmount > 0 ? totalAmount : computedAmount;
+      const gst = Number((baseAmount * 0.02).toFixed(2));
+      const finalAmount = Number((baseAmount + gst).toFixed(2));
+
+      if (validateOnly) {
+        return res.json({ success: true, message: 'Validation successful.' });
+      }
+
+      const hashedPassword = await bcrypt.hash(leader.password, 10);
       const teamId = await generateTeamId();
-
-      // Create Razorpay order
-      const razorpayOrder = await createRazorpayOrder(totalAmount);
 
       const team = await prisma.team.create({
         data: {
           teamId,
-          name: teamName,
+          name: normalizedTeamName,
           category,
           projectTheme,
           techStack,
@@ -30,11 +80,15 @@ export const registerController = {
               {
                 user: {
                   connectOrCreate: {
-                    where: { email: leader.email },
+                    where: { email: normalizedLeaderEmail },
                     create: {
-                      email: leader.email,
-                      name: leader.name,
-                      mobile: leader.mobile,
+                      email: normalizedLeaderEmail,
+                      name: normalizedLeaderName,
+                      mobile: leader.mobile || null,
+                      college: leader.college || null,
+                      linkedin: leader.linkedin || null,
+                      password: hashedPassword,
+                      role: 'PARTICIPANT',
                     },
                   },
                 },
@@ -61,10 +115,11 @@ export const registerController = {
           },
           payment: {
             create: {
-              amount: totalAmount,
+              amount: baseAmount,
+              gst: gst,
+              finalAmount: finalAmount,
               status: 'PENDING',
-              razorpayOrderId: razorpayOrder.id,
-            },
+            } as any,
           },
         },
         include: {
@@ -77,6 +132,46 @@ export const registerController = {
         },
       });
 
+      // Forward order details to SUN for payment handling or return a redirect URL
+      let sunRedirectUrl: string | undefined;
+      try {
+        const leaderMember = team.members.find((m: any) => m.role === 'LEADER');
+        const leaderUser = leaderMember?.user;
+        if (leaderUser) {
+          const payload = {
+            id: leaderUser.id,
+            email: leaderUser.email,
+            name: leaderUser.name,
+            mobile: leaderUser.mobile,
+            amount: baseAmount,
+            gst: gst,
+            finalAmount: finalAmount,
+            teamId: team.teamId,
+            teamName: team.name,
+          };
+
+          if (req.body.returnSunRedirect) {
+            const sunPayload = makeSunPayload(payload as any);
+
+            const endpoint = process.env.SUN_ENDPOINT_URL || 'http://localhost/sun/public/gaminghackathon/create-order.php';
+            const url = new URL(endpoint);
+            Object.entries(sunPayload).forEach(([k, v]) => url.searchParams.set(k, String(v)));
+            sunRedirectUrl = url.toString();
+          } else {
+            await forwardToSun(payload);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to forward order to SUN:', err);
+        if (req.body.returnSunRedirect) {
+          return res.status(500).json({ error: 'Unable to generate payment redirect. Please try again.' });
+        }
+      }
+
+      if (req.body.returnSunRedirect && !sunRedirectUrl) {
+        return res.status(500).json({ error: 'Unable to generate payment redirect. Please try again.' });
+      }
+
       // Send confirmation email
       await sendEmail(
         leader.email,
@@ -87,12 +182,8 @@ export const registerController = {
       res.json({
         success: true,
         teamId: team.teamId,
-        razorpayOrder: {
-          id: razorpayOrder.id,
-          amount: razorpayOrder.amount,
-          currency: razorpayOrder.currency,
-        },
-        message: 'Please complete payment to confirm registration',
+        message: 'Registration created. Please follow payment instructions sent to your email.',
+        sunRedirectUrl,
       });
     } catch (error) {
       console.error('Registration error:', error);

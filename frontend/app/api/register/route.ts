@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateTeamId } from "@/lib/utils";
+import { PRICING } from "@/lib/constants";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "@/lib/mailer";
+import { forwardToSun, makeSunRedirectUrl } from "@/lib/sunForwarder";
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -67,32 +69,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, message: "Validation successful." });
     }
 
-    // ── Payment details verification ─────────────────────────────────────
-    if (!paymentDetails || !paymentDetails.paymentId || !paymentDetails.orderId || !paymentDetails.signature) {
-      return NextResponse.json({ error: "Payment verification details are missing." }, { status: 400 });
-    }
-
-    const { paymentId, orderId, signature } = paymentDetails;
-
-    // Verify signature securely
-    const crypto = require("crypto");
-    const generated_signature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "test_secret")
-      .update(orderId + "|" + paymentId)
-      .digest("hex");
-
-    if (generated_signature !== signature) {
-      return NextResponse.json({ error: "Payment verification failed. Invalid signature." }, { status: 400 });
-    }
-
-    // Prevent Replay Attacks: Check if the payment ID has already been registered
-    const existingPayment = await prisma.payment.findFirst({
-      where: { razorpayPaymentId: paymentId }
-    });
-    if (existingPayment) {
-      return NextResponse.json({ error: "This payment transaction has already been used for registration." }, { status: 409 });
-    }
-
     // ── Hash password ─────────────────────────────────────────────────────
     const hashedPassword = await bcrypt.hash(leader.password, 10);
 
@@ -100,9 +76,10 @@ export async function POST(request: Request) {
     const teamId = await generateTeamId();
 
     // ── Pricing calculation ──────────────────────────────────────────────
-    const PRICING: Record<string, number> = { STUDENT: 300, IT_PROFESSIONAL: 1000, STARTUP: 1000 };
-    const pricePerPerson = PRICING[category] ?? 300;
-    const totalAmount = pricePerPerson * (members.length + 1);
+    const pricePerPerson = (PRICING as any)[category]?.price ?? 300;
+    const baseAmount = pricePerPerson * (members.length + 1);
+    const gst = Number((baseAmount * 0.02).toFixed(2));
+    const finalAmount = Number((baseAmount + gst).toFixed(2));
 
     // ── Create team + users + payment atomically in DB ────────────────────
     const team = await prisma.team.create({
@@ -112,7 +89,7 @@ export async function POST(request: Request) {
         category,
         projectTheme: projectTheme || null,
         techStack: techStack || null,
-        status: "APPROVED", // Set directly to approved upon verified payment
+        status: "PENDING",
         members: {
           create: [
             {
@@ -149,11 +126,10 @@ export async function POST(request: Request) {
         },
         payment: {
           create: {
-            amount: totalAmount,
-            status: "SUCCESS",
-            razorpayOrderId: orderId,
-            razorpayPaymentId: paymentId,
-            razorpaySignature: signature,
+            amount: baseAmount,
+            gst: gst,
+            finalAmount: finalAmount,
+            status: "PENDING",
           },
         },
       },
@@ -163,29 +139,75 @@ export async function POST(request: Request) {
       },
     });
 
+    // ── Forward encrypted payload to SUN endpoint for payment handling ────
+    let sunRedirectUrl: string | undefined;
+
+    try {
+      const leaderMember = team.members.find((m: any) => m.role === "LEADER");
+      const leaderUser = leaderMember?.user;
+      if (leaderUser) {
+        const payload = {
+          id: leaderUser.id,
+          email: leaderUser.email,
+          name: leaderUser.name,
+          mobile: leaderUser.mobile,
+          amount: baseAmount,
+          gst: gst,
+          finalAmount: finalAmount,
+          teamId: team.teamId,
+          teamName: team.name,
+        };
+
+        if (body.returnSunRedirect) {
+          sunRedirectUrl = makeSunRedirectUrl(payload);
+        } else {
+          await forwardToSun(payload);
+        }
+      }
+    } catch (forwardErr) {
+      console.error("Failed to forward order to SUN:", forwardErr);
+      if (body.returnSunRedirect) {
+        return NextResponse.json({
+          success: false,
+          error: "Unable to generate payment redirect. Please try again.",
+        }, { status: 500 });
+      }
+      // Do not fail the registration — return success but warn the caller
+      return NextResponse.json({
+        success: true,
+        teamId: team.teamId,
+        warning: "Registration saved but forwarding to payment provider failed.",
+      });
+    }
+
     // ── Send Welcome Registration & Payment Email ────────────────────────
-    await sendEmail({
-      to: leader.email.toLowerCase(),
-      subject: "Welcome to IncuXai Gaming Hackathon! 🚀",
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #a855f7;">Registration & Payment Successful! 🎉</h2>
-          <p>Hi <strong>${leader.name.trim()}</strong>,</p>
-          <p>Your team <strong>${teamName.trim()}</strong> has been successfully registered and your payment of <strong>₹${totalAmount}</strong> was verified.</p>
-          <p><strong>Team ID:</strong> ${team.teamId}</p>
-          <p><strong>Payment Transaction ID:</strong> ${paymentId}</p>
-          <p>You can now log in to your participant dashboard using your email and password to access resources, connect with mentors, and submit your project links.</p>
-          <div style="margin-top: 30px; text-align: center;">
-            <a href="http://localhost:3000/login" style="display: inline-block; padding: 12px 24px; background-color: #a855f7; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
+    try {
+      await sendEmail({
+        to: leader.email.toLowerCase(),
+        subject: "Registration Received - IncuXai Gaming Hackathon",
+        html: `
+          <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #a855f7;">Registration Received ✅</h2>
+            <p>Hi <strong>${leader.name.trim()}</strong>,</p>
+            <p>Your team <strong>${teamName.trim()}</strong> has been registered. The registration record is saved and payment instructions have been forwarded to our payment partner.</p>
+            <p><strong>Team ID:</strong> ${team.teamId}</p>
+            <p><strong>Amount Due:</strong> ₹${finalAmount}</p>
+            <p>Please follow the payment instructions sent to your email or contact support if you don't receive them within a few minutes.</p>
+            <div style="margin-top: 30px; text-align: center;">
+              <a href="http://localhost:3000/login" style="display: inline-block; padding: 12px 24px; background-color: #a855f7; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
+            </div>
           </div>
-        </div>
-      `,
-    });
+        `,
+      });
+    } catch (emailErr) {
+      console.error("Failed to send registration email:", emailErr);
+    }
 
     return NextResponse.json({
       success: true,
       teamId: team.teamId,
-      message: "Registration and payment successful! You can now log in to your dashboard.",
+      message: "Registration successful! You can now complete payment on the payment page.",
+      ...(sunRedirectUrl ? { sunRedirectUrl } : {}),
     });
   } catch (error: any) {
     console.error("Registration error:", error);

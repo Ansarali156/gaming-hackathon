@@ -28,7 +28,11 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({
+  verify(req, res, buf) {
+    (req as any).rawBody = buf?.toString?.() ?? '';
+  },
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
@@ -48,6 +52,11 @@ app.get('/health', (req, res) => {
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err?.type === 'entity.parse.failed') {
+    console.error('Invalid JSON payload:', err.message, 'path:', req.originalUrl, 'body:', (req as any).rawBody);
+    return res.status(400).json({ error: 'Invalid JSON payload' });
+  }
+
   console.error('Error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });

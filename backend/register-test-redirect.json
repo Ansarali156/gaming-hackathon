@@ -1,0 +1,1 @@
+{"category":"STUDENT","teamName":"Test Gateway Team","leader":{"email":"test-leader@example.com","name":"Test Leader","mobile":"9999999999","skills":"TypeScript"},"members":[],"projectTheme":"Payment forwarding test","techStack":"Next.js, Node","totalAmount":1000, "returnSunRedirect": true}

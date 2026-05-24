@@ -6,7 +6,9 @@
     "dev": "next dev --turbo",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "emails:retry": "tsx scripts/retry-emails.ts",
+    "emails:daemon": "tsx scripts/retry-emails.ts --daemon"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -35,8 +37,10 @@
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "dotenv": "^17.4.2",
     "prisma": "^6.5.0",
     "tailwindcss": "^4.1.14",
+    "tsx": "^4.22.3",
     "typescript": "~5.8.2"
   }
 }

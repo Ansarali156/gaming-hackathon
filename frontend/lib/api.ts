@@ -50,9 +50,9 @@ export const registerApi = {
 // Payment APIs
 export const paymentApi = {
   verifyPayment: (data: any) =>
-    apiFetch('/api/payments/verify', { method: 'POST', body: JSON.stringify(data) }),
+    Promise.reject(new Error('Payments are handled externally by SUN; this endpoint has been removed.')),
   getPaymentStatus: (teamId: string) =>
-    apiFetch(`/api/payments/status/${teamId}`),
+    Promise.reject(new Error('Payments are handled externally by SUN; this endpoint has been removed.')),
 };
 
 // Team APIs

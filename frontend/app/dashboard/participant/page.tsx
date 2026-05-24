@@ -325,69 +325,9 @@ function PaymentTab({ teamData, paymentStatus, onPaymentComplete, session }: any
     if (!teamData) return;
     setLoading(true);
     setError(null);
-
-    try {
-      // Create Razorpay order
-      const res = await fetch("/api/payments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "create-order", teamId: teamData.teamId }),
-      });
-      const data = await res.json();
-
-      if (!res.ok || !data.orderId) {
-        setError(data.error || "Failed to create payment order.");
-        setLoading(false);
-        return;
-      }
-
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SDJLxYQuOsRKMU",
-        amount: data.amount,
-        currency: data.currency,
-        name: "IncuXAI Hackathon",
-        description: "Registration Fee",
-        order_id: data.orderId,
-        handler: async (rpResponse: any) => {
-          try {
-            setLoading(true);
-            const verifyRes = await fetch("/api/payments", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                action: "verify",
-                paymentId: rpResponse.razorpay_payment_id,
-                orderId: rpResponse.razorpay_order_id,
-                signature: rpResponse.razorpay_signature,
-                teamId: teamData.teamId,
-              }),
-            });
-            const verifyData = await verifyRes.json();
-            if (verifyRes.ok && verifyData.success) {
-              onPaymentComplete();
-            } else {
-              setError("Payment verification failed. Please contact support.");
-            }
-          } catch (err) {
-            setError("Failed to verify payment.");
-          } finally {
-            setLoading(false);
-          }
-        },
-        prefill: {
-          name: session?.user?.name || "",
-          email: session?.user?.email || "",
-        },
-        theme: { color: "#a855f7" },
-        modal: { ondismiss: () => setLoading(false) },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
-    } catch (e) {
-      setError("Payment failed. Please try again.");
-      setLoading(false);
-    }
+    // Payments are processed externally by SUN. Trigger forwarding from server or contact support.
+    setError('Payments are handled externally by SUN. Please check your email for payment instructions or contact support.');
+    setLoading(false);
   };
 
   const successfulPayment = teamData?.payment;

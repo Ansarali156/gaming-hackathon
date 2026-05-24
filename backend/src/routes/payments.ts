@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { paymentController } from '../controllers/payments';
 
 const router = Router();
 
-router.post('/verify', paymentController.verifyPayment);
-router.post('/webhook', paymentController.handleWebhook);
-router.get('/status/:teamId', paymentController.getPaymentStatus);
+// Payments are handled externally by SUN. These endpoints are intentionally deprecated.
+router.post('/verify', (req, res) => res.status(410).json({ error: 'Payments moved to SUN' }));
+router.post('/webhook', (req, res) => res.status(410).json({ error: 'Payments moved to SUN' }));
+router.get('/status/:teamId', (req, res) => res.status(410).json({ error: 'Payments moved to SUN' }));
 
 export default router;
