@@ -18,23 +18,25 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 
   try {
     const secret = process.env.JWT_SECRET || 'secret';
-    const decoded = jwt.verify(token, secret) as { userId: string };
+    const decoded = jwt.verify(token, secret) as { id: string; email: string; role: string };
     req.user = decoded;
 
-    // Fetch user from DB based on userId from token
-    if (req.user && req.user.userId) {
+    // Fetch user from DB based on ID from token
+    if (decoded.id) {
       const user = await prisma.user.findUnique({
-        where: { clerkUserId: req.user.userId },
+        where: { id: decoded.id },
       });
       if (user) {
         req.dbUser = user;
       }
-    } catch (error) {
-      console.error('Error fetching user from DB:', error);
-      next(); // Proceed anyway, or fail securely depending on requirements
     }
+    
+    next();
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    res.status(401).json({ error: 'Invalid or expired token.' });
   }
-];
+};
 
 // Authorize roles (requires authenticate to run first)
 export const authorize = (...roles: string[]) => {
