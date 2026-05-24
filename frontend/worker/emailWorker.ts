@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function sendEmail(to: string, type: string, payload: any) {
   console.log(`[EMAIL WORKER] Sending ${type} to ${to} with data:`, payload);
 
-  const user = process.env.EMAIL_USER || "Incuxaigamming@gmail.com";
+  const user = process.env.EMAIL_USER || "incuxaigaming@gmail.com";
   const pass = process.env.EMAIL_PASS;
 
   if (!pass) {
