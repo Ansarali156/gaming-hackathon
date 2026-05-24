@@ -65,9 +65,9 @@ function getConfirmationEmailHtml(teamName: string, teamId: string, amount: numb
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { data, iv, tag, mac, timestamp, sender } = body;
+    const { data, timestamp, sender } = body;
 
-    if (!data || !iv || !tag || !mac || !timestamp || !sender) {
+    if (!data || !timestamp || !sender) {
       return NextResponse.json({ error: "Missing required callback parameters." }, { status: 400 });
     }
 
@@ -83,13 +83,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid sender source." }, { status: 400 });
     }
 
-    // 3. Decrypt and verify HMAC GCM payload
+    // 3. Parse payload from SUN
     let decrypted: any;
     try {
-      decrypted = decryptSunPayload({ data, iv, tag, mac, timestamp, sender });
+      decrypted = decryptSunPayload({ data, timestamp, sender });
     } catch (decryptErr: any) {
-      console.error("Callback signature decryption failed:", decryptErr);
-      return NextResponse.json({ error: "MAC signature verification failed." }, { status: 401 });
+      console.error("Callback payload parse failed:", decryptErr);
+      return NextResponse.json({ error: "Payload parsing failed." }, { status: 401 });
     }
 
     const { email, payment_id, order_id, status } = decrypted;

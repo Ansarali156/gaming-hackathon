@@ -19,13 +19,10 @@ function CallbackContent() {
 
   useEffect(() => {
     const data = searchParams.get("data");
-    const iv = searchParams.get("iv");
-    const tag = searchParams.get("tag");
-    const mac = searchParams.get("mac");
     const timestamp = searchParams.get("timestamp");
     const sender = searchParams.get("sender");
 
-    if (!data || !iv || !tag || !mac || !timestamp || !sender) {
+    if (!data || !timestamp || !sender) {
       setError("Invalid payment callback parameters. If your payment was successful, please contact support.");
       setLoading(false);
       return;
@@ -35,7 +32,7 @@ function CallbackContent() {
     fetch("/api/payments/callback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data, iv, tag, mac, timestamp, sender })
+      body: JSON.stringify({ data, timestamp, sender })
     })
       .then(async (res) => {
         const payload = await res.json();
