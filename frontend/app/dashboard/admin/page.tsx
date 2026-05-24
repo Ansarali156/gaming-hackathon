@@ -379,15 +379,11 @@ export default function AdminDashboard() {
                 <XCircle size={20} />
               </button>
               <div className="text-center border-b border-white/5 pb-4">
-                <h3 className="font-display font-bold text-lg text-text">GST Payment Receipt</h3>
-                <p className="text-text-muted text-xs">Official Registration Invoice</p>
+                <h3 className="font-display font-bold text-lg text-text">Payment Receipt</h3>
+                <p className="text-text-muted text-xs">Official Registration Receipt</p>
               </div>
 
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-text-muted">GSTIN Invoice ID:</span>
-                  <span className="text-text font-mono font-bold text-primary">{selectedReceipt.gstInvoice || "N/A"}</span>
-                </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Team ID:</span>
                   <span className="text-text font-mono">{selectedReceipt.team?.teamId || "N/A"}</span>
@@ -796,7 +792,7 @@ function PaymentsPane({ payments, setSelectedReceipt }: any) {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold text-text">Payment Management</h2>
-        <p className="text-text-muted text-sm">Track GST billing, audit transactions, and process team refunds.</p>
+        <p className="text-text-muted text-sm">Track billing, audit transactions, and view registration receipts.</p>
       </div>
 
       <div className="glass-card overflow-hidden">
@@ -804,7 +800,7 @@ function PaymentsPane({ payments, setSelectedReceipt }: any) {
           <table className="w-full text-left">
             <thead className="bg-surface-light border-b border-white/5 text-text-muted text-xs font-semibold uppercase">
               <tr>
-                <th className="p-4">GST Invoice ID</th>
+                <th className="p-4">Receipt</th>
                 <th className="p-4">Team</th>
                 <th className="p-4">Amount</th>
                 <th className="p-4">Order ID</th>
@@ -816,17 +812,17 @@ function PaymentsPane({ payments, setSelectedReceipt }: any) {
               {payments.length > 0 ? (
                 payments.map((payment: any) => (
                   <tr key={payment.id} className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-text font-mono font-bold text-primary">
-                      {payment.gstInvoice ? (
+                    <td className="p-4">
+                      {payment.status === "SUCCESS" ? (
                         <button
                           onClick={() => setSelectedReceipt(payment)}
-                          className="hover:underline text-left inline-flex items-center gap-1 text-primary font-bold"
+                          className="hover:underline text-left inline-flex items-center gap-1 text-primary font-semibold"
                         >
-                          {payment.gstInvoice}
+                          View Receipt 🧾
                           <ExternalLink size={10} />
                         </button>
                       ) : (
-                        <span className="text-text-dim italic">Pending</span>
+                        <span className="text-text-dim italic">—</span>
                       )}
                     </td>
                     <td className="p-4">
