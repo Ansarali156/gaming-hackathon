@@ -245,9 +245,10 @@ function OverviewTab({ teamData, paymentStatus, loading }: any) {
         <h3 className="font-bold text-text mb-4">Event Timeline</h3>
         <div className="space-y-3">
           <EventItem date="May 18" title="Registrations Open" done />
-          <EventItem date="June 16" title="Online Submission Deadline" />
-          <EventItem date="June 20" title="Results Announced" />
-          <EventItem date="June 27–28" title="Final Offline Round" />
+          <EventItem date="June 12" title="Hackathon Begins" />
+          <EventItem date="June 12–20" title="Round 1" />
+          <EventItem date="June 20" title="Final Submission" />
+          <EventItem date="June 27, 28" title="Round 2" />
           <EventItem date="June 28" title="Winner Announcement" />
         </div>
       </div>

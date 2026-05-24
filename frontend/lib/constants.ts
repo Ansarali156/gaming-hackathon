@@ -1,9 +1,9 @@
 export const EVENT_DATES = {
   registrationOpen: new Date("2026-05-18T00:00:00Z"),
-  registrationClose: new Date("2026-06-16T23:59:59Z"),
-  submissionDeadline: new Date("2026-06-16T23:59:59Z"),
-  resultsOut: new Date("2026-06-20T00:00:00Z"),
-  hackathonStart: new Date("2026-06-27T09:00:00Z"),
+  registrationClose: new Date("2026-06-12T00:00:00Z"),
+  submissionDeadline: new Date("2026-06-20T23:59:59Z"),
+  resultsOut: new Date("2026-06-20T23:59:59Z"),
+  hackathonStart: new Date("2026-06-12T09:00:00Z"),
   hackathonEnd: new Date("2026-06-28T18:00:00Z"),
   winnerAnnouncement: new Date("2026-06-28T20:00:00Z"),
 };
@@ -61,9 +61,10 @@ export const TRACKS = [
 
 export const TIMELINE = [
   { phase: "Registrations Open", date: "May 18", status: "active" },
-  { phase: "Online Submission Deadline", date: "June 16", status: "upcoming" },
-  { phase: "Results Announced", date: "June 20", status: "upcoming" },
-  { phase: "Final Round (Offline)", date: "June 27-28", status: "upcoming" },
+  { phase: "Hackathon Begins", date: "June 12", status: "upcoming" },
+  { phase: "Round 1", date: "June 12–20", status: "upcoming" },
+  { phase: "Final Submission", date: "June 20", status: "upcoming" },
+  { phase: "Round 2", date: "June 27, 28", status: "upcoming" },
   { phase: "Winner Announcement", date: "June 28", status: "upcoming" },
 ];
 
@@ -86,11 +87,11 @@ export const FAQS = [
   },
   {
     question: "Is the event online or offline?",
-    answer: "The final round will be held OFFLINE on June 27th & 28th, 2026.",
+    answer: "The final round (Round 2) will be held OFFLINE on June 27th & 28th, 2026.",
   },
   {
     question: "When is the last date for online submission?",
-    answer: "June 16th, 2026. Results will be announced on June 20th.",
+    answer: "June 20th, 2026. Round 1 submission deadline is June 20th.",
   },
   {
     question: "Who is eligible to participate?",

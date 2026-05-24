@@ -84,7 +84,7 @@ export function Chatbot() {
         animate={{ scale: 1, opacity: 1 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed right-20 bottom-4 z-40 w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-shadow duration-300"
+        className="fixed right-20 bottom-4 z-40 w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:shadow-primary/30 transition-shadow duration-300 border border-white"
         title="AI Assistant Chat"
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -95,7 +95,7 @@ export function Chatbot() {
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
             >
-              <X size={20} />
+              <X size={20} className="text-white" />
             </motion.div>
           ) : (
             <motion.div
@@ -105,7 +105,7 @@ export function Chatbot() {
               exit={{ rotate: -90, opacity: 0 }}
               className="relative flex items-center justify-center"
             >
-              <MessageSquare size={20} />
+              <MessageSquare size={20} className="text-white" />
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-neon-green rounded-full border border-background animate-pulse" />
             </motion.div>
           )}
@@ -120,46 +120,47 @@ export function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.95 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed right-4 bottom-20 z-50 w-[350px] sm:w-[380px] h-[500px] glass-card shadow-2xl border border-white/10 flex flex-col overflow-hidden bg-background-light/95 backdrop-blur-xl"
+            className="fixed right-4 bottom-20 z-50 w-[350px] sm:w-[380px] h-[500px] rounded-2xl border border-primary/20 shadow-2xl flex flex-col overflow-hidden bg-white shadow-primary/10"
           >
             {/* Header */}
-            <div className="p-4 bg-gradient-to-r from-primary/20 to-secondary/20 border-b border-white/5 flex items-center justify-between">
+            <div className="p-4 bg-gradient-to-r from-primary/10 to-secondary/10 border-b border-primary/10 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white relative">
-                  <Bot size={18} />
-                  <span className="absolute bottom-0 right-0 w-2 h-2 bg-neon-green rounded-full border border-background" />
+                  <Bot size={18} className="text-white" />
+                  <span className="absolute bottom-0 right-0 w-2 h-2 bg-neon-green rounded-full border border-white animate-pulse" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white tracking-wide flex items-center gap-1.5">
+                  <h4 className="text-sm font-bold text-text tracking-wide flex items-center gap-1.5" style={{ color: "var(--color-text)" }}>
                     Hackathon Assistant
-                    <Sparkles size={12} className="text-yellow-400 animate-pulse" />
+                    <Sparkles size={12} className="text-secondary animate-pulse" />
                   </h4>
-                  <p className="text-[10px] text-neon-green font-semibold uppercase tracking-wider flex items-center gap-1">
+                  <p className="text-[10px] text-primary font-bold uppercase tracking-wider flex items-center gap-1">
                     Online Support
                   </p>
                 </div>
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-white/10 rounded-lg text-text-muted hover:text-white transition-colors"
+                className="p-1.5 hover:bg-primary/5 rounded-lg text-text-muted hover:text-text transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Message Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[360px] scrollbar-thin">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[360px] scrollbar-thin bg-surface-light">
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
                   className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap font-medium shadow-sm ${
                       msg.sender === "user"
-                        ? "bg-primary text-white rounded-br-none"
-                        : "bg-white/5 border border-white/5 text-text rounded-bl-none"
+                        ? "bg-primary rounded-br-none text-white"
+                        : "bg-white border border-primary/15 rounded-bl-none text-text"
                     }`}
+                    style={msg.sender === "user" ? { color: "#ffffff" } : { color: "var(--color-text)" }}
                   >
                     {msg.text}
                   </div>
@@ -168,7 +169,10 @@ export function Chatbot() {
 
               {loading && (
                 <div className="flex justify-start">
-                  <div className="bg-white/5 border border-white/5 rounded-2xl rounded-bl-none px-4 py-2.5 text-sm text-text-muted flex items-center gap-2">
+                  <div 
+                    className="bg-white border border-primary/15 rounded-2xl rounded-bl-none px-4 py-2.5 text-sm text-text font-medium flex items-center gap-2 shadow-sm"
+                    style={{ color: "var(--color-text)" }}
+                  >
                     <Loader2 className="animate-spin text-primary" size={14} />
                     <span>Thinking...</span>
                   </div>
@@ -180,22 +184,23 @@ export function Chatbot() {
             {/* Input Form Footer */}
             <form 
               onSubmit={handleSend}
-              className="p-3 border-t border-white/5 bg-surface/50 flex gap-2 items-center"
+              className="p-3 border-t border-primary/10 bg-white flex gap-2 items-center"
             >
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about fees, team size..."
-                className="flex-1 bg-white/5 border border-white/10 hover:border-white/20 focus:border-primary/50 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none transition-colors"
+                className="flex-1 bg-surface-light border border-primary/10 hover:border-primary/20 focus:border-primary/50 text-text rounded-xl px-4 py-2.5 text-sm focus:outline-none transition-colors placeholder:text-text-muted"
                 disabled={loading}
+                style={{ color: "var(--color-text)" }}
               />
               <button
                 type="submit"
                 disabled={!input.trim() || loading}
-                className="w-10 h-10 rounded-xl bg-primary hover:bg-primary-hover disabled:bg-white/5 disabled:text-text-dim text-white flex items-center justify-center shrink-0 hover:shadow-lg hover:shadow-primary/10 transition-all"
+                className="w-10 h-10 rounded-xl bg-primary hover:bg-primary-dark disabled:bg-primary/20 disabled:text-white/50 text-white flex items-center justify-center shrink-0 hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer"
               >
-                <Send size={16} />
+                <Send size={16} className="text-white" />
               </button>
             </form>
           </motion.div>

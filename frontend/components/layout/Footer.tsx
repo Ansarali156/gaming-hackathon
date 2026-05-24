@@ -33,7 +33,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="space-y-4">
             <Link href="/" className="font-display text-2xl font-bold gradient-text">
-              Ai gaming hackathon
+              AI Gaming Hackathon
             </Link>
             <p className="text-text-muted">
               India&apos;s Ultimate AI Gaming Hackathon. Build. Battle. Innovate & Conquer.
