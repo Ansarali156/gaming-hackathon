@@ -150,26 +150,24 @@ export const registerController = {
             teamName: team.name,
           };
 
-          if (req.body.returnSunRedirect) {
-            const sunPayload = makeSunPayload(payload as any);
+          // Only attempt SUN forwarding if the shared key is configured
+          if (process.env.SUN_SHARED_KEY) {
+            if (req.body.returnSunRedirect) {
+              const sunPayload = makeSunPayload(payload as any);
 
-            const endpoint = process.env.SUN_ENDPOINT_URL || 'http://localhost/sun/public/gaminghackathon/create-order.php';
-            const url = new URL(endpoint);
-            Object.entries(sunPayload).forEach(([k, v]) => url.searchParams.set(k, String(v)));
-            sunRedirectUrl = url.toString();
+              const endpoint = process.env.SUN_ENDPOINT_URL || 'http://localhost/sun/public/gaminghackathon/create-order.php';
+              const url = new URL(endpoint);
+              Object.entries(sunPayload).forEach(([k, v]) => url.searchParams.set(k, String(v)));
+              sunRedirectUrl = url.toString();
+            } else {
+              await forwardToSun(payload);
+            }
           } else {
-            await forwardToSun(payload);
+            console.log('SUN_SHARED_KEY not configured — skipping SUN forwarding');
           }
         }
       } catch (err) {
         console.error('Failed to forward order to SUN:', err);
-        if (req.body.returnSunRedirect) {
-          return res.status(500).json({ error: 'Unable to generate payment redirect. Please try again.' });
-        }
-      }
-
-      if (req.body.returnSunRedirect && !sunRedirectUrl) {
-        return res.status(500).json({ error: 'Unable to generate payment redirect. Please try again.' });
       }
 
       // Send confirmation email
