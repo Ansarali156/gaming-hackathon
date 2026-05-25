@@ -50,18 +50,51 @@ export async function POST(request: Request) {
       }
     }
 
+    // ── Leader email uniqueness (each leader gets a fresh account + cleanup if pending) ───────
+    const existingUser = await prisma.user.findUnique({
+      where: { email: leader.email.toLowerCase() },
+      include: {
+        teamMembers: {
+          include: {
+            team: true,
+          },
+        },
+      },
+    });
+
+    if (existingUser) {
+      const isPendingParticipant = 
+        existingUser.role === 'PARTICIPANT' &&
+        existingUser.teamMembers.length > 0 &&
+        existingUser.teamMembers.some((tm: any) => tm.team.status === 'PENDING');
+
+      if (isPendingParticipant) {
+        console.log(`🧹 Found pending participant registration for ${leader.email}. Cleaning up for fresh registration.`);
+        
+        const pendingTeams = existingUser.teamMembers
+          .map((tm: any) => tm.team)
+          .filter((t: any) => t.status === 'PENDING');
+
+        if (pendingTeams.length > 0) {
+          await prisma.team.deleteMany({
+            where: { id: { in: pendingTeams.map((t: any) => t.id) } }
+          });
+        }
+
+        await prisma.user.delete({
+          where: { id: existingUser.id }
+        });
+      } else {
+        return NextResponse.json({ error: "An account with this email already exists. Please login." }, { status: 409 });
+      }
+    }
+
     // ── Team name uniqueness ─────────────────────────────────────────────
     const existingTeam = await prisma.team.findFirst({
       where: { name: { equals: teamName.trim(), mode: "insensitive" } },
     });
     if (existingTeam) {
       return NextResponse.json({ error: "A team with this name already exists. Please choose a different name." }, { status: 409 });
-    }
-
-    // ── Leader email uniqueness (each leader gets a fresh account) ───────
-    const existingUser = await prisma.user.findUnique({ where: { email: leader.email.toLowerCase() } });
-    if (existingUser) {
-      return NextResponse.json({ error: "An account with this email already exists. Please login." }, { status: 409 });
     }
 
     // If this is only a validation request, return early and succeed

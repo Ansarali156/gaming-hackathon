@@ -24,7 +24,16 @@ export const authController = {
     try {
       const { email, password } = loginSchema.parse(req.body);
 
-      const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+      const user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+        include: {
+          teamMembers: {
+            include: {
+              team: true,
+            },
+          },
+        },
+      });
       if (!user || !user.password) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
@@ -32,6 +41,18 @@ export const authController = {
       const isValid = await bcrypt.compare(password, user.password);
       if (!isValid) {
         return res.status(401).json({ error: 'Invalid credentials' });
+      }
+
+      // Check if user is a PARTICIPANT with pending payment status
+      if (user.role === 'PARTICIPANT') {
+        const hasApprovedTeam = user.teamMembers.some(
+          (tm: any) => tm.team.status === 'APPROVED'
+        );
+        if (!hasApprovedTeam) {
+          return res.status(403).json({
+            error: 'Your registration payment is pending. Please complete your payment before logging in.',
+          });
+        }
       }
 
       const token = jwt.sign(

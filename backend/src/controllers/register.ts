@@ -43,15 +43,51 @@ export const registerController = {
         return res.status(400).json({ error: 'Password must be at least 8 characters' });
       }
 
+      // 1. Check existing user and cleanup if registration is pending
+      const existingUser = await prisma.user.findUnique({
+        where: { email: normalizedLeaderEmail },
+        include: {
+          teamMembers: {
+            include: {
+              team: true,
+            },
+          },
+        },
+      });
+
+      if (existingUser) {
+        const isPendingParticipant = 
+          existingUser.role === 'PARTICIPANT' &&
+          existingUser.teamMembers.length > 0 &&
+          existingUser.teamMembers.some((tm: any) => tm.team.status === 'PENDING');
+
+        if (isPendingParticipant) {
+          console.log(`🧹 Found pending participant registration for ${normalizedLeaderEmail}. Cleaning up for fresh registration.`);
+          
+          const pendingTeams = existingUser.teamMembers
+            .map((tm: any) => tm.team)
+            .filter((t: any) => t.status === 'PENDING');
+
+          if (pendingTeams.length > 0) {
+            await prisma.team.deleteMany({
+              where: { id: { in: pendingTeams.map((t: any) => t.id) } }
+            });
+          }
+
+          await prisma.user.delete({
+            where: { id: existingUser.id }
+          });
+        } else {
+          return res.status(409).json({ error: 'An account with this email already exists.' });
+        }
+      }
+
+      // 2. Check team name uniqueness
       const existingTeam = await prisma.team.findFirst({
         where: { name: { equals: normalizedTeamName, mode: 'insensitive' } },
       });
       if (existingTeam) {
         return res.status(409).json({ error: 'A team with this name already exists.' });
-      }
-      const existingUser = await prisma.user.findUnique({ where: { email: normalizedLeaderEmail } });
-      if (existingUser) {
-        return res.status(409).json({ error: 'An account with this email already exists.' });
       }
 
       const pricingCategory = category as keyof typeof PRICING;
