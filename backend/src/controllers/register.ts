@@ -150,6 +150,7 @@ export const registerController = {
             finalAmount: finalAmount,
             teamId: team.teamId,
             teamName: team.name,
+            callbackBase: process.env.APP_URL || 'http://localhost:3000',
           };
 
           // Only attempt SUN forwarding if the shared key is configured

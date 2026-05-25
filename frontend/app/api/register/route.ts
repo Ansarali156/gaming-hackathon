@@ -159,6 +159,7 @@ export async function POST(request: Request) {
           finalAmount: finalAmount,
           teamId: team.teamId,
           teamName: team.name,
+          callbackBase: process.env.NEXTAUTH_URL || "http://localhost:3000",
         };
 
         if (body.returnSunRedirect) {

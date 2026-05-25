@@ -53,6 +53,9 @@ export async function GET(request: Request) {
       amount: payment.amount,
       gst: payment.gst || 0,
       finalAmount: payment.finalAmount || (payment.amount * 1.02),
+      teamId: team.teamId,
+      teamName: team.name,
+      callbackBase: process.env.NEXTAUTH_URL || "http://localhost:3000",
     };
 
     const sunRedirectUrl = makeSunRedirectUrl(payload as any);
