@@ -185,4 +185,49 @@ export const registerController = {
       res.status(500).json({ error: 'Registration failed' });
     }
   },
+
+  async cancelRegistration(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { email: String(email).toLowerCase() },
+        include: {
+          teamMembers: {
+            include: {
+              team: {
+                include: { payment: true }
+              }
+            }
+          }
+        }
+      });
+
+      if (user) {
+        const teamMember = user.teamMembers[0];
+        if (teamMember) {
+          const team = teamMember.team;
+          
+          // Only rollback if the payment status is still PENDING!
+          if (team.payment?.status === 'PENDING') {
+            await prisma.$transaction([
+              prisma.payment.deleteMany({ where: { teamId: team.id } }),
+              prisma.teamMember.deleteMany({ where: { teamId: team.id } }),
+              prisma.team.delete({ where: { id: team.id } }),
+              prisma.user.delete({ where: { id: user.id } })
+            ]);
+            console.log(`Log: 🧹 Rolled back pending registration for ${email}`);
+          }
+        }
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Cancel registration failed:', error);
+      res.status(500).json({ error: 'Failed to cancel registration' });
+    }
+  },
 };
