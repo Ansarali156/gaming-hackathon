@@ -224,6 +224,9 @@ export const registerController = {
         }
       }
 
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       res.json({ success: true });
     } catch (error) {
       console.error('Cancel registration failed:', error);

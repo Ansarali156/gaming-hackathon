@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    },
+  });
+}
+
 export async function POST(request: Request) {
   try {
     const { email } = await request.json();
@@ -39,7 +50,13 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      }
+    });
   } catch (err: any) {
     console.error("Cancel registration failed:", err);
     return NextResponse.json({ error: "Failed to cancel registration" }, { status: 500 });
