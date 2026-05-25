@@ -8,7 +8,7 @@ import { SponsorInquiryModal } from "@/components/ui/SponsorInquiryModal";
 const SPONSORS = [
   {
     name: "Ratan Tata Innovation Hub (RTIH)",
-    logo: "https://www.incuxai.com/hackathon/assets/images/rtih.jpeg",
+    logo: "/rtih_logo.png",
     website: "https://rtih.co.in"
   },
   {
