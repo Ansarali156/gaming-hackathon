@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../../lib/prisma';
 import { PRICING } from '../../lib/constants';
-import { forwardToSun, makeSunPayload } from '../../lib/sunForwarder';
+import { forwardToSun, makeSunPayload, makeSunRedirectUrl } from '../../lib/sunForwarder';
 import { generateTeamId } from '../../utils';
 import { sendEmail, getRegistrationEmailHtml } from '../services/email';
 import bcrypt from 'bcryptjs';
@@ -155,14 +155,9 @@ export const registerController = {
           // Only attempt SUN forwarding if the shared key is configured
           if (process.env.SUN_SHARED_KEY) {
             if (req.body.returnSunRedirect) {
-              const sunPayload = makeSunPayload(payload as any);
-
-              const endpoint = process.env.SUN_ENDPOINT_URL || 'http://localhost/sun/public/gaminghackathon/create-order.php';
-              const url = new URL(endpoint);
-              Object.entries(sunPayload).forEach(([k, v]) => url.searchParams.set(k, String(v)));
-              sunRedirectUrl = url.toString();
+              sunRedirectUrl = makeSunRedirectUrl(payload as any);
             } else {
-              await forwardToSun(payload);
+              await forwardToSun(payload as any);
             }
           } else {
             console.log('SUN_SHARED_KEY not configured — skipping SUN forwarding');

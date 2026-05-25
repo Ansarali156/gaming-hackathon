@@ -46,6 +46,7 @@ async function runTest() {
     leader: {
       email: testEmail,
       name: 'Test Leader',
+      password: 'password123',
       mobile: '9999999999',
       skills: 'TypeScript, Express, Next.js',
       college: 'IncuX Academy',
