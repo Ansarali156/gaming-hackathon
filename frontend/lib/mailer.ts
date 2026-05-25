@@ -9,7 +9,7 @@ export async function sendEmail({
   subject: string;
   html: string;
 }) {
-  const user = process.env.EMAIL_USER || "Incuxaigamming@gmail.com";
+  const user = process.env.EMAIL_USER || "incuxaigaming@gmail.com";
   const pass = process.env.EMAIL_PASS;
 
   if (!pass) {

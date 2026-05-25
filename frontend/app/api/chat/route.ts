@@ -12,7 +12,7 @@ const SYSTEM_PROMPT = `You are a helpful virtual assistant for the AI Gaming Hac
 - Tracks: AI NPC Systems, Procedural Content Generation, AI Game Testing, AR/VR Immersive Gaming, Esports Analytics, Serious Games, Metaverse/Web3.
 - Refund Policy: Completely non-refundable due to immediate resource commitments.
 - Venue: Hybrid (online initial submissions for Round 1, 24h offline Grand Finale in Anantapur, AP).
-- Support: incuxgaming@gmail.com or +91 7995061289.
+- Support: incuxaigaming@gmail.com or +91 7995061289.
 
 Be concise, warm, and encourage users to register or join our Discord.`;
 
@@ -34,10 +34,10 @@ const FAQ_RESPONSES: Record<string, string> = {
   "track": "We have 7 cutting-edge challenge tracks:\n1. AI NPC Systems\n2. Procedural Content Generation\n3. AI for Game Testing & Balancing\n4. AR/VR Immersive Gaming\n5. Esports Analytics & AI\n6. Serious Games for Social Impact\n7. Metaverse & Web3 Gaming",
   "theme": "We have 7 cutting-edge challenge tracks:\n1. AI NPC Systems\n2. Procedural Content Generation\n3. AI for Game Testing & Balancing\n4. AR/VR Immersive Gaming\n5. Esports Analytics & AI\n6. Serious Games for Social Impact\n7. Metaverse & Web3 Gaming",
   "discord": "Join our official Discord community to connect with other developers, form teams, and get direct mentorship: https://discord.gg/8gaK52vEs",
-  "contact": "You can contact our Brand Relations Committee at incuxgaming@gmail.com or call us directly at +91 7995061289.",
-  "support": "You can contact our Brand Relations Committee at incuxgaming@gmail.com or call us directly at +91 7995061289.",
-  "email": "You can contact our Brand Relations Committee at incuxgaming@gmail.com or call us directly at +91 7995061289.",
-  "phone": "You can contact our Brand Relations Committee at incuxgaming@gmail.com or call us directly at +91 7995061289.",
+  "contact": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call us directly at +91 7995061289.",
+  "support": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call us directly at +91 7995061289.",
+  "email": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call us directly at +91 7995061289.",
+  "phone": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call us directly at +91 7995061289.",
 };
 
 export async function POST(request: Request) {
@@ -79,6 +79,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ response: matchedResponse });
   } catch (error) {
     console.error("Chat API error:", error);
-    return NextResponse.json({ response: "I'm having trouble connecting right now. Please email support at incuxgaming@gmail.com or call +91 7995061289." });
+    return NextResponse.json({ response: "I'm having trouble connecting right now. Please email support at incuxaigaming@gmail.com or call +91 7995061289." });
   }
 }

@@ -23,7 +23,9 @@ import {
   AlertCircle,
   LogOut,
   Bell,
-  Handshake
+  Handshake,
+  Mail,
+  Phone
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -472,10 +474,9 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
       </div>
 
       {/* Analytics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <OverviewCard icon={<Users className="text-primary" />} label="Total Teams" value={analytics.totalRegistrations || 0} />
         <OverviewCard icon={<DollarSign className="text-neon-green" />} label="Total Revenue" value={`₹${analytics.totalRevenue || 0}`} />
-        <OverviewCard icon={<CreditCard className="text-yellow-400" />} label="Pending Payments" value={analytics.pendingPayments || 0} />
         <OverviewCard icon={<MessageCircle className="text-neon-blue" />} label="Discord Joins" value={analytics.discordJoins || 0} />
       </div>
 
@@ -1003,7 +1004,42 @@ function AnnouncementsPane({
 /* ============================================================================
    G. ADMIN NOTIFICATIONS PANEL
    ============================================================================ */
+function parseSponsorDetails(message: string) {
+  if (!message.includes("Contact:") && !message.includes("Email:")) {
+    return null;
+  }
+  
+  const contactMatch = message.match(/Contact:\s*(.*)/i);
+  const emailMatch = message.match(/Email:\s*(.*)/i);
+  const phoneMatch = message.match(/Phone:\s*(.*)/i);
+  const companyMatch = message.match(/Company:\s*(.*)/i);
+  
+  const messageLabel = "Message:";
+  const messageLabelIndex = message.indexOf(messageLabel);
+  let parsedMessage = "";
+  if (messageLabelIndex !== -1) {
+    const startIdx = messageLabelIndex + messageLabel.length;
+    const endStr = "Please review this inquiry";
+    const endIdx = message.indexOf(endStr);
+    if (endIdx !== -1) {
+      parsedMessage = message.substring(startIdx, endIdx).trim();
+    } else {
+      parsedMessage = message.substring(startIdx).trim();
+    }
+  }
+
+  return {
+    name: contactMatch ? contactMatch[1].trim() : "",
+    email: emailMatch ? emailMatch[1].trim() : "",
+    phone: phoneMatch ? phoneMatch[1].trim() : "",
+    company: companyMatch ? companyMatch[1].trim() : "",
+    message: parsedMessage,
+  };
+}
+
 function AdminNotificationsPane({ announcements }: { announcements: any[] }) {
+  const sponsorNotifications = announcements.filter((a: any) => a.visibility === "ADMIN");
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
@@ -1012,48 +1048,95 @@ function AdminNotificationsPane({ announcements }: { announcements: any[] }) {
       </div>
 
       <div className="glass-card p-6 space-y-3">
-        {announcements.length === 0 ? (
+        {sponsorNotifications.length === 0 ? (
           <div className="py-12 text-center space-y-3">
             <Bell className="mx-auto text-text-dim" size={36} />
             <p className="text-text-muted">No notifications yet.</p>
             <p className="text-text-dim text-xs">Notifications from sponsor inquiries and system events will appear here.</p>
           </div>
         ) : (
-          announcements.map((a: any) => (
-            <div
-              key={a.id}
-              className={`p-4 rounded-xl transition-colors ${
-                a.isPinned
-                  ? "bg-primary/5 border border-primary/20"
-                  : "bg-white/5 border border-white/5 hover:bg-white/[0.07]"
-              }`}
-            >
-              <div className="flex justify-between items-start gap-4 mb-2">
-                <p className={`text-sm ${a.isPinned ? "text-text font-medium" : "text-text-muted"}`}>
-                  {a.isPinned && <span className="mr-2">📌</span>}
-                  {a.title}
-                </p>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {a.visibility === "ADMIN" && (
-                    <span className="px-1.5 py-0.5 bg-secondary/10 text-secondary text-[9px] font-bold rounded uppercase">
-                      Admin
+          sponsorNotifications.map((a: any) => {
+            const details = parseSponsorDetails(a.message || "");
+            return (
+              <div
+                key={a.id}
+                className={`p-4 rounded-xl transition-colors space-y-3 ${
+                  a.isPinned
+                    ? "bg-primary/5 border border-primary/20"
+                    : "bg-white/5 border border-white/5 hover:bg-white/[0.07]"
+                }`}
+              >
+                <div className="flex justify-between items-start gap-4">
+                  <p className={`text-sm ${a.isPinned ? "text-text font-medium" : "text-text-muted"}`}>
+                    {a.isPinned && <span className="mr-2">📌</span>}
+                    {a.title}
+                  </p>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {a.visibility === "ADMIN" && (
+                      <span className="px-1.5 py-0.5 bg-secondary/10 text-secondary text-[9px] font-bold rounded uppercase">
+                        Admin
+                      </span>
+                    )}
+                    <span className="text-text-dim text-xs whitespace-nowrap">
+                      {new Date(a.createdAt).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
-                  )}
-                  <span className="text-text-dim text-xs whitespace-nowrap">
-                    {new Date(a.createdAt).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
+                  </div>
                 </div>
+
+                {details ? (
+                  <div className="bg-white/[0.02] border border-white/5 rounded-lg p-4 space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-[10px] text-text-muted uppercase font-bold tracking-wider block">Sponsor Contact</span>
+                        <span className="text-sm font-medium text-text block mt-0.5">{details.name}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-text-muted uppercase font-bold tracking-wider block">Company / Organization</span>
+                        <span className="text-sm font-medium text-text block mt-0.5">{details.company || "—"}</span>
+                      </div>
+                    </div>
+
+                    {details.message && (
+                      <div className="pt-2 border-t border-white/5">
+                        <span className="text-[10px] text-text-muted uppercase font-bold tracking-wider block">Inquiry Message</span>
+                        <p className="text-text-muted text-xs mt-1 leading-relaxed whitespace-pre-wrap">{details.message}</p>
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {details.email && (
+                        <a
+                          href={`mailto:${details.email}`}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/20 hover:bg-primary/30 text-primary text-xs font-bold rounded-lg transition-colors"
+                        >
+                          <Mail size={12} />
+                          Email: {details.email}
+                        </a>
+                      )}
+                      {details.phone && (
+                        <a
+                          href={`tel:${details.phone}`}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 text-xs font-bold rounded-lg transition-colors"
+                        >
+                          <Phone size={12} />
+                          Call: {details.phone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  a.message && (
+                    <p className="text-text-muted text-sm whitespace-pre-wrap leading-relaxed">{a.message}</p>
+                  )
+                )}
               </div>
-              {a.message && (
-                <p className="text-text-muted text-sm whitespace-pre-wrap leading-relaxed">{a.message}</p>
-              )}
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </motion.div>

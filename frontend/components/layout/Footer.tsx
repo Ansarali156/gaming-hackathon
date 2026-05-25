@@ -23,7 +23,7 @@ const socialLinks = [
   { icon: <Instagram size={20} />, href: "https://instagram.com/incuxai" },
   { icon: <Linkedin size={20} />, href: "https://www.linkedin.com/company/incuxai/" },
   { icon: <MessageCircle size={20} />, href: "https://discord.gg/incuxai" },
-  { icon: <Mail size={20} />, href: "mailto:incuxgaming@gmail.com" },
+  { icon: <Mail size={20} />, href: "mailto:incuxaigaming@gmail.com" },
 ];
 
 export function Footer() {
@@ -71,7 +71,7 @@ export function Footer() {
           <p className="mb-2">
             Website: <a href="https://incuxai.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">incuxai.com</a> | 
             Phone: <a href="tel:+917995061289" className="hover:text-primary transition-colors">+91 7995061289</a> | 
-            Email: <a href="mailto:incuxgaming@gmail.com" className="hover:text-primary transition-colors">incuxgaming@gmail.com</a>
+            Email: <a href="mailto:incuxaigaming@gmail.com" className="hover:text-primary transition-colors">incuxaigaming@gmail.com</a>
           </p>
           <p>© 2026 IncuXai AI Gaming Hackathon. All rights reserved.</p>
         </div>

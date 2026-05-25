@@ -66,7 +66,7 @@ export function Chatbot() {
         ...prev,
         { 
           sender: "bot", 
-          text: "I'm having trouble connecting to my servers right now. Please email support at incuxgaming@gmail.com or call +91 7995061289.", 
+          text: "I'm having trouble connecting to my servers right now. Please email support at incuxaigaming@gmail.com or call +91 7995061289.", 
           timestamp: new Date() 
         },
       ]);

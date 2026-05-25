@@ -118,6 +118,6 @@ export const FAQS = [
 export const CONTACT_INFO = {
   website: "https://incuxai.com",
   phone: "+91 7995061289",
-  email: "incuxgaming@gmail.com",
+  email: "incuxaigaming@gmail.com",
   instagram: "@incuxai",
 };

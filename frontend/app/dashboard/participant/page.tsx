@@ -242,14 +242,16 @@ function OverviewTab({ teamData, paymentStatus, loading }: any) {
       )}
 
       <div className="glass-card p-6">
-        <h3 className="font-bold text-text mb-4">Event Timeline</h3>
-        <div className="space-y-3">
-          <EventItem date="May 18" title="Registrations Open" done />
-          <EventItem date="June 12" title="Hackathon Begins" />
-          <EventItem date="June 12–20" title="Round 1" />
-          <EventItem date="June 20" title="Final Submission" />
-          <EventItem date="June 27, 28" title="Round 2" />
-          <EventItem date="June 28" title="Winner Announcement" />
+        <h3 className="font-bold text-text mb-6 flex items-center gap-2">
+          <Clock size={18} className="text-primary" /> Hackathon Journey Timeline
+        </h3>
+        <div className="space-y-0 pl-1 mt-4">
+          <EventItem date="May 18" title="Registrations Open" description="Sign up your team and secure your spot in India's ultimate innovate-a-thon." done />
+          <EventItem date="June 12" title="Hackathon Opening Ceremony" description="Theme reveals, guidelines briefing, and platform release." active />
+          <EventItem date="June 12–20" title="Round 1: Rapid Development Phase" description="Build out your initial AI MVP and architecture." />
+          <EventItem date="June 20" title="Round 1 Submission Deadline" description="Upload repository links and short video demonstration before 11:59 PM." />
+          <EventItem date="June 27" title="Round 2: Dynamic Live Pitching" description="Top shortlisted teams present their builds live to our jury." />
+          <EventItem date="June 28" title="Winner Announcements & Closing" description="Cash prizes distribution and innovator validation awards." isLast />
         </div>
       </div>
     </motion.div>
@@ -601,12 +603,47 @@ function StatCard({ label, value, color }: { label: string; value: string; color
   );
 }
 
-function EventItem({ date, title, done }: { date: string; title: string; done?: boolean }) {
+function EventItem({ date, title, description, active, done, isLast }: { 
+  date: string; title: string; description?: string; active?: boolean; done?: boolean; isLast?: boolean; 
+}) {
   return (
-    <div className={`flex items-center gap-4 p-3 rounded-lg ${done ? "bg-primary/5" : "bg-surface-light"}`}>
-      <div className={`font-bold text-sm ${done ? "text-primary" : "text-text-muted"}`}>{date}</div>
-      <div className={`text-sm ${done ? "text-text" : "text-text-muted"}`}>{title}</div>
-      {done && <CheckCircle size={14} className="text-primary ml-auto" />}
+    <div className="flex gap-4 relative">
+      {/* Connector line */}
+      {!isLast && (
+        <div className={`absolute left-[11px] top-6 bottom-0 w-0.5 ${
+          done ? "bg-gradient-to-b from-primary to-white/10" : "bg-white/10"
+        }`} />
+      )}
+      
+      {/* Status Dot */}
+      <div className="relative flex-shrink-0 z-10">
+        <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${
+          done ? "border-primary bg-primary/20 text-primary" :
+          active ? "border-sky-400 bg-sky-400/20 text-sky-400 animate-pulse" :
+          "border-white/10 bg-surface text-text-muted"
+        }`}>
+          {done ? (
+            <CheckCircle size={12} className="stroke-[3]" />
+          ) : (
+            <div className={`w-2 h-2 rounded-full ${active ? "bg-sky-400" : "bg-text-dim"}`} />
+          )}
+        </div>
+      </div>
+
+      {/* Content Card */}
+      <div className="pb-6">
+        <span className={`text-xs font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded ${
+          done ? "text-primary bg-primary/5" :
+          active ? "text-sky-400 bg-sky-400/5" :
+          "text-text-muted bg-white/5"
+        }`}>{date}</span>
+        <h4 className={`text-sm font-semibold mt-1.5 transition-colors ${
+          done || active ? "text-text" : "text-text-muted"
+        }`}>{title}</h4>
+        {description && (
+          <p className="text-text-dim text-xs mt-1 max-w-md">{description}</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -93,7 +93,7 @@ export default function PrivacyPolicyPage() {
                 <span>4. Data Integrity & Retention</span>
               </h2>
               <p className="text-text-muted text-sm leading-relaxed">
-                Your team registration data is retained until the platform concludes the 2026 innovation festival evaluation. Participants can request immediate account deletion or modification by emailing support at <span className="font-semibold text-primary">Incuxaigamming@gmail.com</span>.
+                Your team registration data is retained until the platform concludes the 2026 innovation festival evaluation. Participants can request immediate account deletion or modification by emailing support at <span className="font-semibold text-primary">incuxaigaming@gmail.com</span>.
               </p>
             </section>
 

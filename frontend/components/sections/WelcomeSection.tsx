@@ -5,25 +5,22 @@ import { Quote } from "lucide-react";
 
 const messages = [
   {
-    initials: "SI",
-    name: "SRI P. JAGADEESH, I.P.S.",
-    title: "SUPERINTENDENT OF POLICE,\nANANTAPUR",
-    quoteTitle: "Empowering law enforcement with next-gen AI",
-    quoteText: "We invite the brightest minds across the nation to collaborate with the Anantapur Police Department. This hackathon is an opportunity to build solutions that can directly strengthen public safety, improve response systems, and create meaningful impact through AI."
-  },
-  {
-    initials: "JD",
-    name: "JOHN DOE",
-    title: "CHIEF GUEST",
-    quoteTitle: "Innovating for a safer tomorrow",
-    quoteText: "Join us in this groundbreaking initiative to leverage technology for social good. Your ideas have the power to transform how we approach law enforcement and community safety. Let's build the future together."
+    name: "DR. R. HAFEEZ BASHA",
+    title: "CEO, RTIH ANANTHAPUR SPOKE",
+    quoteTitle: "Nurturing innovation and startup scaling in AP",
+    quoteText: "Welcome to the Anantapur Innovation Festival. At the Ratan Tata Innovation Hub, our mission is to empower student innovators and startups with direct pathways to incubation, mentorship, and investment. This hackathon is your canvas to build real-world AI gaming solutions that make a lasting impact.",
+    image: "/hafeez.jpg"
   }
 ];
 
 export function WelcomeSection() {
   const logos = [
+    "https://dc-cdn.s3-ap-southeast-1.amazonaws.com/dc-Cover-4upece6p9dvb9msn1tlcgsivc6-20160519052405.Medi.jpeg",
     "https://incuxai.com/assets/img/logo/incuxai.jpg",
-    "https://incuxai.com/hackathon/assets/images/rtih.jpeg",
+    "https://upload.wikimedia.org/wikipedia/en/e/ea/Appolice%28emblem%29.png",
+    "https://hinduengg.com/hinduenggnew/New-Images-HCET/College/Logos/hcet.png",
+    "https://studentunionfornation.org/sunimages/logo.png",
+    "https://smq.oym.mybluehostin.me/wp-content/uploads/2024/01/NuLeap-Logo.png"
   ];
   
   // Duplicate logos to ensure seamless scrolling
@@ -37,7 +34,7 @@ export function WelcomeSection() {
           100% { transform: translateX(0); }
         }
         .animate-scroll-ltr {
-          animation: scroll-ltr 20s linear infinite;
+          animation: scroll-ltr 90s linear infinite;
         }
       `}</style>
       
@@ -68,7 +65,7 @@ export function WelcomeSection() {
           </div>
         </div>
       </div>
-
+ 
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -83,7 +80,7 @@ export function WelcomeSection() {
             </h2>
           </div>
         </motion.div>
-
+ 
         <div className="flex flex-col gap-8">
           {messages.map((msg, i) => (
             <motion.div
@@ -96,11 +93,17 @@ export function WelcomeSection() {
             >
               {/* Background Quote Watermark */}
               <Quote className="absolute right-8 top-1/2 -translate-y-1/2 w-64 h-64 text-white/[0.02] z-0 pointer-events-none -rotate-12" />
-
+ 
               {/* Sidebar Area */}
               <div className="bg-surface md:w-[320px] p-8 flex flex-col items-center justify-center text-center border-b md:border-b-0 md:border-r border-white/5 z-10 shrink-0">
-                <div className="w-36 h-36 rounded-full bg-[#178C8F] flex items-center justify-center border-[6px] border-background shadow-lg mb-6">
-                  <span className="text-5xl md:text-6xl font-light text-white tracking-widest">{msg.initials}</span>
+                <div className="w-36 h-36 rounded-full overflow-hidden flex items-center justify-center border-[6px] border-background shadow-lg mb-6 bg-surface">
+                  {msg.image ? (
+                    <img src={msg.image} alt={msg.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-[#178C8F] flex items-center justify-center">
+                      <span className="text-5xl md:text-6xl font-light text-white tracking-widest">HB</span>
+                    </div>
+                  )}
                 </div>
                 <h3 className="text-white font-bold tracking-wider mb-2 uppercase text-sm">
                   {msg.name}

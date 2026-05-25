@@ -85,7 +85,7 @@ export default function RefundPolicyPage() {
                 For any queries regarding pending transactions, invoice receipt downloads, or dual deduction reviews, please connect directly with our brand billing desk at:
               </p>
               <div className="p-4 bg-surface-light rounded-xl border border-white/10 text-xs md:text-sm font-mono mt-2 inline-block">
-                Email: <a href="mailto:Incuxaigamming@gmail.com" className="text-primary font-bold hover:underline">Incuxaigamming@gmail.com</a>
+                Email: <a href="mailto:incuxaigaming@gmail.com" className="text-primary font-bold hover:underline">incuxaigaming@gmail.com</a>
               </div>
             </section>
 

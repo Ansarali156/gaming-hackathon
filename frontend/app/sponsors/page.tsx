@@ -201,10 +201,10 @@ export default function SponsorsPage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <a href="mailto:incuxgaming@gmail.com" className="flex flex-col p-5 bg-[#0a091c] rounded-xl border border-white/5 hover:border-primary/30 transition-all group">
+                  <a href="mailto:incuxaigaming@gmail.com" className="flex flex-col p-5 bg-[#0a091c] rounded-xl border border-white/5 hover:border-primary/30 transition-all group">
                     <Mail size={22} className="text-primary mb-3" />
                     <span className="text-[10px] font-bold uppercase text-text-muted tracking-wider">Email Us</span>
-                    <span className="text-sm font-semibold text-white group-hover:text-primary transition-colors truncate mt-1">incuxgaming@gmail.com</span>
+                    <span className="text-sm font-semibold text-white group-hover:text-primary transition-colors truncate mt-1">incuxaigaming@gmail.com</span>
                   </a>
                   <a href="tel:+917995061289" className="flex flex-col p-5 bg-[#0a091c] rounded-xl border border-white/5 hover:border-primary/30 transition-all group">
                     <Phone size={22} className="text-primary mb-3" />
