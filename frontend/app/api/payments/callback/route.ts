@@ -82,6 +82,49 @@ export async function POST(request: Request) {
     const payload = draft.payload as any;
     const { category, teamName, leader, members, projectTheme, techStack, teamId, baseAmount, gst, finalAmount } = payload;
 
+    // ── Direct Razorpay API Verification (Gold Standard Security Check) ──
+    const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
+    const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
+
+    if (razorpayKeyId && razorpayKeySecret) {
+      try {
+        console.log(`🔒 Securely verifying payment ${payment_id} with Razorpay API...`);
+        const auth = Buffer.from(`${razorpayKeyId}:${razorpayKeySecret}`).toString("base64");
+        const rzResponse = await fetch(`https://api.razorpay.com/v1/payments/${payment_id}`, {
+          headers: {
+            Authorization: `Basic ${auth}`,
+          },
+        });
+
+        if (!rzResponse.ok) {
+          console.error(`❌ Razorpay API returned error status ${rzResponse.status} for payment ID ${payment_id}`);
+          return NextResponse.json({ error: "Razorpay payment verification failed. Payment ID invalid." }, { status: 400 });
+        }
+
+        const rzPay = await rzResponse.json();
+
+        // 1. Check payment is authorized or captured
+        if (rzPay.status !== "captured" && rzPay.status !== "authorized") {
+          console.error(`❌ Razorpay payment ${payment_id} status is "${rzPay.status}". Expected captured or authorized.`);
+          return NextResponse.json({ error: "Razorpay payment has not been successfully captured." }, { status: 400 });
+        }
+
+        // 2. Check amount match (Razorpay uses paise, so we multiply by 100)
+        const expectedPaise = Math.round(finalAmount * 100);
+        if (Number(rzPay.amount) !== expectedPaise) {
+          console.error(`❌ Razorpay payment amount mismatch. Expected ${expectedPaise} paise, but received ${rzPay.amount} paise.`);
+          return NextResponse.json({ error: "Razorpay payment amount does not match registration fee." }, { status: 400 });
+        }
+
+        console.log(`✅ Secure Razorpay API check passed successfully for payment ${payment_id}.`);
+      } catch (err: any) {
+        console.error("Critical: Error calling Razorpay API for verification:", err);
+        return NextResponse.json({ error: "Failed to connect to Razorpay gateway for validation." }, { status: 500 });
+      }
+    } else {
+      console.warn("⚠️ RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET not set. Skipping server-side Razorpay verification (graceful sandbox fallback).");
+    }
+
     // 5. Create Team, User (Leader + Members), and Payment records atomically, and delete the draft
     const team = await prisma.$transaction(async (tx) => {
       const t = await tx.team.create({

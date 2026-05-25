@@ -7,7 +7,14 @@ export async function POST(request: Request) {
   try {
     const rawBody = await request.text();
     const signature = request.headers.get('x-razorpay-signature');
-    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || 'test_webhook_secret';
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+
+    if (!secret && process.env.NODE_ENV === 'production') {
+      console.error('Critical: RAZORPAY_WEBHOOK_SECRET is not configured in production!');
+      return NextResponse.json({ error: 'Webhook signature secret is not configured' }, { status: 500 });
+    }
+
+    const signatureSecret = secret || 'test_webhook_secret';
 
     if (!signature) {
       return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
@@ -15,7 +22,7 @@ export async function POST(request: Request) {
 
     // 1. Verify Razorpay Signature
     const expectedSignature = crypto
-      .createHmac('sha256', secret)
+      .createHmac('sha256', signatureSecret)
       .update(rawBody)
       .digest('hex');
 
