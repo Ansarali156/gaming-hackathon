@@ -26,6 +26,7 @@ function PayContent() {
     userName: string;
     userEmail: string;
     userMobile: string;
+    sunRedirectUrl?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -50,9 +51,13 @@ function PayContent() {
       });
   }, [email]);
 
-  // Payments are handled by SUN. This page now only shows pending payment details and instructions.
   const handleCheckout = async () => {
-    setError("Payments are processed externally by our partner. Please follow the instructions sent to your email.");
+    if (details?.sunRedirectUrl) {
+      setPaying(true);
+      window.location.href = details.sunRedirectUrl;
+    } else {
+      setError("Unable to initialize payment redirection. Please try again or contact support.");
+    }
   };
 
   if (loading) {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { makeSunRedirectUrl } from "@/lib/sunForwarder";
 
 export const dynamic = "force-dynamic";
 
@@ -35,19 +36,39 @@ export async function GET(request: Request) {
     }
 
     const team = user.teamMembers[0].team;
-    const amount = team.payment?.amount || 999;
+    const payment = team.payment;
+    
+    if (!payment) {
+      return NextResponse.json({ error: "No payment record found for this team." }, { status: 404 });
+    }
+
+    // Construct secure payload for SUN redirection
+    const payload = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      mobile: user.mobile,
+      category: team.category,
+      baseAmount: payment.amount,
+      amount: payment.amount,
+      gst: payment.gst || 0,
+      finalAmount: payment.finalAmount || (payment.amount * 1.02),
+    };
+
+    const sunRedirectUrl = makeSunRedirectUrl(payload as any);
 
     return NextResponse.json({
       teamName: team.name,
       teamId: team.teamId,
-      amount,
+      amount: payment.finalAmount || (payment.amount * 1.02),
       category: team.category,
       userName: user.name || "Participant",
       userEmail: user.email,
-      userMobile: user.mobile || ""
+      userMobile: user.mobile || "",
+      sunRedirectUrl
     });
   } catch (error) {
     console.error("Pending payment API error:", error);
-    return NextResponse.json({ error: "Failed to fetch payment details." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to load payment details." }, { status: 500 });
   }
 }
