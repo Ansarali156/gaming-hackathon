@@ -114,92 +114,70 @@ export async function POST(request: Request) {
     const gst = Number((baseAmount * 0.02).toFixed(2));
     const finalAmount = Number((baseAmount + gst).toFixed(2));
 
-    // ── Create team + users + payment atomically in DB ────────────────────
-    const team = await prisma.team.create({
-      data: {
-        teamId,
-        name: teamName.trim(),
-        category,
-        projectTheme: projectTheme || null,
-        techStack: techStack || null,
-        status: "PENDING",
-        members: {
-          create: [
-            {
-              user: {
-                create: {
-                  email: leader.email.toLowerCase(),
-                  name: leader.name.trim(),
-                  mobile: leader.mobile || null,
-                  college: leader.college || null,
-                  linkedin: leader.linkedin || null,
-                  password: hashedPassword,
-                  role: "PARTICIPANT",
-                },
-              },
-              role: "LEADER",
-              skills: leader.skills || null,
-            },
-            ...members.map((m: any) => ({
-              user: {
-                connectOrCreate: {
-                  where: { email: m.email.toLowerCase() },
-                  create: {
-                    email: m.email.toLowerCase(),
-                    name: m.name.trim(),
-                    role: "PARTICIPANT",
-                  },
-                },
-              },
-              role: "MEMBER",
-              skills: m.skills || null,
-              position: m.role || null,
-            })),
-          ] as any,
-        },
-        payment: {
-          create: {
-            amount: baseAmount,
-            gst: gst,
-            finalAmount: finalAmount,
-            status: "PENDING",
-          },
-        },
+    // ── Save complete registration details as dynamic PENDING draft in DB ──
+    const registrationPayload = {
+      category,
+      teamName: teamName.trim(),
+      leader: {
+        email: leader.email.toLowerCase(),
+        name: leader.name.trim(),
+        mobile: leader.mobile || null,
+        college: leader.college || null,
+        linkedin: leader.linkedin || null,
+        password: hashedPassword,
+        skills: leader.skills || null,
       },
-      include: {
-        members: { include: { user: true } },
-        payment: true,
+      members: members.map((m: any) => ({
+        email: m.email.toLowerCase(),
+        name: m.name.trim(),
+        skills: m.skills || null,
+        role: m.role || null,
+      })),
+      projectTheme: projectTheme || null,
+      techStack: techStack || null,
+      teamId,
+      baseAmount,
+      gst,
+      finalAmount,
+    };
+
+    const pendingReg = await prisma.pendingRegistration.upsert({
+      where: { email: leader.email.toLowerCase() },
+      create: {
+        email: leader.email.toLowerCase(),
+        teamName: teamName.trim(),
+        payload: registrationPayload as any,
       },
+      update: {
+        teamName: teamName.trim(),
+        payload: registrationPayload as any,
+      }
     });
 
     // ── Forward encrypted payload to SUN endpoint for payment handling ────
     let sunRedirectUrl: string | undefined;
 
     try {
-      const leaderMember = team.members.find((m: any) => m.role === "LEADER");
-      const leaderUser = leaderMember?.user;
-      if (leaderUser) {
-        const payload = {
-          id: leaderUser.id,
-          email: leaderUser.email,
-          name: leaderUser.name,
-          mobile: leaderUser.mobile,
-          category,
-          teamSize: members.length + 1,
-          baseAmount,
-          amount: baseAmount,
-          gst: gst,
-          finalAmount: finalAmount,
-          teamId: team.teamId,
-          teamName: team.name,
-          callbackBase: process.env.NEXTAUTH_URL || "http://localhost:3000",
-        };
+      const payload = {
+        id: pendingReg.id,
+        email: leader.email.toLowerCase(),
+        name: leader.name.trim(),
+        mobile: leader.mobile || null,
+        category,
+        teamSize: members.length + 1,
+        baseAmount,
+        amount: baseAmount,
+        gst: gst,
+        finalAmount: finalAmount,
+        teamId,
+        teamName: teamName.trim(),
+        callbackBase: process.env.NEXTAUTH_URL || "http://localhost:3000",
+      };
 
-        if (body.returnSunRedirect) {
-          sunRedirectUrl = makeSunRedirectUrl(payload);
-        } else {
-          await forwardToSun(payload);
-        }
+      if (body.returnSunRedirect) {
+        sunRedirectUrl = makeSunRedirectUrl(payload);
+      } else {
+        await forwardToSun(payload);
       }
     } catch (forwardErr) {
       console.error("Failed to forward order to SUN:", forwardErr);
@@ -212,7 +190,7 @@ export async function POST(request: Request) {
       // Do not fail the registration — return success but warn the caller
       return NextResponse.json({
         success: true,
-        teamId: team.teamId,
+        teamId,
         warning: "Registration saved but forwarding to payment provider failed.",
       });
     }
@@ -227,7 +205,7 @@ export async function POST(request: Request) {
             <h2 style="color: #a855f7;">Registration Received ✅</h2>
             <p>Hi <strong>${leader.name.trim()}</strong>,</p>
             <p>Your team <strong>${teamName.trim()}</strong> has been registered. The registration record is saved and payment instructions have been forwarded to our payment partner.</p>
-            <p><strong>Team ID:</strong> ${team.teamId}</p>
+            <p><strong>Team ID:</strong> ${teamId}</p>
             <p><strong>Amount Due:</strong> ₹${finalAmount}</p>
             <p>Please follow the payment instructions sent to your email or contact support if you don't receive them within a few minutes.</p>
             <div style="margin-top: 30px; text-align: center;">
@@ -242,7 +220,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      teamId: team.teamId,
+      teamId,
       message: "Registration successful! You can now complete payment on the payment page.",
       ...(sunRedirectUrl ? { sunRedirectUrl } : {}),
     });

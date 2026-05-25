@@ -70,54 +70,89 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid payload details." }, { status: 400 });
     }
 
-    // 4. Find user by email and fetch their team & payment records
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-      include: {
-        teamMembers: {
-          include: {
-            team: {
-              include: { payment: true }
-            }
-          }
-        }
-      }
+    // 4. Find pending registration draft by email
+    const draft = await prisma.pendingRegistration.findUnique({
+      where: { email: email.toLowerCase() }
     });
 
-    if (!user) {
-      return NextResponse.json({ error: "Leader account not found." }, { status: 404 });
+    if (!draft) {
+      return NextResponse.json({ error: "Pending registration details not found." }, { status: 404 });
     }
 
-    if (user.teamMembers.length === 0) {
-      return NextResponse.json({ error: "No registered team found for this account." }, { status: 400 });
-    }
+    const payload = draft.payload as any;
+    const { category, teamName, leader, members, projectTheme, techStack, teamId, baseAmount, gst, finalAmount } = payload;
 
-    const team = user.teamMembers[0].team;
-    const payment = team.payment;
-
-    if (!payment) {
-      return NextResponse.json({ error: "No payment record associated with this team." }, { status: 404 });
-    }
-
-    // 5. Update Payment and Team status in the database atomically
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: payment.id },
+    // 5. Create Team, User (Leader + Members), and Payment records atomically, and delete the draft
+    const team = await prisma.$transaction(async (tx) => {
+      const t = await tx.team.create({
         data: {
-          status: "SUCCESS",
-          razorpayPaymentId: payment_id,
-          razorpayOrderId: order_id || payment.razorpayOrderId,
-        }
-      }),
-      prisma.team.update({
-        where: { id: team.id },
-        data: {
-          status: "APPROVED"
-        }
-      })
-    ]);
+          teamId,
+          name: teamName,
+          category,
+          projectTheme,
+          techStack,
+          status: "APPROVED",
+          members: {
+            create: [
+              {
+                user: {
+                  create: {
+                    email: leader.email.toLowerCase(),
+                    name: leader.name,
+                    mobile: leader.mobile,
+                    college: leader.college,
+                    linkedin: leader.linkedin,
+                    password: leader.password, // Already hashed password
+                    role: "PARTICIPANT",
+                  },
+                },
+                role: "LEADER",
+                skills: leader.skills,
+              },
+              ...members.map((m: any) => ({
+                user: {
+                  connectOrCreate: {
+                    where: { email: m.email.toLowerCase() },
+                    create: {
+                      email: m.email.toLowerCase(),
+                      name: m.name,
+                      role: "PARTICIPANT",
+                    },
+                  },
+                },
+                role: "MEMBER",
+                skills: m.skills,
+                position: m.role,
+              })),
+            ] as any,
+          },
+          payment: {
+            create: {
+              amount: baseAmount,
+              gst: gst,
+              finalAmount: finalAmount,
+              status: "SUCCESS",
+              razorpayPaymentId: payment_id,
+              razorpayOrderId: order_id || undefined,
+            },
+          },
+        },
+        include: {
+          members: { include: { user: true } },
+          payment: true,
+        },
+      });
 
-    console.log(`🎉 Payment successfully updated to SUCCESS for team "${team.name}" (ID: ${team.teamId}). Payment ID: ${payment_id}`);
+      // Delete the pending registration draft
+      await tx.pendingRegistration.delete({
+        where: { id: draft.id },
+      });
+
+      return t;
+    });
+
+    const payment = team.payment!;
+    console.log(`🎉 Payment successfully verified and team/user account created for team "${team.name}" (ID: ${team.teamId}). Payment ID: ${payment_id}`);
 
     // 6. Attempt to send confirmation email
     let emailStatus = "sent";

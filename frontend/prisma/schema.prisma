@@ -289,3 +289,12 @@ model EmailQueue {
   updatedAt DateTime @updatedAt
 }
 
+model PendingRegistration {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  teamName  String
+  payload   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

@@ -13,61 +13,50 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Email is required." }, { status: 400 });
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        teamMembers: {
-          include: {
-            team: {
-              include: { payment: true }
-            }
-          }
-        }
-      }
+    // Find pending registration draft by email
+    const pendingReg = await prisma.pendingRegistration.findUnique({
+      where: { email: email.toLowerCase() }
     });
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found." }, { status: 404 });
+    if (!pendingReg) {
+      return NextResponse.json({ error: "No pending registration found for this email." }, { status: 404 });
     }
 
-    if (user.teamMembers.length === 0) {
-      return NextResponse.json({ error: "No team registered for this user." }, { status: 400 });
-    }
-
-    const team = user.teamMembers[0].team;
-    const payment = team.payment;
-    
-    if (!payment) {
-      return NextResponse.json({ error: "No payment record found for this team." }, { status: 404 });
-    }
+    const payload = pendingReg.payload as any;
+    const teamName = payload.teamName;
+    const teamId = payload.teamId;
+    const amount = payload.finalAmount;
+    const category = payload.category;
+    const userName = payload.leader.name;
+    const userEmail = payload.leader.email;
+    const userMobile = payload.leader.mobile || "";
 
     // Construct secure payload for SUN redirection
-    const payload = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      mobile: user.mobile,
-      category: team.category,
-      baseAmount: payment.amount,
-      amount: payment.amount,
-      gst: payment.gst || 0,
-      finalAmount: payment.finalAmount || (payment.amount * 1.02),
-      teamId: team.teamId,
-      teamName: team.name,
+    const redirectPayload = {
+      id: pendingReg.id,
+      email: userEmail,
+      name: userName,
+      mobile: userMobile,
+      category,
+      baseAmount: payload.baseAmount,
+      amount: payload.baseAmount,
+      gst: payload.gst || 0,
+      finalAmount: amount,
+      teamId,
+      teamName,
       callbackBase: process.env.NEXTAUTH_URL || "http://localhost:3000",
     };
 
-    const sunRedirectUrl = makeSunRedirectUrl(payload as any);
+    const sunRedirectUrl = makeSunRedirectUrl(redirectPayload as any);
 
     return NextResponse.json({
-      teamName: team.name,
-      teamId: team.teamId,
-      amount: payment.finalAmount || (payment.amount * 1.02),
-      category: team.category,
-      userName: user.name || "Participant",
-      userEmail: user.email,
-      userMobile: user.mobile || "",
+      teamName,
+      teamId,
+      amount,
+      category,
+      userName,
+      userEmail,
+      userMobile,
       sunRedirectUrl
     });
   } catch (error) {

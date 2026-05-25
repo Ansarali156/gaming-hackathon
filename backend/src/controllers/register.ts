@@ -103,102 +103,76 @@ export const registerController = {
       const hashedPassword = await bcrypt.hash(leader.password, 10);
       const teamId = await generateTeamId();
 
-      const team = await prisma.team.create({
-        data: {
-          teamId,
-          name: normalizedTeamName,
-          category,
-          projectTheme,
-          techStack,
-          members: {
-            create: [
-              {
-                user: {
-                  connectOrCreate: {
-                    where: { email: normalizedLeaderEmail },
-                    create: {
-                      email: normalizedLeaderEmail,
-                      name: normalizedLeaderName,
-                      mobile: leader.mobile || null,
-                      college: leader.college || null,
-                      linkedin: leader.linkedin || null,
-                      password: hashedPassword,
-                      role: 'PARTICIPANT',
-                    },
-                  },
-                },
-                role: 'LEADER',
-                skills: leader.skills,
-              },
-              ...members
-                .filter((m: any) => m.email)
-                .map((m: any) => ({
-                  user: {
-                    connectOrCreate: {
-                      where: { email: m.email },
-                      create: {
-                        email: m.email,
-                        name: m.name,
-                      },
-                    },
-                  },
-                  role: 'MEMBER',
-                  skills: m.skills,
-                  position: m.role,
-                })),
-            ],
-          },
-          payment: {
-            create: {
-              amount: baseAmount,
-              gst: gst,
-              finalAmount: finalAmount,
-              status: 'PENDING',
-            } as any,
-          },
+      // ── Save complete registration details as dynamic PENDING draft in DB ──
+      const registrationPayload = {
+        category,
+        teamName: normalizedTeamName,
+        leader: {
+          email: normalizedLeaderEmail,
+          name: normalizedLeaderName,
+          mobile: leader.mobile || null,
+          college: leader.college || null,
+          linkedin: leader.linkedin || null,
+          password: hashedPassword,
+          skills: leader.skills || null,
         },
-        include: {
-          members: {
-            include: {
-              user: true,
-            },
-          },
-          payment: true,
+        members: members
+          .filter((m: any) => m.email)
+          .map((m: any) => ({
+            email: m.email.toLowerCase(),
+            name: m.name.trim(),
+            skills: m.skills || null,
+            role: m.role || null,
+          })),
+        projectTheme: projectTheme || null,
+        techStack: techStack || null,
+        teamId,
+        baseAmount,
+        gst,
+        finalAmount,
+      };
+
+      const pendingReg = await prisma.pendingRegistration.upsert({
+        where: { email: normalizedLeaderEmail },
+        create: {
+          email: normalizedLeaderEmail,
+          teamName: normalizedTeamName,
+          payload: registrationPayload as any,
         },
+        update: {
+          teamName: normalizedTeamName,
+          payload: registrationPayload as any,
+        }
       });
 
       // Forward order details to SUN for payment handling or return a redirect URL
       let sunRedirectUrl: string | undefined;
       try {
-        const leaderMember = team.members.find((m: any) => m.role === 'LEADER');
-        const leaderUser = leaderMember?.user;
-        if (leaderUser) {
-          const payload = {
-            id: leaderUser.id,
-            email: leaderUser.email,
-            name: leaderUser.name,
-            mobile: leaderUser.mobile,
-            category,
-            teamSize: members.length + 1,
-            baseAmount,
-            amount: baseAmount,
-            gst: gst,
-            finalAmount: finalAmount,
-            teamId: team.teamId,
-            teamName: team.name,
-            callbackBase: process.env.APP_URL || 'http://localhost:3000',
-          };
+        const payload = {
+          id: pendingReg.id,
+          email: normalizedLeaderEmail,
+          name: normalizedLeaderName,
+          mobile: leader.mobile || null,
+          category,
+          teamSize: members.length + 1,
+          baseAmount,
+          amount: baseAmount,
+          gst: gst,
+          finalAmount: finalAmount,
+          teamId,
+          teamName: normalizedTeamName,
+          callbackBase: process.env.APP_URL || 'http://localhost:3000',
+        };
 
-          // Only attempt SUN forwarding if the shared key is configured
-          if (process.env.SUN_SHARED_KEY) {
-            if (req.body.returnSunRedirect) {
-              sunRedirectUrl = makeSunRedirectUrl(payload as any);
-            } else {
-              await forwardToSun(payload as any);
-            }
+        // Only attempt SUN forwarding if the shared key is configured
+        if (process.env.SUN_SHARED_KEY) {
+          if (req.body.returnSunRedirect) {
+            sunRedirectUrl = makeSunRedirectUrl(payload as any);
           } else {
-            console.log('SUN_SHARED_KEY not configured — skipping SUN forwarding');
+            await forwardToSun(payload as any);
           }
+        } else {
+          console.log('SUN_SHARED_KEY not configured — skipping SUN forwarding');
         }
       } catch (err) {
         console.error('Failed to forward order to SUN:', err);
@@ -208,12 +182,12 @@ export const registerController = {
       await sendEmail(
         leader.email,
         'Registration Successful - IncuXAI Gaming Hackathon',
-        getRegistrationEmailHtml(teamName, teamId)
+        getRegistrationEmailHtml(normalizedTeamName, teamId)
       );
 
       res.json({
         success: true,
-        teamId: team.teamId,
+        teamId,
         message: 'Registration created. Please follow payment instructions sent to your email.',
         sunRedirectUrl,
       });

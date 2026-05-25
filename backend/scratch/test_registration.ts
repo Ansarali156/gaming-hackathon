@@ -121,10 +121,10 @@ async function runTest() {
 
     // Cleanup database records to keep DB pristine
     console.log('\n🧹 Cleaning up test database records...');
-    const deletedTeam = await prisma.team.delete({
-      where: { teamId: responseData.teamId }
+    const deletedDraft = await prisma.pendingRegistration.delete({
+      where: { email: testEmail }
     });
-    console.log(`🗑️ Successfully deleted test team "${deletedTeam.name}" from database.`);
+    console.log(`🗑️ Successfully deleted pending registration draft for "${deletedDraft.email}" from database.`);
 
   } catch (error) {
     console.error('\n❌ Test Run Error:', error);
