@@ -15,7 +15,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "IncuXai AI Gaming Hackathon | India's Ultimate AI Gaming Hackathon",
+  title: "AI Gaming Hackathon | India's Ultimate AI Gaming Hackathon",
   description: "Build intelligent games, AI systems & immersive experiences with developers, gamers, startups & innovators. India's First Large-Scale AI Gaming Innovation Festival.",
   keywords: ["AI", "Gaming", "Hackathon", "India", "Innovation", "Startup", "Developer"],
 };

@@ -58,7 +58,7 @@ export default function RefundPolicyPage() {
                 <span>1. Non-Refundable Fee Structure</span>
               </h2>
               <p className="text-text-muted text-sm leading-relaxed">
-                Registration fees for IncuXai AI Gaming (₹300/person for students, ₹1000/person for IT professionals, ₹5000 for startup teams) represent essential resource commitments. We deploy immediate infrastructure resources (pre-purchased evaluation cloud credit tokens, grand finale lunch vouchers, server load allocations) instantly upon team payment. Therefore, <span className="font-semibold text-red-500">no voluntary refunds or registration cancellations are permitted</span> once payment is processed.
+                Registration fees for AI Gaming Hackathon (₹300/person for students, ₹1000/person for IT professionals, ₹5000 for startup teams) represent essential resource commitments. We deploy immediate infrastructure resources (pre-purchased evaluation cloud credit tokens, grand finale lunch vouchers, server load allocations) instantly upon team payment. Therefore, <span className="font-semibold text-red-500">no voluntary refunds or registration cancellations are permitted</span> once payment is processed.
               </p>
             </section>
 

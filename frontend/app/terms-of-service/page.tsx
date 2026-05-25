@@ -48,7 +48,7 @@ export default function TermsOfServicePage() {
             <div className="flex gap-4 p-5 bg-primary/5 rounded-2xl border border-primary/10 text-primary">
               <ShieldCheck size={24} className="shrink-0" />
               <p className="text-xs md:text-sm font-semibold leading-relaxed">
-                By accessing, registering, or participating in the IncuXai AI Gaming Hackathon, you fully agree to adhere to these Terms of Service. Please read them thoroughly.
+                By accessing, registering, or participating in the AI Gaming Hackathon, you fully agree to adhere to these Terms of Service. Please read them thoroughly.
               </p>
             </div>
 

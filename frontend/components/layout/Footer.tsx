@@ -73,7 +73,7 @@ export function Footer() {
             Phone: <a href="tel:+917995061289" className="hover:text-primary transition-colors">+91 7995061289</a> | 
             Email: <a href="mailto:incuxaigaming@gmail.com" className="hover:text-primary transition-colors">incuxaigaming@gmail.com</a>
           </p>
-          <p>© 2026 IncuXai AI Gaming Hackathon. All rights reserved.</p>
+          <p>© 2026 AI Gaming Hackathon. All rights reserved.</p>
         </div>
       </div>
     </footer>

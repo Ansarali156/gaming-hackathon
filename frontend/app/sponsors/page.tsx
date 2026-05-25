@@ -104,7 +104,7 @@ export default function SponsorsPage() {
               className="font-display text-4xl md:text-6xl font-extrabold text-[#1E293B] mb-6 leading-tight tracking-tight"
             >
               Elevate Your Brand With <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">IncuXai AI Gaming</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">AI Gaming Hackathon</span>
             </motion.h1>
             
             <motion.p
