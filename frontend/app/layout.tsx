@@ -15,9 +15,58 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "AI Gaming Hackathon | India's Ultimate AI Gaming Hackathon",
-  description: "Build intelligent games, AI systems & immersive experiences with developers, gamers, startups & innovators. India's First Large-Scale AI Gaming Innovation Festival.",
-  keywords: ["AI", "Gaming", "Hackathon", "India", "Innovation", "Startup", "Developer"],
+  metadataBase: new URL("https://incuxai.com"),
+  title: {
+    default: "AI Gaming Hackathon | India's Ultimate AI Gaming Innovation Festival",
+    template: "%s | AI Gaming Hackathon"
+  },
+  description: "Build intelligent games, AI systems, and immersive gaming experiences. Connect with elite developers, gamers, startups, and mentors at India's first large-scale AI Gaming Hackathon. Over ₹10 Lakhs in cash prizes, internships, incubation & seed investment.",
+  keywords: [
+    "AI Gaming Hackathon", "Artificial Intelligence", "Game Development", 
+    "Esports Analytics", "AI NPC", "Procedural Content Generation", 
+    "AR/VR Gaming", "Web3 Gaming", "Hackathon India 2026", "IncuXai"
+  ],
+  authors: [{ name: "IncuXai Team" }],
+  creator: "IncuXai",
+  publisher: "IncuXai",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://incuxai.com",
+    title: "AI Gaming Hackathon | India's Ultimate AI Gaming Innovation Festival",
+    description: "Connect, build, and battle. Join elite students, startups, and game developers in India's first large-scale AI Gaming Hackathon with prizes worth ₹10 Lakhs.",
+    siteName: "AI Gaming Hackathon",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "IncuXai AI Gaming Hackathon 2026 Banner",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Gaming Hackathon | India's Ultimate AI Gaming Innovation Festival",
+    description: "Join India's premier AI Gaming Hackathon. Build AI NPCs, procedural content, and immersive AR/VR games. Cash prize pool of ₹10,00,000!",
+    images: ["/images/og-image.jpg"],
+    creator: "@incuxai",
+  },
+  alternates: {
+    canonical: "https://incuxai.com",
+  },
+  category: "technology",
 };
 
 export default function RootLayout({
