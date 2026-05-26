@@ -16,6 +16,10 @@ function isValidPhone(phone: string) {
 
 export async function POST(request: Request) {
   try {
+    const host = request.headers.get("host") || "localhost:3000";
+    const protocol = host.includes("localhost") ? "http" : "https";
+    const loginUrl = `${protocol}://${host}/login`;
+
     const body = await request.json();
     const { category, teamName, leader, members, projectTheme, techStack, validateOnly, paymentDetails } = body;
 
@@ -209,7 +213,7 @@ export async function POST(request: Request) {
             <p><strong>Amount Due:</strong> ₹${finalAmount}</p>
             <p>Please follow the payment instructions sent to your email or contact support if you don't receive them within a few minutes.</p>
             <div style="margin-top: 30px; text-align: center;">
-              <a href="http://localhost:3000/login" style="display: inline-block; padding: 12px 24px; background-color: #a855f7; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
+              <a href="${loginUrl}" style="display: inline-block; padding: 12px 24px; background-color: #a855f7; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
             </div>
           </div>
         `,

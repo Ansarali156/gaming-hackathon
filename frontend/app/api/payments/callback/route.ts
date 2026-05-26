@@ -4,7 +4,7 @@ import { sendEmail } from "@/lib/mailer";
 
 export const dynamic = "force-dynamic";
 
-function getConfirmationEmailHtml(teamName: string, teamId: string, amount: number, gst: number, finalAmount: number, paymentId: string) {
+function getConfirmationEmailHtml(teamName: string, teamId: string, amount: number, gst: number, finalAmount: number, paymentId: string, loginUrl: string) {
   return `
     <div style="font-family: 'Inter', sans-serif; background-color: #03000a; color: #f3f4f6; padding: 40px 20px; min-height: 100vh;">
       <div style="max-width: 600px; margin: 0 auto; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);">
@@ -50,7 +50,7 @@ function getConfirmationEmailHtml(teamName: string, teamId: string, amount: numb
         <p style="font-size: 14px; line-height: 1.6; color: #9ca3af; margin-bottom: 30px;">You can now log in to your participant dashboard using your registered email and password to submit your project repositories, track statistics, and join the official Discord channel.</p>
         
         <div style="text-align: center; margin-bottom: 30px;">
-          <a href="http://localhost:3000/login" style="display: inline-block; background: linear-gradient(90deg, #a855f7, #0ea5e9); color: #ffffff; font-weight: 600; text-decoration: none; padding: 14px 30px; border-radius: 10px; box-shadow: 0 0 20px -5px rgba(168, 85, 247, 0.4);">Access Your Dashboard</a>
+          <a href="${loginUrl}" style="display: inline-block; background: linear-gradient(90deg, #a855f7, #0ea5e9); color: #ffffff; font-weight: 600; text-decoration: none; padding: 14px 30px; border-radius: 10px; box-shadow: 0 0 20px -5px rgba(168, 85, 247, 0.4);">Access Your Dashboard</a>
         </div>
         
         <div style="text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; font-size: 11px; color: #6b7280;">
@@ -218,10 +218,15 @@ export async function POST(request: Request) {
     const payment = team.payment!;
     console.log(`🎉 Payment successfully verified and team/user account created for team "${team.name}" (ID: ${team.teamId}). Payment ID: ${payment_id}`);
 
+    // Generate dynamic loginUrl using request host
+    const host = request.headers.get("host") || "localhost:3000";
+    const protocol = host.includes("localhost") ? "http" : "https";
+    const loginUrl = `${protocol}://${host}/login`;
+
     // 6. Attempt to send confirmation email
     let emailStatus = "sent";
     try {
-      const emailHtml = getConfirmationEmailHtml(team.name, team.teamId, payment.amount, payment.gst, payment.finalAmount, payment_id);
+      const emailHtml = getConfirmationEmailHtml(team.name, team.teamId, payment.amount, payment.gst, payment.finalAmount, payment_id, loginUrl);
       const emailRes = await sendEmail({
         to: email.toLowerCase(),
         subject: "🎉 Registration Confirmed - India's Ultimate AI Gaming Hackathon",
@@ -245,7 +250,7 @@ export async function POST(request: Request) {
     } catch (mailErr: any) {
       emailStatus = "queued";
       try {
-        const emailHtml = getConfirmationEmailHtml(team.name, team.teamId, payment.amount, payment.gst, payment.finalAmount, payment_id);
+        const emailHtml = getConfirmationEmailHtml(team.name, team.teamId, payment.amount, payment.gst, payment.finalAmount, payment_id, loginUrl);
         await prisma.emailQueue.create({
           data: {
             to: email.toLowerCase(),
