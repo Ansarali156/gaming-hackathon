@@ -108,6 +108,7 @@ export default function RegisterPage() {
     if (!leaderMobile.trim()) errs.leaderMobile = "Mobile number is required.";
     else if (!isValidPhone(leaderMobile)) errs.leaderMobile = "Enter a valid 10-digit Indian mobile number.";
     if (!leaderCollege.trim()) errs.leaderCollege = "College/Company is required.";
+    if (!projectTheme) errs.projectTheme = "Please select a theme/track.";
 
     members.forEach((m, i) => {
       if (!m.name.trim()) errs[`member_${i}_name`] = `Member ${i + 1}: name is required.`;
@@ -595,16 +596,17 @@ export default function RegisterPage() {
                   {/* Project Info */}
                   <div className="border-t border-white/5 pt-6">
                     <h3 className="font-bold text-text mb-4">
-                      Project Information{" "}
-                      <span className="text-text-dim text-sm font-normal">(optional)</span>
+                      Project Information
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="label-text">Theme / Track</label>
+                        <label className="label-text">
+                          Theme / Track <span className="text-red-400">*</span>
+                        </label>
                         <select
                           value={projectTheme}
                           onChange={(e) => setProjectTheme(e.target.value)}
-                          className="input-field"
+                          className={`input-field ${errors.projectTheme ? "border-red-500/50" : ""}`}
                         >
                           <option value="">Select a theme</option>
                           {TRACKS.map((track) => (
@@ -613,6 +615,7 @@ export default function RegisterPage() {
                             </option>
                           ))}
                         </select>
+                        <FieldError msg={errors.projectTheme} />
                       </div>
                       <div>
                         <label className="label-text">Tech Stack</label>
