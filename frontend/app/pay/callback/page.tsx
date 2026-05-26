@@ -301,8 +301,6 @@ function CallbackContent() {
     </motion.div>
   );
 }
-  );
-}
 
 export default function PayCallbackPage() {
   return (
