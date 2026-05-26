@@ -477,7 +477,7 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <OverviewCard icon={<Users className="text-primary" />} label="Total Teams" value={analytics.totalRegistrations || 0} />
         <OverviewCard icon={<DollarSign className="text-neon-green" />} label="Total Revenue" value={`₹${analytics.totalRevenue || 0}`} />
-        <OverviewCard icon={<MessageCircle className="text-neon-blue" />} label="Discord Joins" value={analytics.discordJoins || 0} />
+        <OverviewCard icon={<MessageCircle className="text-neon-blue" />} label="WhatsApp Enquiries" value={analytics.discordJoins || 0} />
       </div>
 
       {/* Charts & Trends Grid */}
@@ -880,7 +880,7 @@ function AnnouncementsPane({
       <div className="lg:col-span-2 space-y-6">
         <div>
           <h2 className="font-display text-2xl font-bold text-text">Broadcast Announcements</h2>
-          <p className="text-text-muted text-sm">Send real-time alerts to dashboard, emails, and discord channels.</p>
+          <p className="text-text-muted text-sm">Send real-time alerts to dashboard, emails, and WhatsApp groups.</p>
         </div>
 
         <form onSubmit={handleSendAnnouncement} className="glass-card p-6 space-y-4">
@@ -938,7 +938,7 @@ function AnnouncementsPane({
                   onChange={(e) => setChannels({ ...channels, discord: e.target.checked })}
                   className="rounded border-white/10 text-primary focus:ring-primary"
                 />
-                Discord Hook (#announcements)
+                WhatsApp Broadcast (Simulation)
               </label>
             </div>
           </div>

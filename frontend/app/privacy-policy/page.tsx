@@ -73,7 +73,7 @@ export default function PrivacyPolicyPage() {
                 <span>2. Use of Collected Data</span>
               </h2>
               <p className="text-text-muted text-sm leading-relaxed">
-                Your information is used strictly to configure your hackathon dashboard, pair Discord support accounts, generate printable team participation certificates, and dispatch important announcements. Under no circumstances do we utilize or sell participant contact details for third-party commercial spamming.
+                Your information is used strictly to configure your hackathon dashboard, configure WhatsApp support contacts, generate printable team participation certificates, and dispatch important announcements. Under no circumstances do we utilize or sell participant contact details for third-party commercial spamming.
               </p>
             </section>
 

@@ -99,9 +99,9 @@ export function HeroSection() {
             <Link href="/register" className="btn-primary btn-glow">
               Register Now
             </Link>
-            <a href="https://discord.gg/8gaK52vEs" className="btn-secondary">
+            <a href="https://wa.me/917995061289" className="btn-secondary">
               <MessageCircle className="inline mr-2" size={18} />
-              Join Discord
+              WhatsApp Support
             </a>
             <Link href="/sponsors" className="btn-secondary">
               Become Sponsor

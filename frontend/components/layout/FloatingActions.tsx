@@ -7,7 +7,7 @@ import { Instagram, MessageCircle, Mail, UserPlus } from "lucide-react";
 const actions = [
   { icon: <UserPlus size={20} />, href: "/register", label: "Register", color: "bg-primary text-background" },
   { icon: <Instagram size={20} />, href: "https://www.instagram.com/incuxai", label: "Instagram", color: "bg-pink-600 text-white" },
-  { icon: <MessageCircle size={20} />, href: "https://discord.gg/8gaK52vEs", label: "Discord", color: "bg-indigo-600 text-white" },
+  { icon: <MessageCircle size={20} />, href: "https://wa.me/917995061289", label: "WhatsApp", color: "bg-green-600 text-white" },
   { icon: <Mail size={20} />, href: "mailto:incuxaigaming@gmail.com", label: "Email", color: "bg-secondary text-white" },
 ];
 

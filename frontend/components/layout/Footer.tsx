@@ -22,7 +22,7 @@ const footerLinks: Record<string, { label: string; href: string }[]> = {
 const socialLinks = [
   { icon: <Instagram size={20} />, href: "https://instagram.com/incuxai" },
   { icon: <Linkedin size={20} />, href: "https://www.linkedin.com/company/incuxai/" },
-  { icon: <MessageCircle size={20} />, href: "https://discord.gg/incuxai" },
+  { icon: <MessageCircle size={20} />, href: "https://wa.me/917995061289" },
   { icon: <Mail size={20} />, href: "mailto:incuxaigaming@gmail.com" },
 ];
 

@@ -14,7 +14,7 @@ const SYSTEM_PROMPT = `You are a helpful virtual assistant for the AI Gaming Hac
 - Venue: Hybrid (online initial submissions for Round 1, 24h offline Grand Finale in Anantapur, AP).
 - Support: incuxaigaming@gmail.com or +91 7995061289.
 
-Be concise, warm, and encourage users to register or join our Discord.`;
+Be concise, warm, and encourage users to register or reach out via WhatsApp at +91 7995061289.`;
 
 const FAQ_RESPONSES: Record<string, string> = {
   "fee": "Registration fees are dynamically calculated by category:\n• Students: ₹300 per person\n• IT Professionals: ₹1000 per person\n• Startups: ₹1000 per person\n\nAll payments are processed securely via Razorpay.",
@@ -33,11 +33,12 @@ const FAQ_RESPONSES: Record<string, string> = {
   "reward": "Prizes worth over ₹10 Lakhs are up for grabs, including cash awards, corporate internships, seed incubation support, and direct investor pitch opportunities for startups!",
   "track": "We have 7 cutting-edge challenge tracks:\n1. AI NPC Systems\n2. Procedural Content Generation\n3. AI for Game Testing & Balancing\n4. AR/VR Immersive Gaming\n5. Esports Analytics & AI\n6. Serious Games for Social Impact\n7. Metaverse & Web3 Gaming",
   "theme": "We have 7 cutting-edge challenge tracks:\n1. AI NPC Systems\n2. Procedural Content Generation\n3. AI for Game Testing & Balancing\n4. AR/VR Immersive Gaming\n5. Esports Analytics & AI\n6. Serious Games for Social Impact\n7. Metaverse & Web3 Gaming",
-  "discord": "Join our official Discord community to connect with other developers, form teams, and get direct mentorship: https://discord.gg/8gaK52vEs",
-  "contact": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call us directly at +91 7995061289.",
-  "support": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call us directly at +91 7995061289.",
-  "email": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call us directly at +91 7995061289.",
-  "phone": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call us directly at +91 7995061289.",
+  "discord": "We have transitioned our community support to WhatsApp! You can reach us directly on WhatsApp for support, team formation help, and quick queries at +91 7995061289 or chat directly at: https://wa.me/917995061289",
+  "whatsapp": "Reach out to us directly on WhatsApp for support, team formation help, and quick queries at +91 7995061289 or chat directly at: https://wa.me/917995061289",
+  "contact": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call/WhatsApp us directly at +91 7995061289.",
+  "support": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call/WhatsApp us directly at +91 7995061289.",
+  "email": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call/WhatsApp us directly at +91 7995061289.",
+  "phone": "You can contact our Brand Relations Committee at incuxaigaming@gmail.com or call/WhatsApp us directly at +91 7995061289.",
 };
 
 export async function POST(request: Request) {

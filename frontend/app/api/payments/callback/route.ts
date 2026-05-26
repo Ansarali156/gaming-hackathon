@@ -47,7 +47,7 @@ function getConfirmationEmailHtml(teamName: string, teamId: string, amount: numb
           </table>
         </div>
         
-        <p style="font-size: 14px; line-height: 1.6; color: #9ca3af; margin-bottom: 30px;">You can now log in to your participant dashboard using your registered email and password to submit your project repositories, track statistics, and join the official Discord channel.</p>
+        <p style="font-size: 14px; line-height: 1.6; color: #9ca3af; margin-bottom: 30px;">You can now log in to your participant dashboard using your registered email and password to submit your project repositories, track statistics, and reach out to support on WhatsApp (+91 7995061289).</p>
         
         <div style="text-align: center; margin-bottom: 30px;">
           <a href="${loginUrl}" style="display: inline-block; background: linear-gradient(90deg, #a855f7, #0ea5e9); color: #ffffff; font-weight: 600; text-decoration: none; padding: 14px 30px; border-radius: 10px; box-shadow: 0 0 20px -5px rgba(168, 85, 247, 0.4);">Access Your Dashboard</a>
