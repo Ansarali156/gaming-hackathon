@@ -125,11 +125,32 @@ export async function POST(request: Request) {
       console.warn("⚠️ RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET not set. Skipping server-side Razorpay verification (graceful sandbox fallback).");
     }
 
+    // ── Generate a dynamically guaranteed unique teamId ──
+    let activeTeamId = teamId;
+    const conflict = await prisma.team.findUnique({ where: { teamId: activeTeamId } });
+    if (conflict) {
+      let isUnique = false;
+      let attempt = 1;
+      const prefix = "INC";
+      const year = new Date().getFullYear().toString().slice(-2);
+      while (!isUnique) {
+        const count = await prisma.team.count();
+        const number = (count + attempt).toString().padStart(4, "0");
+        activeTeamId = `${prefix}${year}${number}`;
+        const duplicate = await prisma.team.findUnique({ where: { teamId: activeTeamId } });
+        if (!duplicate) {
+          isUnique = true;
+        } else {
+          attempt++;
+        }
+      }
+    }
+
     // 5. Create Team, User (Leader + Members), and Payment records atomically, and delete the draft
     const team = await prisma.$transaction(async (tx) => {
       const t = await tx.team.create({
         data: {
-          teamId,
+          teamId: activeTeamId,
           name: teamName,
           category,
           projectTheme,
