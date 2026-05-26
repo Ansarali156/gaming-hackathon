@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
+import Image from "next/image";
 import { Building2 } from "lucide-react";
 import { SponsorInquiryModal } from "@/components/ui/SponsorInquiryModal";
 
@@ -52,9 +53,11 @@ export function SponsorsSection() {
                   className="flex flex-col items-center gap-4 text-center group w-full"
                 >
                   <div className="h-24 w-full flex items-center justify-center mb-2 p-2">
-                    <img
+                    <Image
                       src={sponsor.logo}
                       alt={sponsor.name}
+                      width={180}
+                      height={96}
                       className="max-h-full max-w-full object-contain transition-all duration-300"
                     />
                   </div>
@@ -65,9 +68,11 @@ export function SponsorsSection() {
               ) : (
                 <div className="flex flex-col items-center gap-4 text-center w-full">
                   <div className="h-24 w-full flex items-center justify-center mb-2 p-2">
-                    <img
+                    <Image
                       src={sponsor.logo}
                       alt={sponsor.name}
+                      width={180}
+                      height={96}
                       className="max-h-full max-w-full object-contain"
                     />
                   </div>

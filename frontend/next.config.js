@@ -14,6 +14,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'avatars.githubusercontent.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'incuxai.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.incuxai.com',
+      },
     ],
   },
 };

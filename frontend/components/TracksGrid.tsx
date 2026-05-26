@@ -1,5 +1,6 @@
 'use client';
 
+import Image from "next/image";
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'motion/react';
 import { Box, Code2, Shield, Zap, Layout, Globe } from 'lucide-react';
@@ -119,11 +120,12 @@ function TrackCard({ track }: { track: typeof TRACKS[0] }) {
       
       {track.image && (
         <div className="absolute inset-0 pointer-events-none opacity-10 group-hover:opacity-30 transition-opacity duration-700">
-          <img 
+          <Image 
             src={track.image} 
             alt={track.title} 
-            className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
-            referrerPolicy="no-referrer"
+            fill
+            sizes="(max-width: 768px) 320px, 420px"
+            className="object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-transparent" />
