@@ -33,7 +33,7 @@ function getConfirmationEmailHtml(teamName: string, teamId: string, amount: numb
               <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #ffffff;">₹${amount}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #9ca3af;">GST (2%):</td>
+              <td style="padding: 8px 0; color: #9ca3af;">Platform Charges (2%):</td>
               <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #a855f7;">₹${gst}</td>
             </tr>
             <tr>

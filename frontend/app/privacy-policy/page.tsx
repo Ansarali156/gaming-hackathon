@@ -58,7 +58,7 @@ export default function PrivacyPolicyPage() {
                 <span>1. Information We Collect</span>
               </h2>
               <p className="text-text-muted text-sm leading-relaxed">
-                We collect personal registration details necessary to verify team credentials and process GST-compliant transaction receipts:
+                We collect personal registration details necessary to verify team credentials and process transaction receipts:
               </p>
               <ul className="list-disc list-inside text-text-muted text-sm space-y-1.5 pl-4">
                 <li>Participant and leader names, business/personal emails, and phone numbers.</li>

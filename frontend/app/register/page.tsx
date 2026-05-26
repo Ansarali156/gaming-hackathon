@@ -715,7 +715,7 @@ export default function RegisterPage() {
                       <Row label="Category Fee" value={`₹${pricing?.price || 0} per person`} />
                       <Row label="Total Members" value={`${members.length + 1} (Leader + ${members.length} Members)`} />
                       <Row label="Base Fee" value={`₹${pricing ? pricing.price * (members.length + 1) : 0}`} />
-                      <Row label="GST (2%)" value={`₹${pricing ? Number((pricing.price * (members.length + 1) * 0.02).toFixed(2)) : 0}`} />
+                      <Row label="Platform Charges (2%)" value={`₹${pricing ? Number((pricing.price * (members.length + 1) * 0.02).toFixed(2)) : 0}`} />
                       <div className="border-t border-primary/25 pt-2 flex justify-between items-center">
                         <span className="text-text font-bold">Total Amount to Pay</span>
                         <span className="text-primary font-bold text-xl">₹{pricing ? Number((pricing.price * (members.length + 1) * 1.02).toFixed(2)) : 0}</span>
