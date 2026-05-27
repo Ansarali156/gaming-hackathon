@@ -17,7 +17,7 @@ const messages = [
     title: "Founder, College Circle & YouTuber (@asifma121)",
     quoteTitle: "Bridging the gap between students and career opportunities",
     quoteText: "AI is the ultimate game-changer for the next generation of creators and developers. This hackathon is not just a competition, but an absolute launchpad for students to build real-world products, connect with industry leaders, and scale their ideas. Unleash your creativity, think out of the box, and construct the future of interactive technology!",
-    image: "asif.png",
+    image: "/asif.png",
     initials: "AM"
   }
 ];
