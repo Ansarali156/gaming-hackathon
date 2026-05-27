@@ -1,6 +1,6 @@
 export const EVENT_DATES = {
   registrationOpen: new Date("2026-05-18T00:00:00Z"),
-  registrationClose: new Date("2026-06-20T23:59:59Z"),
+  registrationClose: new Date("2026-06-16T00:00:00Z"),
   round1: new Date("2026-06-20T00:00:00Z"),
   round2: new Date("2026-06-27T00:00:00Z"),
   hackathonStart: new Date("2026-06-28T09:00:00Z"),

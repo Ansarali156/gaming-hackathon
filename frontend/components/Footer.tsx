@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto gap-8">
         <div className="flex flex-col items-center md:items-start gap-2">
           <div className="font-headline-lg text-primary font-bold tracking-tighter">HACK.2026</div>
-          <p className="font-body-md text-on-surface-variant/60 text-sm">© 2026 HACK.2026. All rights reserved.</p>
+          <p className="font-body-md text-on-surface-variant/60 text-sm">© 2026 IncuXai AI Gaming Hackathon. All rights reserved.</p>
         </div>
         
         <div className="flex gap-8">
