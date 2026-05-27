@@ -14,7 +14,7 @@ const SPONSORS = [
   },
   {
     name: "IncuXai",
-    logo: "https://www.incuxai.com/assets/img/logo/incuxai.jpg",
+    logo: "/incuxai_new.png",
     website: "https://incuxai.com"
   }
 ];

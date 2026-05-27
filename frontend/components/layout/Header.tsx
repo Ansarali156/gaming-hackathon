@@ -71,18 +71,6 @@ export function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            <div className="flex items-center gap-2 mr-2">
-              <img 
-                src="https://www.collegecircle.cc/assets/cclogo.PNG" 
-                alt="College Circle Logo" 
-                className="h-10 w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
-              />
-              <img 
-                src="https://incuxai.com/assets/img/logo/incuxai.jpg" 
-                alt="IncuXai Logo" 
-                className="h-10 w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
-              />
-            </div>
             {status === "loading" ? (
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             ) : session ? (
@@ -118,6 +106,19 @@ export function Header() {
                 </Link>
               </>
             )}
+
+            <div className="flex items-center gap-2 ml-2">
+              <img 
+                src="https://www.collegecircle.cc/assets/cclogo.PNG" 
+                alt="College Circle Logo" 
+                className="h-10 w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
+              />
+              <img 
+                src="/incuxai_new.png" 
+                alt="IncuXai Logo" 
+                className="h-10 w-auto max-w-[120px] object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
+              />
+            </div>
           </div>
 
           <button
@@ -147,18 +148,6 @@ export function Header() {
               </Link>
             ))}
             <div className="flex flex-col gap-3 pt-4 border-t border-white/5">
-              <div className="flex items-center justify-center gap-4 mb-2">
-                <img 
-                  src="https://www.collegecircle.cc/assets/cclogo.PNG" 
-                  alt="College Circle Logo" 
-                  className="h-10 w-10 object-contain rounded-md shadow border border-white/5 bg-white/5"
-                />
-                <img 
-                  src="https://incuxai.com/assets/img/logo/incuxai.jpg" 
-                  alt="IncuXai Logo" 
-                  className="h-10 w-10 object-contain rounded-md shadow border border-white/5 bg-white/5"
-                />
-              </div>
               {status === "loading" ? (
                 <div className="flex justify-center py-2">
                   <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -202,6 +191,19 @@ export function Header() {
                   </Link>
                 </div>
               )}
+
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <img 
+                  src="https://www.collegecircle.cc/assets/cclogo.PNG" 
+                  alt="College Circle Logo" 
+                  className="h-10 w-10 object-contain rounded-md shadow border border-white/5 bg-white/5"
+                />
+                <img 
+                  src="/incuxai_new.png" 
+                  alt="IncuXai Logo" 
+                  className="h-10 w-auto max-w-[120px] object-contain rounded-md shadow border border-white/5 bg-white/5"
+                />
+              </div>
             </div>
           </div>
         </motion.div>
