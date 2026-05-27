@@ -16,6 +16,7 @@ const messages = [
 export function WelcomeSection() {
   const logos = [
     "/rtih_logo.png",
+    "https://www.collegecircle.cc/assets/cclogo.PNG",
     "https://dc-cdn.s3-ap-southeast-1.amazonaws.com/dc-Cover-4upece6p9dvb9msn1tlcgsivc6-20160519052405.Medi.jpeg",
     "https://incuxai.com/assets/img/logo/incuxai.jpg",
     "https://upload.wikimedia.org/wikipedia/en/e/ea/Appolice%28emblem%29.png",

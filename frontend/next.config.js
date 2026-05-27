@@ -22,6 +22,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'www.incuxai.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.collegecircle.cc',
+      },
     ],
   },
 };
