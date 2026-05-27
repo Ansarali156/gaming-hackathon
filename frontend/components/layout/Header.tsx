@@ -35,56 +35,56 @@ export function Header() {
         scrolled ? "bg-background/80 backdrop-blur-xl border-b border-white/5" : ""
       }`}
     >
-      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+      <div className="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="flex items-center gap-2">
               <img 
                 src="https://scontent.fvga7-1.fna.fbcdn.net/v/t39.30808-6/462228572_3821598438114122_1927581696670989735_n.png?stp=dst-jpg_tt6&_nc_cat=109&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=MIEnFTa5i7IQ7kNvwFcuPFo&_nc_oc=Adrgho52WJebKn9y9OUJ5Xz2BjmylnkD8buymT1zcMziJO9pe9uT5HCidZJBayH8RIQ&_nc_zt=23&_nc_ht=scontent.fvga7-1.fna&_nc_gid=FUZaUO2qWlrYpGMhw1yXnQ&_nc_ss=7b289&oh=00_Af7o82fI2gaU2GiWnYoQqlS9DlPvBLAdCOoYYFZOZj57hA&oe=6A1C6219" 
                 alt="Partner Logo" 
-                className="h-10 w-10 md:h-12 md:w-12 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 group-hover:scale-105"
+                className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 group-hover:scale-105"
               />
               <img 
                 src="/rtih_logo.png" 
                 alt="RTIH Logo" 
-                className="h-10 w-10 md:h-12 md:w-12 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 group-hover:scale-105"
+                className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 group-hover:scale-105"
               />
             </div>
-            <span className="font-display text-lg md:text-2xl font-bold gradient-text hidden sm:inline-block leading-none">
+            <span className="font-display text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold gradient-text hidden sm:inline-block leading-none tracking-tight">
               AI Gaming Hackathon
             </span>
-            <span className="font-display text-lg font-bold gradient-text sm:hidden leading-none">
+            <span className="font-display text-sm sm:text-base font-bold gradient-text sm:hidden leading-none tracking-tight">
               AI Gaming
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-text-muted hover:text-primary transition-colors font-medium"
+                className="text-text-muted hover:text-primary transition-colors font-medium text-sm xl:text-base"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-3 xl:gap-4">
             {status === "loading" ? (
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             ) : session ? (
               <>
                 <Link
                   href={dashboardUrl}
-                  className="px-6 py-2 border border-primary/50 text-primary rounded-lg hover:bg-primary/10 transition-all font-medium flex items-center gap-2"
+                  className="px-4 py-1.5 xl:px-6 xl:py-2 border border-primary/50 text-primary rounded-lg hover:bg-primary/10 transition-all font-medium flex items-center gap-2 text-sm xl:text-base"
                 >
                   <LayoutDashboard size={16} />
                   Dashboard
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="px-6 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-all font-bold flex items-center gap-2"
+                  className="px-4 py-1.5 xl:px-6 xl:py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-all font-bold flex items-center gap-2 text-sm xl:text-base"
                 >
                   <LogOut size={16} />
                   Logout
@@ -94,36 +94,36 @@ export function Header() {
               <>
                 <Link
                   href="/login"
-                  className="px-6 py-2 border border-primary/50 text-primary rounded-lg hover:bg-primary/10 transition-all font-medium"
+                  className="px-4 py-1.5 xl:px-6 xl:py-2 border border-primary/50 text-primary rounded-lg hover:bg-primary/10 transition-all font-medium text-sm xl:text-base"
                 >
                   Login
                 </Link>
                 <Link
                   href="/register"
-                  className="px-6 py-2 bg-primary text-background rounded-lg hover:neon-glow transition-all font-bold"
+                  className="px-4 py-1.5 xl:px-6 xl:py-2 bg-primary text-background rounded-lg hover:neon-glow transition-all font-bold text-sm xl:text-base whitespace-nowrap shadow-lg shadow-primary/10 hover:shadow-primary/20"
                 >
                   Register Now
                 </Link>
               </>
             )}
 
-            <div className="flex items-center gap-2 ml-2">
+            <div className="flex items-center gap-2 ml-1 xl:ml-3 shrink-0">
               <img 
                 src="https://www.collegecircle.cc/assets/cclogo.PNG" 
                 alt="College Circle Logo" 
-                className="h-10 w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
+                className="h-8 w-8 xl:h-10 xl:w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
               />
               <img 
                 src="/incuxai_new.png" 
                 alt="IncuXai Logo" 
-                className="h-10 w-auto max-w-[120px] object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
+                className="h-8 xl:h-10 w-auto max-w-[90px] xl:max-w-[120px] object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
               />
             </div>
           </div>
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden text-text"
+            className="lg:hidden text-text p-2 hover:bg-white/5 rounded-lg transition-colors"
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -134,7 +134,7 @@ export function Header() {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="md:hidden bg-surface border-t border-white/5"
+          className="lg:hidden bg-surface/95 backdrop-blur-xl border-t border-white/5 shadow-2xl"
         >
           <div className="px-6 py-4 space-y-4">
             {navLinks.map((link) => (
@@ -142,7 +142,7 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="block text-text-muted hover:text-primary transition-colors"
+                className="block text-text-muted hover:text-primary transition-colors text-base py-1"
               >
                 {link.label}
               </Link>
@@ -157,7 +157,7 @@ export function Header() {
                   <Link
                     href={dashboardUrl}
                     onClick={() => setMobileOpen(false)}
-                    className="w-full text-center py-2 border border-primary/50 text-primary rounded-lg flex items-center justify-center gap-2"
+                    className="w-full text-center py-2.5 border border-primary/50 text-primary rounded-lg flex items-center justify-center gap-2 font-medium"
                   >
                     <LayoutDashboard size={16} />
                     Dashboard
@@ -167,7 +167,7 @@ export function Header() {
                       setMobileOpen(false);
                       signOut({ callbackUrl: "/" });
                     }}
-                    className="w-full text-center py-2 bg-red-500/10 text-red-400 rounded-lg font-bold flex items-center justify-center gap-2"
+                    className="w-full text-center py-2.5 bg-red-500/10 text-red-400 rounded-lg font-bold flex items-center justify-center gap-2"
                   >
                     <LogOut size={16} />
                     Logout
@@ -178,21 +178,21 @@ export function Header() {
                   <Link
                     href="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="flex-1 text-center py-2 border border-primary/50 text-primary rounded-lg"
+                    className="flex-1 text-center py-2.5 border border-primary/50 text-primary rounded-lg font-medium"
                   >
                     Login
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setMobileOpen(false)}
-                    className="flex-1 text-center py-2 bg-primary text-background rounded-lg font-bold"
+                    className="flex-1 text-center py-2.5 bg-primary text-background rounded-lg font-bold shadow-lg shadow-primary/10"
                   >
                     Register
                   </Link>
                 </div>
               )}
 
-              <div className="flex items-center justify-center gap-4 mt-2">
+              <div className="flex items-center justify-center gap-4 mt-4 pt-2">
                 <img 
                   src="https://www.collegecircle.cc/assets/cclogo.PNG" 
                   alt="College Circle Logo" 
