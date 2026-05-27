@@ -61,6 +61,7 @@ export const TRACKS = [
 
 export const TIMELINE = [
   { phase: "Registrations Open", date: "May 25", status: "active" },
+  { phase: "Registration Closes", date: "June 25", status: "upcoming" },
   { phase: "Round 1 Submission", date: "June 25", status: "upcoming" },
   { phase: "Round 1 Results", date: "June 28", status: "upcoming" },
   { phase: "Round 2 Offline", date: "July 4, 5", status: "upcoming" },
