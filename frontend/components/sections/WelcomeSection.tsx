@@ -9,7 +9,16 @@ const messages = [
     title: "CEO, RTIH ANANTHAPUR SPOKE",
     quoteTitle: "Nurturing innovation and startup scaling in AP",
     quoteText: "Welcome to the Anantapur Innovation Festival. At the Ratan Tata Innovation Hub, our mission is to empower student innovators and startups with direct pathways to incubation, mentorship, and investment. This hackathon is your canvas to build real-world AI gaming solutions that make a lasting impact.",
-    image: "/hafeez.jpg"
+    image: "/hafeez.jpg",
+    initials: "HB"
+  },
+  {
+    name: "ASIF MA",
+    title: "Founder, College Circle & YouTuber (@asifma121)",
+    quoteTitle: "Bridging the gap between students and career opportunities",
+    quoteText: "AI is the ultimate game-changer for the next generation of creators and developers. This hackathon is not just a competition, but an absolute launchpad for students to build real-world products, connect with industry leaders, and scale their ideas. Unleash your creativity, think out of the box, and construct the future of interactive technology!",
+    image: "/asifma121.png",
+    initials: "AM"
   }
 ];
 
@@ -103,7 +112,7 @@ export function WelcomeSection() {
                     <img src={msg.image} alt={msg.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full bg-[#178C8F] flex items-center justify-center">
-                      <span className="text-5xl md:text-6xl font-light text-white tracking-widest">HB</span>
+                      <span className="text-5xl md:text-6xl font-light text-white tracking-widest">{msg.initials}</span>
                     </div>
                   )}
                 </div>

@@ -1,11 +1,11 @@
 export const EVENT_DATES = {
-  registrationOpen: new Date("2026-05-18T00:00:00Z"),
-  registrationClose: new Date("2026-06-16T00:00:00Z"),
-  round1: new Date("2026-06-20T00:00:00Z"),
-  round2: new Date("2026-06-27T00:00:00Z"),
-  hackathonStart: new Date("2026-06-28T09:00:00Z"),
-  submissionDeadline: new Date("2026-06-28T18:00:00Z"),
-  winnerAnnouncement: new Date("2026-06-28T20:00:00Z"),
+  registrationOpen: new Date("2026-05-25T00:00:00Z"),
+  registrationClose: new Date("2026-06-25T23:59:59Z"),
+  round1: new Date("2026-06-25T23:59:59Z"),
+  round2: new Date("2026-07-04T09:00:00Z"),
+  hackathonStart: new Date("2026-07-04T09:00:00Z"),
+  submissionDeadline: new Date("2026-07-05T18:00:00Z"),
+  winnerAnnouncement: new Date("2026-07-05T20:00:00Z"),
 };
 
 export const PRICING = {
@@ -60,12 +60,11 @@ export const TRACKS = [
 ];
 
 export const TIMELINE = [
-  { phase: "Registrations Open", date: "May 18", status: "active" },
-  { phase: "Round 1", date: "June 20", status: "upcoming" },
-  { phase: "Round 2", date: "June 27-28", status: "upcoming" },
-  { phase: "Hackathon Begins", date: "June 12", status: "upcoming" },
-  { phase: "Final Submission", date: "June 20", status: "upcoming" },
-  { phase: "Winner Announcement", date: "June 28", status: "upcoming" },
+  { phase: "Registrations Open", date: "May 25", status: "active" },
+  { phase: "Round 1 Submission", date: "June 25", status: "upcoming" },
+  { phase: "Round 1 Results", date: "June 28", status: "upcoming" },
+  { phase: "Round 2 Offline", date: "July 4, 5", status: "upcoming" },
+  { phase: "Winner Announcement", date: "July 5", status: "upcoming" },
 ];
 
 export const PRIZE_POOL = [

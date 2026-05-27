@@ -1,11 +1,11 @@
 export const EVENT_DATES = {
-  registrationOpen: new Date("2026-05-18T00:00:00Z"),
-  registrationClose: new Date("2026-06-16T00:00:00Z"),
-  submissionDeadline: new Date("2026-06-20T23:59:59Z"),
-  resultsOut: new Date("2026-06-20T23:59:59Z"),
-  hackathonStart: new Date("2026-06-12T09:00:00Z"),
-  hackathonEnd: new Date("2026-06-28T18:00:00Z"),
-  winnerAnnouncement: new Date("2026-06-28T20:00:00Z"),
+  registrationOpen: new Date("2026-05-25T00:00:00Z"),
+  registrationClose: new Date("2026-06-25T23:59:59Z"),
+  submissionDeadline: new Date("2026-06-25T23:59:59Z"),
+  resultsOut: new Date("2026-06-28T18:00:00Z"),
+  hackathonStart: new Date("2026-07-04T09:00:00Z"),
+  hackathonEnd: new Date("2026-07-05T18:00:00Z"),
+  winnerAnnouncement: new Date("2026-07-05T20:00:00Z"),
 };
 
 export const PRICING = {
@@ -72,12 +72,11 @@ export const TRACKS = [
 ];
 
 export const TIMELINE = [
-  { phase: "Registrations Open", date: "May 18", status: "active" },
-  { phase: "Hackathon Begins", date: "June 12", status: "upcoming" },
-  { phase: "Round 1", date: "June 12–20", status: "upcoming" },
-  { phase: "Final Submission", date: "June 20", status: "upcoming" },
-  { phase: "Round 2", date: "June 27, 28", status: "upcoming" },
-  { phase: "Winner Announcement", date: "June 28", status: "upcoming" },
+  { phase: "Registrations Open", date: "May 25", status: "active" },
+  { phase: "Round 1 Submission", date: "June 25", status: "upcoming" },
+  { phase: "Round 1 Results", date: "June 28", status: "upcoming" },
+  { phase: "Round 2 Offline", date: "July 4, 5", status: "upcoming" },
+  { phase: "Winner Announcement", date: "July 5", status: "upcoming" },
 ];
 
 export const PRIZE_POOL = [
@@ -99,11 +98,11 @@ export const FAQS = [
   },
   {
     question: "Is the event online or offline?",
-    answer: "The final round (Round 2) will be held OFFLINE on June 27th & 28th, 2026.",
+    answer: "The final round (Round 2) will be held OFFLINE on July 4th & 5th, 2026.",
   },
   {
     question: "When is the last date for online submission?",
-    answer: "June 20th, 2026. Round 1 submission deadline is June 20th.",
+    answer: "June 25th, 2026. Round 1 submission deadline is June 25th.",
   },
   {
     question: "Who is eligible to participate?",

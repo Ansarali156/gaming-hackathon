@@ -246,12 +246,11 @@ function OverviewTab({ teamData, paymentStatus, loading }: any) {
           <Clock size={18} className="text-primary" /> Hackathon Journey Timeline
         </h3>
         <div className="space-y-0 pl-1 mt-4">
-          <EventItem date="May 18" title="Registrations Open" description="Sign up your team and secure your spot in India's ultimate innovate-a-thon." done />
-          <EventItem date="June 12" title="Hackathon Opening Ceremony" description="Theme reveals, guidelines briefing, and platform release." active />
-          <EventItem date="June 12–20" title="Round 1: Rapid Development Phase" description="Build out your initial AI MVP and architecture." />
-          <EventItem date="June 20" title="Round 1 Submission Deadline" description="Upload repository links and short video demonstration before 11:59 PM." />
-          <EventItem date="June 27" title="Round 2: Dynamic Live Pitching" description="Top shortlisted teams present their builds live to our jury." />
-          <EventItem date="June 28" title="Winner Announcements & Closing" description="Cash prizes distribution and innovator validation awards." isLast />
+          <EventItem date="May 25" title="Registrations Open" description="Sign up your team and secure your spot in India's ultimate innovate-a-thon." done />
+          <EventItem date="June 25" title="Round 1 Submission Deadline" description="Upload repository links and short video demonstration before 11:59 PM." active />
+          <EventItem date="June 28" title="Round 1 Evaluation & Results" description="Top shortlisted teams are announced and promoted to the grand finale." />
+          <EventItem date="July 4–5" title="Round 2: Offline Grand Finale" description="Shortlisted teams present and pitch their dynamic AI builds live to our jury." />
+          <EventItem date="July 5" title="Winner Announcements & Closing" description="Cash prizes distribution and innovator validation awards." isLast />
         </div>
       </div>
     </motion.div>
