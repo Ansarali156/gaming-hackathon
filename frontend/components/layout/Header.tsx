@@ -37,8 +37,25 @@ export function Header() {
     >
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <div className="flex items-center justify-between h-20">
-          <Link href="/" className="font-display text-2xl font-bold gradient-text">
-            AI Gaming Hackathon
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="flex items-center gap-2">
+              <img 
+                src="https://dc-cdn.s3-ap-southeast-1.amazonaws.com/dc-Cover-4upece6p9dvb9msn1tlcgsivc6-20160519052405.Medi.jpeg" 
+                alt="Partner Logo" 
+                className="h-10 w-10 md:h-12 md:w-12 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 group-hover:scale-105"
+              />
+              <img 
+                src="/rtih_logo.png" 
+                alt="RTIH Logo" 
+                className="h-10 w-10 md:h-12 md:w-12 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+            <span className="font-display text-lg md:text-2xl font-bold gradient-text hidden sm:inline-block leading-none">
+              AI Gaming Hackathon
+            </span>
+            <span className="font-display text-lg font-bold gradient-text sm:hidden leading-none">
+              AI Gaming
+            </span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
