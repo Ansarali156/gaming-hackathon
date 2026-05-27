@@ -247,8 +247,7 @@ function OverviewTab({ teamData, paymentStatus, loading }: any) {
         </h3>
         <div className="space-y-0 pl-1 mt-4">
           <EventItem date="May 25" title="Registrations Open" description="Sign up your team and secure your spot in India's ultimate innovate-a-thon." done />
-          <EventItem date="June 25" title="Registration Closes" description="Official registration portal close." />
-          <EventItem date="June 25" title="Round 1 Submission Deadline" description="Upload repository links and short video demonstration before 11:59 PM." active />
+          <EventItem date="June 25" title="Registration Closes & Round 1 Submission Deadline" description="Registration portal closes. Submit your repository link and project demonstration video before 11:59 PM." active />
           <EventItem date="June 28" title="Round 1 Evaluation & Results" description="Top shortlisted teams are announced and promoted to the grand finale." />
           <EventItem date="July 4–5" title="Round 2: Offline Grand Finale" description="Shortlisted teams present and pitch their dynamic AI builds live to our jury." />
           <EventItem date="July 5" title="Winner Announcements & Closing" description="Cash prizes distribution and innovator validation awards." isLast />
