@@ -15,7 +15,7 @@ export function TimelineSection() {
           className="text-center mb-16"
         >
           <h2 className="section-title">Event Timeline</h2>
-          <p className="section-subtitle">Final Round: 27th & 28th June 2026 — Offline Event</p>
+          <p className="section-subtitle">Final Round: 4th & 5th July 2026 — Offline Event</p>
         </motion.div>
 
         <div className="relative">

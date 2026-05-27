@@ -6,7 +6,7 @@ const FAQ_RESPONSES: Record<string, string> = {
   'refund': 'Refunds are available up to 7 days before the event start date. Contact support for assistance.',
   'eligibility': 'Students, IT professionals, and startups from across India are welcome to participate.',
   'certificate': 'Yes, all participants receive digital certificates. Winners get special recognition certificates.',
-  'schedule': 'Registrations open May 18, Hackathon begins June 12, Final submission June 20, Winners announced June 28.',
+  'schedule': 'Registrations open May 25, Registration Closes June 25, Round 1 Submission June 25, Round 1 Results June 28, Round 2 Offline July 4-5, Winner Announcement July 5.',
   'venue': 'The hackathon will be held in a hybrid format with both online and offline participation.',
   'discord': 'Join our Discord server for updates, mentorship, and team collaboration. Link is on our homepage.',
   'prize': '1st Place: ₹1,00,000 | 2nd Place: ₹50,000 | 3rd Place: ₹25,000 | Best AI Innovation: ₹15,000',

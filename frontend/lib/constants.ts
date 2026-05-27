@@ -102,8 +102,12 @@ export const FAQS = [
     answer: "The final round (Round 2) will be held OFFLINE on July 4th & 5th, 2026.",
   },
   {
+    question: "When does the registration close?",
+    answer: "Registration closes on June 25th, 2026. This is also the last date for Round 1 online submissions.",
+  },
+  {
     question: "When is the last date for online submission?",
-    answer: "June 25th, 2026. Round 1 submission deadline is June 25th.",
+    answer: "June 25th, 2026. Both registrations and Round 1 online submissions close on June 25th, 2026.",
   },
   {
     question: "Who is eligible to participate?",

@@ -87,7 +87,15 @@ export const FAQS = [
   },
   {
     question: "Is the event online or offline?",
-    answer: "The hackathon will be held in a hybrid format with both online and offline participation options.",
+    answer: "The hackathon will be held in a hybrid format, with Round 1 online and the Grand Finale (Round 2) offline on July 4th & 5th, 2026.",
+  },
+  {
+    question: "When does the registration close?",
+    answer: "Registration closes on June 25th, 2026. This is also the last date for Round 1 online submissions.",
+  },
+  {
+    question: "When is the last date for online submission?",
+    answer: "June 25th, 2026. Both registrations and Round 1 online submissions close on June 25th, 2026.",
   },
   {
     question: "Are refunds available?",

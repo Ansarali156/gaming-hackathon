@@ -21,7 +21,7 @@ export function AboutSection() {
         >
           <h2 className="section-title">About the Hackathon</h2>
           <p className="section-subtitle">
-            Gaming Hackathon Final Round — 27th & 28th June 2026 (Offline). All B.Tech, M.Tech students, Startups & Working Professionals can participate. Build your game, solve real challenges, and win cash prizes worth ₹10 Lakhs.
+            Gaming Hackathon Final Round — 4th & 5th July 2026 (Offline). All B.Tech, M.Tech students, Startups & Working Professionals can participate. Build your game, solve real challenges, and win cash prizes worth ₹10 Lakhs.
           </p>
         </motion.div>
 

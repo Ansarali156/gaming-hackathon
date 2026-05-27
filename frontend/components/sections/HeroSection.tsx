@@ -90,7 +90,7 @@ export function HeroSection() {
           </h1>
 
           <p className="text-text-muted text-lg md:text-xl max-w-3xl mx-auto">
-            National Level Hackathon | 27th & 28th June 2026 | Cash Prizes Worth ₹10 Lakhs | Internships, Incubation & Investments
+            National Level Hackathon | 4th & 5th July 2026 | Cash Prizes Worth ₹10 Lakhs | Internships, Incubation & Investments
           </p>
 
           <CountdownTimer targetDate={EVENT_DATES.registrationClose} label="Registration Closing In" />

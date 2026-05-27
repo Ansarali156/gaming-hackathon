@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({
 const SYSTEM_PROMPT = `You are a helpful virtual assistant for the AI Gaming Hackathon. Answer questions accurately and concisely about:
 - Registration fees: Students ₹300/person, IT Professionals ₹1000/person, Startups ₹1000/person.
 - Team size: Students 2-5 members, IT Professionals 2-4 members, Startups 2-4 members.
-- Timeline: Registrations open May 18, Hackathon begins June 12, Round 1 is June 12-20 with Final Submission on June 20, Round 2 (offline) is June 27-28, Winner Announcement is June 28.
+- Timeline: Registrations open May 25, Registration Closes June 25, Round 1 Submission is June 25, Round 1 Results on June 28, Round 2 (offline Grand Finale) is July 4-5, Winner Announcement is July 5.
 - Tracks: AI NPC Systems, Procedural Content Generation, AI Game Testing, AR/VR Immersive Gaming, Esports Analytics, Serious Games, Metaverse/Web3.
 - Refund Policy: Completely non-refundable due to immediate resource commitments.
 - Venue: Hybrid (online initial submissions for Round 1, 24h offline Grand Finale in Anantapur, AP).
@@ -23,12 +23,12 @@ const FAQ_RESPONSES: Record<string, string> = {
   "team": "Team size requirements vary by category:\n• Students: 2 to 5 members per team\n• IT Professionals: 2 to 4 members per team\n• Startups: 2 to 4 members per team\n\nNote: All members will have dashboard accounts.",
   "size": "Team size requirements vary by category:\n• Students: 2 to 5 members per team\n• IT Professionals: 2 to 4 members per team\n• Startups: 2 to 4 members per team\n\nNote: All members will have dashboard accounts.",
   "refund": "Due to immediate resource deployments (infrastructure cloud credits, grand finale vouchers, server allocations), registration fees are strictly non-refundable once paid.",
-  "schedule": "Timeline for the 2026 Hackathon:\n• May 18: Registrations Open (Active)\n• June 12: Hackathon Begins\n• June 12–20: Round 1\n• June 20: Final Submission\n• June 27, 28: Round 2 (Offline Grand Finale)\n• June 28: Winner Announcement",
-  "date": "Timeline for the 2026 Hackathon:\n• May 18: Registrations Open (Active)\n• June 12: Hackathon Begins\n• June 12–20: Round 1\n• June 20: Final Submission\n• June 27, 28: Round 2 (Offline Grand Finale)\n• June 28: Winner Announcement",
-  "when": "Timeline for the 2026 Hackathon:\n• May 18: Registrations Open (Active)\n• June 12: Hackathon Begins\n• June 12–20: Round 1\n• June 20: Final Submission\n• June 27, 28: Round 2 (Offline Grand Finale)\n• June 28: Winner Announcement",
-  "venue": "Round 1 is fully online (June 12-20) with Final Submission on June 20. The grand finale (Round 2) is a 24-hour offline hackathon held on June 27-28, 2026 in Anantapur, Andhra Pradesh, India.",
-  "location": "Round 1 is fully online (June 12-20) with Final Submission on June 20. The grand finale (Round 2) is a 24-hour offline hackathon held on June 27-28, 2026 in Anantapur, Andhra Pradesh, India.",
-  "where": "Round 1 is fully online (June 12-20) with Final Submission on June 20. The grand finale (Round 2) is a 24-hour offline hackathon held on June 27-28, 2026 in Anantapur, Andhra Pradesh, India.",
+  "schedule": "Timeline for the 2026 Hackathon:\n• May 25: Registrations Open (Active)\n• June 25: Registration Closes / Round 1 Submission Deadline\n• June 28: Round 1 Evaluation & Results\n• July 4–5: Round 2 (Offline Grand Finale in Anantapur)\n• July 5: Winner Announcement",
+  "date": "Timeline for the 2026 Hackathon:\n• May 25: Registrations Open (Active)\n• June 25: Registration Closes / Round 1 Submission Deadline\n• June 28: Round 1 Evaluation & Results\n• July 4–5: Round 2 (Offline Grand Finale in Anantapur)\n• July 5: Winner Announcement",
+  "when": "Timeline for the 2026 Hackathon:\n• May 25: Registrations Open (Active)\n• June 25: Registration Closes / Round 1 Submission Deadline\n• June 28: Round 1 Evaluation & Results\n• July 4–5: Round 2 (Offline Grand Finale in Anantapur)\n• July 5: Winner Announcement",
+  "venue": "Round 1 is fully online with registration and project submissions closing on June 25, 2026. The grand finale (Round 2) is a 24-hour offline hackathon held on July 4-5, 2026 in Anantapur, Andhra Pradesh, India.",
+  "location": "Round 1 is fully online with registration and project submissions closing on June 25, 2026. The grand finale (Round 2) is a 24-hour offline hackathon held on July 4-5, 2026 in Anantapur, Andhra Pradesh, India.",
+  "where": "Round 1 is fully online with registration and project submissions closing on June 25, 2026. The grand finale (Round 2) is a 24-hour offline hackathon held on July 4-5, 2026 in Anantapur, Andhra Pradesh, India.",
   "prize": "Prizes worth over ₹10 Lakhs are up for grabs, including cash awards, corporate internships, seed incubation support, and direct investor pitch opportunities for startups!",
   "reward": "Prizes worth over ₹10 Lakhs are up for grabs, including cash awards, corporate internships, seed incubation support, and direct investor pitch opportunities for startups!",
   "track": "We have 7 cutting-edge challenge tracks:\n1. AI NPC Systems\n2. Procedural Content Generation\n3. AI for Game Testing & Balancing\n4. AR/VR Immersive Gaming\n5. Esports Analytics & AI\n6. Serious Games for Social Impact\n7. Metaverse & Web3 Gaming",
