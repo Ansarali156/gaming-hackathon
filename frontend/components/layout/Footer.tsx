@@ -67,15 +67,26 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Google Map of RTIH Anantapur */}
-        <div className="mt-12 w-full max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative z-10 group bg-surface">
-          {/* Overlay label */}
-          <div className="absolute top-3 left-3 z-20 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 pointer-events-none">
-            <span className="text-red-400">📍</span>
-            <span className="font-medium">RTIH Anantapur, Andhra Pradesh</span>
+        {/* Google Map of RTIH Anantapur - using exact coordinates for Anantapur city */}
+        <div className="mt-12 w-full max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative z-10 bg-surface">
+          {/* Label above the map, not overlaid */}
+          <div className="flex items-center gap-2 px-4 py-3 bg-surface border-b border-white/10">
+            <span className="text-red-400 text-base">📍</span>
+            <div>
+              <p className="text-white text-sm font-semibold leading-tight">RTIH Anantapur Spoke</p>
+              <p className="text-text-muted text-xs">Anantapur, Andhra Pradesh, India</p>
+            </div>
+            <a
+              href="https://www.google.com/maps?q=14.6819,77.6006"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-auto text-xs text-primary hover:underline"
+            >
+              Open in Maps ↗
+            </a>
           </div>
           <iframe
-            src="https://maps.google.com/maps?q=RTIH+Anantapur+Spoke+Andhra+Pradesh+India&output=embed&z=15"
+            src="https://maps.google.com/maps?q=14.6819,77.6006&output=embed&z=14"
             width="100%"
             height="300"
             style={{ border: 0 }}
