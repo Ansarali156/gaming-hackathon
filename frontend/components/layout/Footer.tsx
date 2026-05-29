@@ -70,7 +70,7 @@ export function Footer() {
         {/* Google Map of RTIH Anantapur */}
         <div className="mt-12 w-full max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative z-10 group bg-surface">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.326294861219!2d77.6047248!3d14.6467362!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb14ac5d8f6f59b%3A0xc9188cd7281f621a!2sRegional%20Technology%20Innovation%20Hub%20(RTIH)%2C%20JNTUA!5e0!3m2!1sen!2sin!4v1716954200000!5m2!1sen!2sin"
+            src="https://maps.google.com/maps?q=Regional%20Technology%20Innovation%20Hub%20(RTIH),%20JNTUA,%20Anantapur,%20Andhra%20Pradesh,%20India&t=&z=15&ie=UTF8&iwloc=&output=embed"
             width="100%"
             height="280"
             style={{ border: 0, filter: "grayscale(100%) invert(90%) contrast(90%)" }}
