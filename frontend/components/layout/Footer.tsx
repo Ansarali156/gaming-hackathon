@@ -69,15 +69,20 @@ export function Footer() {
 
         {/* Google Map of RTIH Anantapur */}
         <div className="mt-12 w-full max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative z-10 group bg-surface">
+          {/* Overlay label */}
+          <div className="absolute top-3 left-3 z-20 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 pointer-events-none">
+            <span className="text-red-400">📍</span>
+            <span className="font-medium">RTIH Anantapur, Andhra Pradesh</span>
+          </div>
           <iframe
-            src="https://maps.google.com/maps?q=Regional%20Technology%20Innovation%20Hub%20(RTIH),%20JNTUA,%20Anantapur,%20Andhra%20Pradesh,%20India&t=&z=15&ie=UTF8&iwloc=&output=embed"
+            src="https://maps.google.com/maps?q=RTIH+Anantapur+Spoke+Andhra+Pradesh+India&output=embed&z=15"
             width="100%"
-            height="280"
-            style={{ border: 0, filter: "grayscale(100%) invert(90%) contrast(90%)" }}
-            allowFullScreen={false}
+            height="300"
+            style={{ border: 0 }}
+            allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            className="w-full transition-all duration-700 ease-out opacity-75 group-hover:opacity-100 group-hover:filter-none"
+            className="w-full"
           />
         </div>
 

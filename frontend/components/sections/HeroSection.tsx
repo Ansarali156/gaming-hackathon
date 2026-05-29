@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { MessageCircle, Instagram, Users, Trophy } from "lucide-react";
+import { MessageCircle, Instagram, Users, Trophy, Download } from "lucide-react";
 import { EVENT_DATES } from "@/lib/constants";
 
 function CountdownTimer({ targetDate, label }: { targetDate: Date; label: string }) {
@@ -99,6 +99,14 @@ export function HeroSection() {
             <Link href="/register" className="btn-primary btn-glow">
               Register Now
             </Link>
+            <a
+              href="/participation-guide.pdf"
+              download="IncuXai_AI_Gaming_Hackathon_Participation_Guide.pdf"
+              className="btn-secondary flex items-center gap-2"
+            >
+              <Download size={18} />
+              Download Guide
+            </a>
             <a href="https://wa.me/917995061289" className="btn-secondary">
               <MessageCircle className="inline mr-2" size={18} />
               WhatsApp Support
