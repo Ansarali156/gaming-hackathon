@@ -73,20 +73,20 @@ export function Footer() {
           <div className="flex items-center gap-2 px-4 py-3 bg-surface border-b border-white/10">
             <span className="text-red-400 text-base">📍</span>
             <div>
-              <p className="text-white text-sm font-semibold leading-tight">RTIH Anantapur Spoke</p>
-              <p className="text-text-muted text-xs">Anantapur, Andhra Pradesh, India</p>
+              <p className="text-white text-sm font-semibold leading-tight">Ratan Tata Innovation Hub (RTIH) — Anantapur Spoke</p>
+              <p className="text-text-muted text-xs">Old Admin Block, JNTUA, Anantapur, Andhra Pradesh – 515002</p>
             </div>
             <a
-              href="https://www.google.com/maps?q=14.6819,77.6006"
+              href="https://www.google.com/maps?q=Old+Admin+Block+JNTUA+Anantapur+Andhra+Pradesh+515002"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-auto text-xs text-primary hover:underline"
+              className="ml-auto text-xs text-primary hover:underline whitespace-nowrap"
             >
               Open in Maps ↗
             </a>
           </div>
           <iframe
-            src="https://maps.google.com/maps?q=14.6819,77.6006&output=embed&z=14"
+            src="https://maps.google.com/maps?q=Old+Admin+Block+JNTUA+Anantapur+Andhra+Pradesh+515002&output=embed&z=16"
             width="100%"
             height="300"
             style={{ border: 0 }}
@@ -99,7 +99,10 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-white/5 text-center text-text-muted">
           <p className="mb-2">
-            Venue Location: <span className="text-text font-medium">Regional Technology Innovation Hub (RTIH), Anantapur, Andhra Pradesh, India</span>
+            Venue: <span className="text-text font-medium">Ratan Tata Innovation Hub (RTIH) — Anantapur Spoke</span>
+          </p>
+          <p className="mb-2 text-sm">
+            Old Admin Block, Jawaharlal Nehru Technological University (JNTU), Anantapur, Andhra Pradesh – 515002
           </p>
           <p className="mb-2">
             Website: <a href="https://incuxai.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">incuxai.com</a> | 
