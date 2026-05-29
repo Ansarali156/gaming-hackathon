@@ -66,6 +66,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://incuxai.com",
   },
+  icons: {
+    icon: "/incuxai_new.png",
+    shortcut: "/incuxai_new.png",
+    apple: "/incuxai_new.png",
+  },
   category: "technology",
 };
 
