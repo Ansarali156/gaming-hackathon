@@ -6,7 +6,7 @@ import Link from "next/link";
 
 const benefits = [
   { icon: Trophy, title: "Win Prizes", desc: "Compete for ₹10,00,000+ in cash prizes and exciting rewards." },
-  { icon: GraduationCap, title: "Free Course Worth ₹5,000", desc: "Receive full access to a premium certified AI or Game Dev course after team registration." },
+  { icon: GraduationCap, title: "Free Course Worth ₹5000", desc: "Receive full access to a premium certified AI or Game Dev course after team registration." },
   { icon: Globe, title: "Get Recognized Nationally", desc: "Showcase your talent to industry leaders across India." },
   { icon: Briefcase, title: "Internship & Placements", desc: "Top performers get direct interview opportunities." },
   { icon: Users, title: "Learn & Network", desc: "Connect with startups, mentors, and fellow developers." },
