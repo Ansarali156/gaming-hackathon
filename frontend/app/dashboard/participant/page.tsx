@@ -746,179 +746,55 @@ function CoursesTab({ teamData, paymentStatus, loading, setActiveTab }: {
 }) {
   const isRegistered = paymentStatus === "SUCCESS";
 
-  const courses = [
-    {
-      id: 1,
-      title: "AI Tools for Professionals",
-      provider: "IncuXai Academy",
-      duration: "10 Hours",
-      modules: "8 modules",
-      badge: "Beginner → Intermediate",
-      description: "Master the most powerful AI tools used in industry today — ChatGPT, Gemini, Copilot, Midjourney, and more. Learn to use them effectively for productivity, content creation, and automation.",
-      topics: [
-        "Introduction to AI Tools Ecosystem",
-        "Prompt Engineering Fundamentals",
-        "ChatGPT & Gemini for Work & Study",
-        "AI Image Generation (Midjourney, DALL·E)",
-        "AI for Code Assistance (GitHub Copilot)",
-        "Automating Workflows with AI Tools",
-        "AI Content Creation & Summarisation",
-        "Capstone: Build an AI-Powered Workflow"
-      ]
-    },
-    {
-      id: 2,
-      title: "Generative AI & LLMs Certification",
-      provider: "IncuXai Academy",
-      duration: "12 Hours",
-      modules: "10 modules",
-      badge: "Intermediate → Advanced",
-      description: "Deep dive into Generative AI and Large Language Models. Learn how LLMs work, how to build AI-powered apps using APIs, and how to apply them in real-world projects.",
-      topics: [
-        "How Generative AI & LLMs Work",
-        "Prompt Engineering (Advanced)",
-        "OpenAI & Gemini API Integration",
-        "Building Chatbots with LLM APIs",
-        "RAG (Retrieval-Augmented Generation)",
-        "Fine-Tuning & Custom AI Assistants",
-        "AI Ethics, Bias & Responsible Use",
-        "Capstone: Deploy an AI-Powered Application"
-      ]
-    }
-  ];
-
   if (loading) return <Spinner />;
 
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="font-display text-2xl font-bold text-text flex items-center gap-2">
-            <GraduationCap className="text-primary" size={28} /> AI Tools Certification Courses
-          </h2>
-          <p className="text-text-muted text-sm mt-1">
-            Exclusively for registered hackathon participants — unlocks after hackathon completion.
+      <div>
+        <h2 className="font-display text-2xl font-bold text-text flex items-center gap-2">
+          <GraduationCap className="text-primary" size={28} /> AI Tools Certification Courses
+        </h2>
+        <p className="text-text-muted text-sm mt-1">
+          Exclusively for registered hackathon participants.
+        </p>
+      </div>
+
+      {/* Main notice */}
+      <div className="flex flex-col items-center justify-center text-center py-16 px-6 rounded-2xl border border-white/10 bg-gradient-to-b from-primary/5 to-transparent gap-5">
+        <div className="w-20 h-20 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+          <GraduationCap className="text-primary" size={36} />
+        </div>
+        <div className="space-y-2 max-w-lg">
+          <h3 className="font-display text-2xl font-bold text-text">
+            Courses Enabled After July 5th
+          </h3>
+          <p className="text-text-muted text-sm leading-relaxed">
+            {isRegistered
+              ? "🎉 Your AI Tools Certification Courses are reserved! They will be enabled for all team members immediately after the hackathon concludes on July 5th, 2026."
+              : "Complete your registration to secure free access to AI Tools Certification Courses worth ₹5,000. Courses will be enabled after the hackathon on July 5th, 2026."}
           </p>
         </div>
-        <span className={`px-4 py-1.5 rounded-full text-xs font-semibold border self-start md:self-auto uppercase tracking-wider flex items-center gap-1.5 ${
-          isRegistered
-            ? "bg-primary/10 text-primary border-primary/20"
-            : "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-        }`}>
-          {isRegistered ? "⏳ Unlocks After Hackathon" : "🔒 Registered Participants Only"}
+        <span className="px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold flex items-center gap-2">
+          <Clock size={14} className="animate-pulse" /> Enabled: July 5th, 2026
         </span>
-      </div>
-
-      {/* Status Banner */}
-      {isRegistered ? (
-        <div className="p-5 rounded-xl bg-gradient-to-r from-primary/15 via-secondary/10 to-transparent border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h3 className="font-bold text-text text-base flex items-center gap-2">
-              <Clock className="text-primary animate-pulse" size={16} />
-              Your AI Certification Courses are Reserved!
-            </h3>
-            <p className="text-text-muted text-sm max-w-2xl">
-              🎉 As a registered participant, you'll get <strong className="text-primary">free access to AI Tools Certification Courses</strong> worth ₹5,000.
-              These courses will be <strong className="text-white">unlocked for all team members immediately after the hackathon concludes on July 5th, 2026</strong>.
-            </p>
-          </div>
-          <span className="px-4 py-2 rounded bg-white/5 border border-white/10 text-text-muted text-xs font-semibold whitespace-nowrap self-start md:self-auto">
-            ⏳ Unlocking: July 5th, 2026
-          </span>
-        </div>
-      ) : (
-        <div className="p-5 rounded-xl bg-gradient-to-r from-yellow-500/10 via-primary/5 to-transparent border border-yellow-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h3 className="font-bold text-text text-base flex items-center gap-2">
-              <Lock className="text-yellow-500" size={16} /> For Registered Participants Only
-            </h3>
-            <p className="text-text-muted text-sm max-w-xl">
-              Complete your registration and payment to secure free access to <strong className="text-white">AI Tools Certification Courses worth ₹5,000</strong>.
-              Courses unlock for your entire team after the hackathon on July 5th, 2026.
-            </p>
-          </div>
+        {!isRegistered && (
           <button
             onClick={() => setActiveTab("payment")}
-            className="btn-primary btn-glow flex items-center gap-2 whitespace-nowrap self-start md:self-auto"
+            className="btn-primary btn-glow flex items-center gap-2"
           >
-            <CreditCard size={16} /> Complete Payment
+            <CreditCard size={16} /> Complete Payment to Unlock
           </button>
-        </div>
-      )}
-
-      {/* Course Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
-        {/* Blur overlay when not registered */}
-        {!isRegistered && (
-          <div className="absolute inset-0 bg-background/30 backdrop-blur-[2px] z-20 rounded-xl pointer-events-none" />
         )}
-
-        {courses.map((course) => (
-          <div key={course.id} className="glass-card p-6 flex flex-col border border-white/5 hover:border-primary/20 transition-all relative overflow-hidden group">
-            {/* Lock / Clock icon */}
-            <div className="absolute right-4 top-4 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-text-muted">
-              {isRegistered ? <Clock size={14} /> : <Lock size={14} />}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                {course.provider}
-              </span>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded bg-white/5 text-text-muted border border-white/10">
-                {course.badge}
-              </span>
-            </div>
-
-            <h3 className="font-display text-lg font-bold text-text group-hover:text-primary transition-colors mb-1">
-              {course.title}
-            </h3>
-            <p className="text-text-muted text-xs mb-4 leading-relaxed">
-              {course.description}
-            </p>
-
-            <div className="space-y-2 mb-5">
-              <p className="text-xs font-semibold text-text flex items-center gap-1.5">
-                <BookOpen size={12} className="text-primary" /> What You'll Learn:
-              </p>
-              <ul className="grid grid-cols-1 gap-1 pl-1">
-                {course.topics.slice(0, 5).map((item, index) => (
-                  <li key={index} className="text-text-dim text-xs flex items-start gap-1.5">
-                    <span className="text-primary mt-0.5">•</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-                {course.topics.length > 5 && (
-                  <li className="text-text-dim/60 text-xs italic pl-3">
-                    + {course.topics.length - 5} more modules...
-                  </li>
-                )}
-              </ul>
-            </div>
-
-            <div className="border-t border-white/5 pt-4 mt-auto flex items-center justify-between gap-4">
-              <span className="text-text-dim text-xs font-medium">
-                ⏱ Duration: <strong className="text-text font-semibold">{course.duration}</strong>
-                <span className="ml-2 text-text-dim/60">• {course.modules}</span>
-              </span>
-              <span className="px-4 py-1.5 rounded bg-white/5 border border-white/10 text-text-muted text-xs font-semibold flex items-center gap-1">
-                {isRegistered ? <><Clock size={10} /> Coming Soon</> : <><Lock size={10} /> Locked</>}
-              </span>
-            </div>
-          </div>
-        ))}
       </div>
 
-      {/* Footer note */}
-      <p className="text-center text-text-dim text-xs pt-2">
-        🔐 AI Tools Certification Courses are exclusively available to registered hackathon participants and unlock automatically after hackathon completion on <strong className="text-text">July 5th, 2026</strong>.
-      </p>
     </motion.div>
   );
 }
 
 function Spinner() {
+
 
   return (
     <div className="flex justify-center py-12">

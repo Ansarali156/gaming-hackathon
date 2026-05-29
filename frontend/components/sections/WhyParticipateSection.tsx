@@ -63,7 +63,7 @@ export function WhyParticipateSection() {
                 Exclusive Participant Reward
               </span>
               <h3 className="font-display text-2xl md:text-3xl font-bold text-text mb-2">
-                Free Certified Course Worth <span className="text-primary font-extrabold font-mono">₹5,000</span>
+                Free Certified Course Worth <span className="text-primary font-extrabold font-mono">₹5000</span>
               </h3>
               <p className="text-text-muted text-sm md:text-base max-w-2xl">
                 Boost your tech stack! Every registered team member gets full access to a premium, industry-certified AI Engineering or Game Development course absolutely free, immediately upon completing your registration.
