@@ -77,7 +77,7 @@ export function Footer() {
               <p className="text-text-muted text-xs">Old Admin Block, JNTUA, Anantapur, Andhra Pradesh – 515002</p>
             </div>
             <a
-              href="https://www.google.com/maps?q=Old+Admin+Block+JNTUA+Anantapur+Andhra+Pradesh+515002"
+              href="https://www.google.com/maps?q=14.6498,77.6064"
               target="_blank"
               rel="noopener noreferrer"
               className="ml-auto text-xs text-primary hover:underline whitespace-nowrap"
@@ -86,7 +86,7 @@ export function Footer() {
             </a>
           </div>
           <iframe
-            src="https://maps.google.com/maps?q=Old+Admin+Block+JNTUA+Anantapur+Andhra+Pradesh+515002&output=embed&z=16"
+            src="https://maps.google.com/maps?q=14.6498,77.6064&output=embed&z=17"
             width="100%"
             height="300"
             style={{ border: 0 }}
