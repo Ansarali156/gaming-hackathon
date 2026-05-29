@@ -744,16 +744,7 @@ function NotificationItem({ title, message, time, unread }: {
 function CoursesTab({ teamData, paymentStatus, loading, setActiveTab }: {
   teamData: any; paymentStatus: string; loading: boolean; setActiveTab: (tab: string) => void;
 }) {
-  const [copied, setCopied] = useState(false);
-  const isUnlocked = paymentStatus === "SUCCESS";
-
-  const couponCode = `INCUX5K-CLAIM-${teamData?.teamId || "MEMBER"}`;
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(couponCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  const isRegistered = paymentStatus === "SUCCESS";
 
   const courses = [
     {
@@ -808,43 +799,29 @@ function CoursesTab({ teamData, paymentStatus, loading, setActiveTab }: {
           </p>
         </div>
         <span className={`px-4 py-1.5 rounded-full text-xs font-semibold border self-start md:self-auto uppercase tracking-wider flex items-center gap-1.5 ${
-          isUnlocked 
-            ? "bg-green-500/10 text-green-400 border-green-500/20" 
+          isRegistered 
+            ? "bg-primary/10 text-primary border-primary/20" 
             : "bg-yellow-500/10 text-yellow-400 border-yellow-500/20 animate-pulse"
         }`}>
-          {isUnlocked ? "🎉 Course Bundle Unlocked" : "🔒 Complete Registration to Unlock"}
+          {isRegistered ? "⏳ Coming Soon (Reserved)" : "🔒 Locked (Pending Registration)"}
         </span>
       </div>
 
       {/* Banner callout based on payment status */}
-      {isUnlocked ? (
-        <div className="p-6 rounded-xl bg-gradient-to-r from-green-500/15 via-primary/10 to-transparent border border-green-500/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {isRegistered ? (
+        <div className="p-6 rounded-xl bg-gradient-to-r from-primary/15 via-secondary/10 to-transparent border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
-            <h3 className="font-bold text-text text-lg">Your Courses are Fully Unlocked!</h3>
-            <p className="text-text-muted text-sm max-w-xl">
-              Use your team's exclusive claim voucher to unlock full lifetime access on our learning portal. Copy the code below and click "Go to Portal" to claim.
+            <h3 className="font-bold text-text text-lg flex items-center gap-2">
+              <Clock className="text-primary animate-pulse" size={18} /> Course Bundle Reserved — Coming Soon!
+            </h3>
+            <p className="text-text-muted text-sm max-w-2xl">
+              🎉 Congratulations! Your team registration is completed successfully and your free ₹5,000 certification courses are secured. 
+              These premium certified courses will unlock for all team members **immediately after the completion of the hackathon on July 5th, 2026**.
             </p>
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="font-mono text-xs text-text-muted bg-white/5 px-2.5 py-1 rounded">VOUCHER:</span>
-              <span className="font-mono text-sm font-bold text-primary bg-primary/10 border border-primary/20 px-3 py-0.5 rounded select-all tracking-wider">
-                {couponCode}
-              </span>
-              <button 
-                onClick={copyToClipboard}
-                className="text-xs text-primary hover:text-white transition-colors bg-white/5 hover:bg-primary/20 px-2 py-1 rounded border border-white/10"
-              >
-                {copied ? "Copied!" : "Copy Voucher"}
-              </button>
-            </div>
           </div>
-          <a 
-            href="https://academy.incuxai.com/redeem" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="btn-primary btn-glow flex items-center gap-2 whitespace-nowrap self-start md:self-auto"
-          >
-            <BookOpen size={16} /> Go to Portal <ExternalLink size={12} />
-          </a>
+          <span className="px-4 py-2 rounded bg-white/5 border border-white/10 text-text-muted text-xs font-semibold whitespace-nowrap self-start md:self-auto">
+            ⏳ Unlocking July 5th, 2026
+          </span>
         </div>
       ) : (
         <div className="p-6 rounded-xl bg-gradient-to-r from-yellow-500/10 via-primary/5 to-transparent border border-yellow-500/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -853,7 +830,8 @@ function CoursesTab({ teamData, paymentStatus, loading, setActiveTab }: {
               <Lock className="text-yellow-500" size={18} /> Premium Learning Bundle is Locked
             </h3>
             <p className="text-text-muted text-sm max-w-xl">
-              Complete your team registration payment to instantly claim these certification courses worth ₹5,000 absolutely free for all team members.
+              Complete your team registration payment to reserve your premium ₹5,000 certification courses. 
+              Access will be unlocked for all team members after the completion of the hackathon on July 5th, 2026.
             </p>
           </div>
           <button 
@@ -867,17 +845,14 @@ function CoursesTab({ teamData, paymentStatus, loading, setActiveTab }: {
 
       {/* Courses Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
-        {!isUnlocked && (
-          <div className="absolute inset-0 bg-background/20 backdrop-blur-[2px] z-20 rounded-xl pointer-events-none" />
-        )}
+        <div className="absolute inset-0 bg-background/10 backdrop-blur-[1px] z-20 rounded-xl pointer-events-none" />
         
         {courses.map((course) => (
           <div key={course.id} className="glass-card p-6 flex flex-col justify-between border border-white/5 hover:border-primary/20 transition-all relative overflow-hidden group">
-            {!isUnlocked && (
-              <div className="absolute right-4 top-4 z-30 w-8 h-8 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-500">
-                <Lock size={14} />
-              </div>
-            )}
+            <div className="absolute right-4 top-4 z-30 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-text-muted">
+              {isRegistered ? <Clock size={14} /> : <Lock size={14} />}
+            </div>
+            
             <div>
               <div className="flex items-center justify-between gap-2 mb-3">
                 <span className="text-xs font-semibold px-2.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
@@ -918,15 +893,10 @@ function CoursesTab({ teamData, paymentStatus, loading, setActiveTab }: {
               <span className="text-text-dim text-xs font-medium">
                 Duration: <strong className="text-text font-semibold">{course.duration}</strong>
               </span>
-              {isUnlocked ? (
-                <a 
-                  href="https://academy.incuxai.com/courses" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="px-4 py-1.5 rounded bg-primary text-white text-xs font-semibold hover:bg-primary-hover transition-colors flex items-center gap-1"
-                >
-                  <Play size={10} className="fill-current" /> Start Learning
-                </a>
+              {isRegistered ? (
+                <span className="px-4 py-1.5 rounded bg-white/5 border border-white/10 text-text-muted text-xs font-semibold flex items-center gap-1">
+                  <Clock size={10} /> Coming Soon
+                </span>
               ) : (
                 <button 
                   onClick={() => setActiveTab("payment")} 
