@@ -69,6 +69,9 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-white/5 text-center text-text-muted">
           <p className="mb-2">
+            Venue Location: <span className="text-text font-medium">Regional Technology Innovation Hub (RTIH), Anantapur, Andhra Pradesh, India</span>
+          </p>
+          <p className="mb-2">
             Website: <a href="https://incuxai.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">incuxai.com</a> | 
             Phone: <a href="tel:+917995061289" className="hover:text-primary transition-colors">+91 7995061289</a> | 
             Email: <a href="mailto:incuxaigaming@gmail.com" className="hover:text-primary transition-colors">incuxaigaming@gmail.com</a>

@@ -7,6 +7,7 @@ export default function Footer() {
         <div className="flex flex-col items-center md:items-start gap-2">
           <div className="font-headline-lg text-primary font-bold tracking-tighter">HACK.2026</div>
           <p className="font-body-md text-on-surface-variant/60 text-sm">© 2026 IncuXai AI Gaming Hackathon. All rights reserved.</p>
+          <p className="text-xs text-on-surface-variant/40">Venue: Regional Technology Innovation Hub (RTIH), Anantapur, AP</p>
         </div>
         
         <div className="flex gap-8">
