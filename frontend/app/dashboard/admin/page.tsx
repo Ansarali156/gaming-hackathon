@@ -41,6 +41,7 @@ export default function AdminDashboard() {
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
+  const [drafts, setDrafts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -112,6 +113,9 @@ export default function AdminDashboard() {
 
       const submissionsRes = await fetch("/api/admin/submissions");
       if (submissionsRes.ok) setSubmissions((await submissionsRes.json()).submissions || []);
+
+      const draftsRes = await fetch("/api/admin/drafts");
+      if (draftsRes.ok) setDrafts((await draftsRes.json()).drafts || []);
     } catch (error) {
       console.error("Failed to fetch admin data:", error);
     }
@@ -290,6 +294,7 @@ export default function AdminDashboard() {
                   <NavItem icon={<Users size={16} />} label="Participants" active={activeTab === "participants"} onClick={() => setActiveTab("participants")} />
                   <NavItem icon={<CreditCard size={16} />} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
                   <NavItem icon={<ExternalLink size={16} />} label="Submissions" active={activeTab === "submissions"} onClick={() => setActiveTab("submissions")} />
+                  <NavItem icon={<AlertCircle size={16} />} label="Abandoned" active={activeTab === "drafts"} onClick={() => setActiveTab("drafts")} />
                   <NavItem icon={<Megaphone size={16} />} label="Announcements" active={activeTab === "announcements"} onClick={() => setActiveTab("announcements")} />
                   <NavItem
                     icon={<Bell size={16} />}
@@ -340,6 +345,7 @@ export default function AdminDashboard() {
                   setSelectedReceipt={setSelectedReceipt}
                 />
               )}
+              {activeTab === "drafts" && <DraftsPane drafts={drafts} />}
               {activeTab === "announcements" && (
                 <AnnouncementsPane
                   announcements={announcements}
@@ -618,7 +624,7 @@ function ParticipantsPane({
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-white/5 p-4 rounded-xl border border-white/5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-white/5 p-4 rounded-xl border border-white/5">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" size={16} />
           <input
@@ -668,7 +674,7 @@ function ParticipantsPane({
                           disabled={!team.payment}
                           className={`px-2 py-0.5 rounded-full text-xs font-bold inline-flex items-center gap-1 ${
                             team.payment?.status === "SUCCESS" ? "bg-green-500/10 text-green-400 cursor-pointer hover:bg-green-500/20" :
-                            team.payment?.status === "PENDING" ? "bg-yellow-500/10 text-yellow-400" :
+                            (team.payment?.status === "PENDING" || !team.payment) ? "bg-yellow-500/10 text-yellow-400" :
                             team.payment?.status === "REFUNDED" ? "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 cursor-pointer" :
                             "bg-red-500/10 text-red-400"
                           }`}
@@ -795,7 +801,6 @@ function PaymentsPane({ payments, setSelectedReceipt }: any) {
         <h2 className="font-display text-2xl font-bold text-text">Payment Management</h2>
         <p className="text-text-muted text-sm">Track billing, audit transactions, and view registration receipts.</p>
       </div>
-
       <div className="glass-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -806,7 +811,6 @@ function PaymentsPane({ payments, setSelectedReceipt }: any) {
                 <th className="p-4">Amount</th>
                 <th className="p-4">Order ID</th>
                 <th className="p-4 text-center">Status</th>
-                <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 text-sm">
@@ -830,24 +834,20 @@ function PaymentsPane({ payments, setSelectedReceipt }: any) {
                       <span className="text-text font-medium block">{payment.team?.name}</span>
                       <span className="text-xs text-text-muted font-mono">{payment.team?.teamId}</span>
                     </td>
-                    <td className="p-4 text-neon-green font-bold">₹{payment.amount}</td>
+                    <td className="p-4 text-neon-green font-bold">₹{payment.finalAmount || payment.amount}</td>
                     <td className="p-4 text-text-muted font-mono text-xs truncate max-w-[120px]">{payment.razorpayOrderId || "N/A"}</td>
                     <td className="p-4 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                        payment.status === "SUCCESS" ? "bg-green-500/10 text-green-400" :
-                        payment.status === "PENDING" ? "bg-yellow-500/10 text-yellow-400" :
-                        payment.status === "REFUNDED" ? "bg-purple-500/10 text-purple-400" :
-                        "bg-red-500/10 text-red-400"
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${
+                        payment.status === "SUCCESS" ? "bg-green-500/10 text-green-400 border-green-500/20" :
+                        payment.status === "PENDING"  ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" :
+                        "bg-red-500/10 text-red-400 border-red-500/20"
                       }`}>{payment.status}</span>
-                    </td>
-                    <td className="p-4 text-right">
-                      {/* Refund option removed */}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-text-muted">No transactions found</td>
+                  <td colSpan={5} className="p-8 text-center text-text-muted">No transactions found</td>
                 </tr>
               )}
             </tbody>
@@ -860,6 +860,7 @@ function PaymentsPane({ payments, setSelectedReceipt }: any) {
 
 /* ============================================================================
    D. ANNOUNCEMENT SYSTEM
+
    ============================================================================ */
 function AnnouncementsPane({
   announcements,
@@ -1469,6 +1470,57 @@ function SponsorsPane({
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ============================================================================
+   J. ABANDONED REGISTRATIONS PANE
+   ============================================================================ */
+function DraftsPane({ drafts }: { drafts: any[] }) {
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <div>
+        <h2 className="font-display text-2xl font-bold text-text">Abandoned Registrations</h2>
+        <p className="text-text-muted text-sm">Teams who started registration but dropped off at payment. Use this to follow up with them!</p>
+      </div>
+
+      <div className="glass-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-surface-light border-b border-white/5 text-text-muted text-xs font-semibold uppercase">
+              <tr>
+                <th className="p-4">Date</th>
+                <th className="p-4">Team Name</th>
+                <th className="p-4">Leader Email</th>
+                <th className="p-4">Phone / Contact</th>
+                <th className="p-4 text-center">Amount Due</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5 text-sm">
+              {drafts.length > 0 ? (
+                drafts.map((draft: any) => (
+                  <tr key={draft.id} className="hover:bg-white/5 transition-colors">
+                    <td className="p-4 text-text-muted text-xs whitespace-nowrap">
+                      {new Date(draft.createdAt).toLocaleDateString()} {new Date(draft.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td className="p-4 text-text font-medium">{draft.teamName}</td>
+                    <td className="p-4 text-primary font-mono">{draft.email}</td>
+                    <td className="p-4 text-text-muted">{draft.payload?.leader?.mobile || "N/A"}</td>
+                    <td className="p-4 text-center font-bold text-neon-green">₹{draft.payload?.finalAmount || draft.payload?.baseAmount || "N/A"}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-text-muted">
+                    No abandoned registrations found. Great!
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </motion.div>

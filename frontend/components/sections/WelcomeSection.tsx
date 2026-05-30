@@ -23,60 +23,9 @@ const messages = [
 ];
 
 export function WelcomeSection() {
-  const logos = [
-    "/rtih_logo.png",
-    "https://www.collegecircle.cc/assets/cclogo.PNG",
-    "https://dc-cdn.s3-ap-southeast-1.amazonaws.com/dc-Cover-4upece6p9dvb9msn1tlcgsivc6-20160519052405.Medi.jpeg",
-    "/incuxai_new.png",
-    "https://upload.wikimedia.org/wikipedia/en/e/ea/Appolice%28emblem%29.png",
-    "https://hinduengg.com/hinduenggnew/New-Images-HCET/College/Logos/hcet.png",
-    "https://studentunionfornation.org/sunimages/logo.png",
-    "https://smq.oym.mybluehostin.me/wp-content/uploads/2024/01/NuLeap-Logo.png"
-  ];
-  
-  // Duplicate logos to ensure seamless scrolling
-  const marqueeLogos = [...logos, ...logos, ...logos, ...logos, ...logos, ...logos];
-
   return (
-    <section id="welcome" className="pb-24 bg-background relative overflow-hidden">
-      <style>{`
-        @keyframes scroll-ltr {
-          0% { transform: translateX(-50%); }
-          100% { transform: translateX(0); }
-        }
-        .animate-scroll-ltr {
-          animation: scroll-ltr 90s linear infinite;
-        }
-      `}</style>
-      
-      {/* Scrolling Logos Marquee */}
-      <div className="w-full mt-20 mb-20 py-8 bg-surface-light/50 border-y border-white/5 flex overflow-hidden">
-        <div className="flex w-max animate-scroll-ltr items-center hover:[animation-play-state:paused]">
-          {/* First Group */}
-          <div className="flex w-max items-center gap-16 px-8">
-            {marqueeLogos.map((logo, i) => (
-              <img 
-                key={`group1-${i}`} 
-                src={logo} 
-                alt="Partner Logo" 
-                className="h-20 md:h-24 object-contain rounded-lg shadow-lg opacity-80 hover:opacity-100 transition-opacity shrink-0" 
-              />
-            ))}
-          </div>
-          {/* Second Group */}
-          <div className="flex w-max items-center gap-16 px-8">
-            {marqueeLogos.map((logo, i) => (
-              <img 
-                key={`group2-${i}`} 
-                src={logo} 
-                alt="Partner Logo" 
-                className="h-20 md:h-24 object-contain rounded-lg shadow-lg opacity-80 hover:opacity-100 transition-opacity shrink-0" 
-              />
-            ))}
-          </div>
-        </div>
-      </div>
- 
+    <section id="welcome" className="py-24 bg-background relative overflow-hidden">
+
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

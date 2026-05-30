@@ -309,3 +309,19 @@ model PasswordResetToken {
   @@index([token])
 }
 
+model PaymentLog {
+  id          String   @id @default(cuid())
+  email       String
+  teamName    String
+  teamId      String?
+  amount      Float?
+  finalAmount Float?
+  status      String   // PENDING | FAILED | SUCCESS
+  reason      String?  // reason for failure or note
+  payload     Json?    // full registration payload snapshot
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([email])
+}

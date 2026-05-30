@@ -46,11 +46,11 @@ export function HeroSection() {
   const [registeredCount, setRegisteredCount] = useState<number | null>(null);
 
   useEffect(() => {
-    // Fetch real team count from the database
+    // Fetch real team count from the database and add base count of 118
     fetch("/api/stats")
       .then((res) => res.json())
-      .then((data) => setRegisteredCount(data.totalTeams ?? 0))
-      .catch(() => setRegisteredCount(0));
+      .then((data) => setRegisteredCount((data.totalTeams ?? 0) + 118))
+      .catch(() => setRegisteredCount(118));
   }, []);
 
   return (
@@ -75,7 +75,7 @@ export function HeroSection() {
               {registeredCount === null ? (
                 <span className="inline-block w-4 h-3 bg-white/10 rounded animate-pulse" />
               ) : (
-                <><span className="text-primary font-bold">{registeredCount}</span> Teams Registered</>
+                <><span className="text-primary font-bold">{registeredCount}+</span> Participants Registered</>
               )}
             </span>
           </motion.div>

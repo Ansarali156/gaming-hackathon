@@ -12,15 +12,11 @@ export async function GET(request: Request) {
     const status = searchParams.get("status");
     const category = searchParams.get("category");
 
-    const where: any = {};
+    const where: any = {
+      payment: { status: "SUCCESS" }
+    };
     if (status) {
       where.status = status;
-    } else {
-      // Hide PENDING teams that haven't paid from the main list to prevent clutter
-      where.OR = [
-        { status: { not: "PENDING" } },
-        { payment: { status: "SUCCESS" } }
-      ];
     }
     if (category) where.category = category;
 

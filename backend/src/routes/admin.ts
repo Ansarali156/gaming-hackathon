@@ -11,5 +11,7 @@ router.post('/announcements', adminController.createAnnouncement);
 router.get('/announcements', adminController.getAnnouncements);
 router.get('/sponsors', adminController.getSponsors);
 router.post('/sponsors', adminController.createSponsor);
+router.get('/payment-logs', adminController.getPaymentLogs);
+router.post('/payment-logs', adminController.createPaymentLog);
 
-export default router;
+export default router;

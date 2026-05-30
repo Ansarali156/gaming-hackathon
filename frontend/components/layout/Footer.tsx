@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Instagram, Linkedin, MessageCircle, Mail } from "lucide-react";
 
 const footerLinks: Record<string, { label: string; href: string }[]> = {
@@ -27,6 +28,9 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
   return (
     <footer className="bg-surface border-t border-white/5">
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-16">
@@ -67,43 +71,48 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Google Map of RTIH Anantapur - using exact coordinates for Anantapur city */}
-        <div className="mt-12 w-full max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative z-10 bg-surface">
-          {/* Label above the map, not overlaid */}
-          <div className="flex items-center gap-2 px-4 py-3 bg-surface border-b border-white/10">
-            <span className="text-red-400 text-base">📍</span>
-            <div>
-              <p className="text-white text-sm font-semibold leading-tight">Ratan Tata Innovation Hub (RTIH) — Anantapur Spoke</p>
-              <p className="text-text-muted text-xs">Old Admin Block, JNTUA, Anantapur, Andhra Pradesh – 515002</p>
+        {/* Map — home page only */}
+        {isHome && (
+          <div className="mt-12 w-full max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative z-10 bg-surface">
+            <div className="flex items-center gap-2 px-4 py-3 bg-surface border-b border-white/10">
+              <span className="text-red-400 text-base">📍</span>
+              <div>
+                <p className="text-white text-sm font-semibold leading-tight">Ratan Tata Innovation Hub (RTIH) — Anantapur Spoke</p>
+                <p className="text-text-muted text-xs">Old Admin Block, JNTUA, Anantapur, Andhra Pradesh – 515002</p>
+              </div>
+              <a
+                href="https://www.google.com/maps?q=14.6498,77.6064"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-auto text-xs text-primary hover:underline whitespace-nowrap"
+              >
+                Open in Maps ↗
+              </a>
             </div>
-            <a
-              href="https://www.google.com/maps?q=14.6498,77.6064"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-auto text-xs text-primary hover:underline whitespace-nowrap"
-            >
-              Open in Maps ↗
-            </a>
+            <iframe
+              src="https://maps.google.com/maps?q=14.6498,77.6064&output=embed&z=17"
+              width="100%"
+              height="300"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="w-full"
+            />
           </div>
-          <iframe
-            src="https://maps.google.com/maps?q=14.6498,77.6064&output=embed&z=17"
-            width="100%"
-            height="300"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            className="w-full"
-          />
-        </div>
+        )}
 
         <div className="mt-12 pt-8 border-t border-white/5 text-center text-text-muted">
-          <p className="mb-2">
-            Venue: <span className="text-text font-medium">Ratan Tata Innovation Hub (RTIH) — Anantapur Spoke</span>
-          </p>
-          <p className="mb-2 text-sm">
-            Old Admin Block, Jawaharlal Nehru Technological University (JNTU), Anantapur, Andhra Pradesh – 515002
-          </p>
+          {isHome && (
+            <>
+              <p className="mb-2">
+                Venue: <span className="text-text font-medium">Ratan Tata Innovation Hub (RTIH) — Anantapur Spoke</span>
+              </p>
+              <p className="mb-2 text-sm">
+                Old Admin Block, Jawaharlal Nehru Technological University (JNTU), Anantapur, Andhra Pradesh – 515002
+              </p>
+            </>
+          )}
           <p className="mb-2">
             Website: <a href="https://incuxai.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">incuxai.com</a> | 
             Phone: <a href="tel:+917995061289" className="hover:text-primary transition-colors">+91 7995061289</a> | 

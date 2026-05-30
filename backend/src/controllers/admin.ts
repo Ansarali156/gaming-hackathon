@@ -161,4 +161,41 @@ export const adminController = {
       res.status(500).json({ error: 'Failed to create sponsor' });
     }
   },
-};
+
+  // Get payment logs filtered by status (PENDING | FAILED | SUCCESS)
+  async getPaymentLogs(req: Request, res: Response) {
+    try {
+      const { status } = req.query;
+      const where: any = {};
+      if (status && status !== 'ALL') where.status = String(status).toUpperCase();
+
+      const logs = await prisma.paymentLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: 200,
+      });
+
+      res.json({ success: true, logs });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch payment logs' });
+    }
+  },
+
+  // Create a payment log entry (called on pending/failed events)
+  async createPaymentLog(req: Request, res: Response) {
+    try {
+      const { email, teamName, teamId, amount, finalAmount, status, reason, payload } = req.body;
+      if (!email || !teamName || !status) {
+        return res.status(400).json({ error: 'email, teamName, and status are required' });
+      }
+
+      const log = await prisma.paymentLog.create({
+        data: { email, teamName, teamId, amount, finalAmount, status, reason, payload },
+      });
+
+      res.json({ success: true, log });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create payment log' });
+    }
+  },
+};

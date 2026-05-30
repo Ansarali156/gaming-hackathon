@@ -145,6 +145,31 @@ export const registerController = {
         }
       });
 
+      // Log this as a PENDING payment entry
+      await prisma.paymentLog.upsert({
+        where: { id: pendingReg.id },
+        create: {
+          id: pendingReg.id,
+          email: normalizedLeaderEmail,
+          teamName: normalizedTeamName,
+          teamId,
+          amount: baseAmount,
+          finalAmount,
+          status: 'PENDING',
+          reason: 'Registration initiated, awaiting payment',
+          payload: registrationPayload as any,
+        },
+        update: {
+          teamName: normalizedTeamName,
+          teamId,
+          amount: baseAmount,
+          finalAmount,
+          status: 'PENDING',
+          reason: 'Registration re-initiated, awaiting payment',
+          payload: registrationPayload as any,
+        },
+      });
+
       // Forward order details to SUN for payment handling or return a redirect URL
       let sunRedirectUrl: string | undefined;
       try {
@@ -231,6 +256,19 @@ export const registerController = {
               prisma.user.delete({ where: { id: user.id } })
             ]);
             console.log(`Log: 🧹 Rolled back pending registration for ${email}`);
+
+            // Log this as a FAILED/cancelled payment
+            await prisma.paymentLog.create({
+              data: {
+                email: String(email).toLowerCase(),
+                teamName: team.name,
+                teamId: team.teamId,
+                amount: team.payment?.amount ?? null,
+                finalAmount: team.payment?.finalAmount ?? null,
+                status: 'FAILED',
+                reason: 'Registration cancelled or payment abandoned by user',
+              },
+            });
           }
         }
       }
