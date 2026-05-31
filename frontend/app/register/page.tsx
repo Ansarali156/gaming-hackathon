@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { PRICING, TRACKS } from "@/lib/constants";
+import { PRICING, TRACK_CATEGORIES } from "@/lib/constants";
 import {
   Users,
   CheckCircle,
@@ -59,6 +59,7 @@ export default function RegisterPage() {
   const [members, setMembers] = useState<TeamMember[]>([
     { name: "", email: "", skills: "", role: "" },
   ]);
+  const [mainTrackCategory, setMainTrackCategory] = useState("");
   const [projectTheme, setProjectTheme] = useState("");
   const [techStack, setTechStack] = useState("");
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -601,19 +602,40 @@ export default function RegisterPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="label-text">
-                          Theme / Track <span className="text-red-400">*</span>
+                          Main Track <span className="text-red-400">*</span>
+                        </label>
+                        <select
+                          value={mainTrackCategory}
+                          onChange={(e) => {
+                            setMainTrackCategory(e.target.value);
+                            setProjectTheme("");
+                          }}
+                          className={`input-field mb-4`}
+                        >
+                          <option value="">Select a Main Track</option>
+                          {TRACK_CATEGORIES.map((category) => (
+                            <option key={category.slug} value={category.slug}>
+                              {category.category}
+                            </option>
+                          ))}
+                        </select>
+
+                        <label className="label-text mt-4">
+                          Theme / Sub-Topic <span className="text-red-400">*</span>
                         </label>
                         <select
                           value={projectTheme}
                           onChange={(e) => setProjectTheme(e.target.value)}
                           className={`input-field ${errors.projectTheme ? "border-red-500/50" : ""}`}
+                          disabled={!mainTrackCategory}
                         >
-                          <option value="">Select a theme</option>
-                          {TRACKS.map((track) => (
-                            <option key={track.id} value={track.title}>
-                              {track.title}
-                            </option>
-                          ))}
+                          <option value="">Select a sub-topic</option>
+                          {mainTrackCategory &&
+                            TRACK_CATEGORIES.find((c) => c.slug === mainTrackCategory)?.tracks.map((track) => (
+                              <option key={track.id} value={track.title}>
+                                {track.title}
+                              </option>
+                            ))}
                         </select>
                         <FieldError msg={errors.projectTheme} />
                       </div>

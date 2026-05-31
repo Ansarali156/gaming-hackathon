@@ -100,8 +100,8 @@ export function HeroSection() {
               Register Now
             </Link>
             <a
-              href="/participation-guide.pdf"
-              download="IncuXai_AI_Gaming_Hackathon_Participation_Guide.pdf"
+              href="/user-guide.pdf"
+              download="TRACK-1,2,3_AI_HACKATHON_INCUX_AI.pdf"
               className="btn-secondary flex items-center gap-2"
             >
               <Download size={18} />

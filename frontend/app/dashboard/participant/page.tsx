@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { TRACK_CATEGORIES } from "@/lib/constants";
 import {
   Users,
   CreditCard,
@@ -282,6 +283,8 @@ function TeamTab({ teamData, loading }: any) {
 
   const leader = teamData.members?.find((m: any) => m.role === "LEADER");
   const members = teamData.members?.filter((m: any) => m.role !== "LEADER") || [];
+  
+  const mainTrack = TRACK_CATEGORIES.find(c => c.tracks.some(t => t.title === teamData.projectTheme))?.category.split(":")[0] || null;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -302,9 +305,10 @@ function TeamTab({ teamData, loading }: any) {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 text-sm border-t border-white/5 pt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm border-t border-white/5 pt-4">
           <InfoRow label="Category" value={teamData.category} />
-          {teamData.projectTheme && <InfoRow label="Theme" value={teamData.projectTheme} />}
+          {mainTrack && <InfoRow label="Main Track" value={mainTrack} />}
+          {teamData.projectTheme && <InfoRow label="Theme / Sub-Topic" value={teamData.projectTheme} />}
           {teamData.techStack && <InfoRow label="Tech Stack" value={teamData.techStack} />}
         </div>
       </div>
@@ -682,8 +686,8 @@ function MemberCard({ member, isLeader }: { member: any; isLeader?: boolean }) {
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex justify-between text-sm">
-      <span className="text-text-muted">{label}</span>
+    <div className="flex flex-col gap-1 text-sm bg-white/5 p-3 rounded-lg border border-white/5">
+      <span className="text-text-muted text-xs uppercase tracking-wider font-bold">{label}</span>
       <span className="text-text font-medium">{value}</span>
     </div>
   );

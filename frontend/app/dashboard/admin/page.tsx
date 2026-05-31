@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { TRACK_CATEGORIES } from "@/lib/constants";
 import {
   Users,
   CreditCard,
@@ -1153,6 +1154,8 @@ function TeamDetailsModal({ team, onClose }: { team: any; onClose: () => void })
   const leader = leaderData?.user;
   const regularMembers = team.members?.filter((m: any) => m.role !== "LEADER") || [];
 
+  const mainTrack = TRACK_CATEGORIES.find(c => c.tracks.some(t => t.title === team.projectTheme))?.category.split(":")[0] || "N/A";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8" onClick={(e) => e.stopPropagation()}>
@@ -1167,10 +1170,22 @@ function TeamDetailsModal({ team, onClose }: { team: any; onClose: () => void })
         </div>
 
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="bg-white/5 p-4 rounded-xl">
               <p className="text-text-muted text-xs mb-1">Category</p>
               <p className="text-text font-medium">{team.category}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Main Track</p>
+              <p className="text-text font-medium">{mainTrack}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Theme / Sub-Topic</p>
+              <p className="text-text font-medium">{team.projectTheme || "N/A"}</p>
+            </div>
+            <div className="bg-white/5 p-4 rounded-xl">
+              <p className="text-text-muted text-xs mb-1">Tech Stack</p>
+              <p className="text-text font-medium">{team.techStack || "N/A"}</p>
             </div>
             <div className="bg-white/5 p-4 rounded-xl">
               <p className="text-text-muted text-xs mb-1">Payment Status</p>

@@ -63,6 +63,8 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
+                target={link.href.endsWith(".pdf") ? "_blank" : undefined}
+                rel={link.href.endsWith(".pdf") ? "noopener noreferrer" : undefined}
                 className="text-text-muted hover:text-primary transition-colors font-medium text-sm xl:text-base"
               >
                 {link.label}
@@ -141,6 +143,8 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
+                target={link.href.endsWith(".pdf") ? "_blank" : undefined}
+                rel={link.href.endsWith(".pdf") ? "noopener noreferrer" : undefined}
                 onClick={() => setMobileOpen(false)}
                 className="block text-text-muted hover:text-primary transition-colors text-base py-1"
               >

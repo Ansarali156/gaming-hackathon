@@ -14,62 +14,97 @@ export const PRICING = {
   STARTUP: { price: 1000, minTeam: 2, maxTeam: 4 },
 };
 
-export const TRACKS = [
+export const TRACK_CATEGORIES = [
   {
-    id: 1,
-    title: "Action & Adventure — Side-Scroller Combat",
-    description: "Build a 2D side-scrolling action game where the player fights waves of enemies across multiple levels. The character moves left and right, attacks enemies, and must survive to reach the end of each stage. Difficulty increases with each level.",
-    elements: ["Health bar — top left", "Enemies from right — canvas", "Score counter — top right", "Player sprite — center left", "D-pad — bottom left", "Attack + Jump buttons — bottom right"],
+    slug: "track-01",
+    category: "Track 01: For Game Developers",
+    description: "Nine game genres to build and conquer.",
+    tracks: [
+      {
+        id: "T1-1",
+        title: "Action & Adventure — Side-Scroller Combat",
+        description: "Build a 2D side-scrolling action game where the player fights waves of enemies across multiple levels. The character moves left and right, attacks enemies, and must survive to reach the end of each stage. Difficulty increases with each level.",
+        elements: ["Health bar", "Enemies", "Score counter", "Player sprite", "Controls"],
+      },
+      {
+        id: "T1-2",
+        title: "Casual — Bubble Pop Blitz",
+        description: "Build a bubble-shooting game where the player clears colored bubbles before they reach the bottom. Match 3 or more same-colored bubbles to pop them. Each level adds more rows and tricky layouts.",
+        elements: ["Bubble grid", "Score + level", "Launcher", "Next bubble preview", "Mechanics"],
+      },
+      {
+        id: "T1-3",
+        title: "Sports & Racing — Endless Kart Racer",
+        description: "Build a top-down kart racing game where the player dodges oncoming traffic and collects speed boosts on an infinite scrolling road. The game gets faster over time and tracks distance covered.",
+        elements: ["Scrolling track", "Minimap", "Speedometer", "Distance counter", "Controls"],
+      },
+      {
+        id: "T1-4",
+        title: "Strategy — Tower Defense",
+        description: "Build a tower defense game where the player places different towers along a path to stop waves of enemies from reaching the base. Earn gold by defeating enemies and spend it on new or upgraded towers between waves.",
+        elements: ["Grid map", "Lives counter", "Enemy HP", "Tower types", "Gold counter"],
+      },
+      {
+        id: "T1-5",
+        title: "Multiplayer / Battle Royale — Last Squad Standing",
+        description: "Build a top-down mini battle royale where the player fights AI bots while a shrinking safe zone forces everyone closer together. Collect weapons and survive until the last player standing.",
+        elements: ["Top-down map", "Zone timer", "Shoot button", "Shrinking zone", "Minimap"],
+      },
+      {
+        id: "T1-6",
+        title: "Horror & Survival — Flashlight Escape",
+        description: "Build a top-down survival horror game where the player navigates a dark maze using only a flashlight. Monsters patrol the maze and the player must avoid them while conserving stamina and maintaining sanity to escape.",
+        elements: ["Dark maze", "Sanity meter", "Flashlight", "Stamina bar", "Controls"],
+      },
+      {
+        id: "T1-7",
+        title: "Educational — Math Quest",
+        description: "Build an educational game where players answer math questions to attack enemies and progress through levels. Each correct answer deals damage; wrong answers let the enemy strike back. Topics get harder each level.",
+        elements: ["Battle scene", "Timer bar", "Math question", "Answer buttons", "Feedback"],
+      },
+      {
+        id: "T1-8",
+        title: "Music & Rhythm — Beat Tap Challenge",
+        description: "Build a rhythm game where colored notes fall down 4 lanes in sync with the beat. The player must tap the correct lane at the right moment. Combos multiply the score and accuracy ratings are shown after each note.",
+        elements: ["Lanes", "Combo multiplier", "Falling notes", "Accuracy feedback", "Controls"],
+      },
+      {
+        id: "T1-9",
+        title: "Sandbox & Creative — World Builder",
+        description: "Build a grid-based sandbox where players freely place different block types to create their own world. There are no goals — just creative freedom to build landscapes, structures, and environments tile by tile.",
+        elements: ["Tile grid", "Undo button", "Block toolbar", "Save button", "Controls"],
+      },
+    ]
   },
   {
-    id: 2,
-    title: "Casual — Bubble Pop Blitz",
-    description: "Build a bubble-shooting game where the player clears colored bubbles before they reach the bottom. Match 3 or more same-colored bubbles to pop them. Each level adds more rows and tricky layouts.",
-    elements: ["Bubble grid — top area", "Score + level — top bar", "Launcher + aim line — bottom center", "Next bubble preview — bottom right", "Tap/drag to aim & shoot — mechanic"],
+    slug: "track-02",
+    category: "Track 02: Strategy & Growth with AI",
+    description: "For MBA Minds, Product Thinkers, and Strategic Builders.",
+    tracks: [
+      {
+        id: "T2-1",
+        title: "Strategy & Growth with AI",
+        description: "Participants must develop and present an AI-assisted business strategy or growth plan. Build an AI-powered market analysis, a go-to-market strategy, and a revenue model backed by data.",
+        elements: ["Strategic Clarity", "AI Integration", "Market Viability", "Revenue Model", "Pitch Quality", "Innovation"],
+      }
+    ]
   },
   {
-    id: 3,
-    title: "Sports & Racing — Endless Kart Racer",
-    description: "Build a top-down kart racing game where the player dodges oncoming traffic and collects speed boosts on an infinite scrolling road. The game gets faster over time and tracks distance covered.",
-    elements: ["Vertical scrolling track — center", "Minimap — top right", "Speedometer — bottom right", "Distance counter — top center", "Left/Right buttons — bottom corners"],
-  },
-  {
-    id: 4,
-    title: "Strategy — Tower Defense",
-    description: "Build a tower defense game where the player places different towers along a path to stop waves of enemies from reaching the base. Earn gold by defeating enemies and spend it on new or upgraded towers between waves.",
-    elements: ["Grid map with enemy path — center", "Lives counter — top left", "Enemy HP bars — above units", "Tower types + cost — bottom bar", "Start wave button — top right", "Gold counter — top left", "Tower range on hover — canvas"],
-  },
-  {
-    id: 5,
-    title: "Multiplayer / Battle Royale — Last Squad Standing",
-    description: "Build a top-down mini battle royale where the player fights AI bots while a shrinking safe zone forces everyone closer together. Collect weapons and survive until the last player standing.",
-    elements: ["Top-down map canvas — center", "Zone timer — top center", "Shoot button — bottom right", "Shrinking zone overlay — canvas", "Minimap — top right", "HP bar — bottom left", "Joystick — bottom left"],
-  },
-  {
-    id: 6,
-    title: "Horror & Survival — Flashlight Escape",
-    description: "Build a top-down survival horror game where the player navigates a dark maze using only a flashlight. Monsters patrol the maze and the player must avoid them while conserving stamina and maintaining sanity to escape.",
-    elements: ["Dark maze canvas — full screen", "Sanity meter — top right", "Flashlight reveal — around player", "Stamina bar — top left", "Joystick — bottom left", "Sprint button — bottom right"],
-  },
-  {
-    id: 7,
-    title: "Educational — Math Quest",
-    description: "Build an educational game where players answer math questions to attack enemies and progress through levels. Each correct answer deals damage; wrong answers let the enemy strike back. Topics get harder each level.",
-    elements: ["Battle scene — top half", "Timer bar — per question", "Math question — bottom half", "4 answer buttons — bottom grid", "Correct/wrong feedback — battle scene", "Score + level — top bar"],
-  },
-  {
-    id: 8,
-    title: "Music & Rhythm — Beat Tap Challenge",
-    description: "Build a rhythm game where colored notes fall down 4 lanes in sync with the beat. The player must tap the correct lane at the right moment. Combos multiply the score and accuracy ratings are shown after each note.",
-    elements: ["4 lane columns — full canvas", "Combo multiplier — top center", "Falling notes — top to bottom", "Accuracy feedback — center screen", "Tap zone bar — near bottom", "Lane tap buttons — bottom"],
-  },
-  {
-    id: 9,
-    title: "Sandbox & Creative — World Builder",
-    description: "Build a grid-based sandbox where players freely place different block types to create their own world. There are no goals — just creative freedom to build landscapes, structures, and environments tile by tile.",
-    elements: ["Tile grid canvas — center", "Undo button — top left", "Block type toolbar — bottom", "Save button — top right", "Zoom in/out — top right", "Tap tile to place block — mechanic"],
-  },
+    slug: "track-03",
+    category: "Track 03: One Idea. One Pitch.",
+    description: "Open to Everyone. No Domain Restriction. No Prior Experience Needed.",
+    tracks: [
+      {
+        id: "T3-1",
+        title: "One Idea. One Pitch.",
+        description: "All you need is one solid idea and the ability to pitch it simply and confidently. Your deck must answer: What is the problem? What is the solution? Who benefits? And why will it work?",
+        elements: ["Idea Strength", "AI Relevance", "Pitch Clarity", "Originality", "Delivery", "Impact Potential"],
+      }
+    ]
+  }
 ];
+
+export const TRACKS = TRACK_CATEGORIES.flatMap(c => c.tracks);
 
 export const TIMELINE = [
   { phase: "Registrations Open", date: "May 25", status: "active" },
