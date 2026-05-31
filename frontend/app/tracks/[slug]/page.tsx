@@ -14,8 +14,9 @@ export function generateStaticParams() {
 
 const iconList = [Swords, Shapes, Car, Castle, Crosshair, Moon, Calculator, Music, Paintbrush];
 
-export default function TrackPage({ params }: { params: { slug: string } }) {
-  const categoryIndex = TRACK_CATEGORIES.findIndex((c) => c.slug === params.slug);
+export default async function TrackPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const categoryIndex = TRACK_CATEGORIES.findIndex((c) => c.slug === slug);
   
   if (categoryIndex === -1) {
     notFound();
