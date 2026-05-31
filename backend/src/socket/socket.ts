@@ -11,7 +11,7 @@ export const initializeSocket = (httpServer: HttpServer) => {
       origin: (origin, callback) => {
         const allowedOrigins = [
           'http://localhost:3000',
-          'https://ai-gaming-hackthon.vercel.app',
+          'https://aigaminghackathon.incuxai.com',
           ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(s => s.trim()) : []),
         ];
         if (!origin || allowedOrigins.includes(origin)) {

@@ -6,6 +6,7 @@ import { Providers } from "@/components/Providers";
 import { FloatingActions } from "@/components/layout/FloatingActions";
 import { Chatbot } from "@/components/layout/Chatbot";
 import { ParticleBackground } from "@/components/ui/ParticleBackground";
+import { Toaster } from "react-hot-toast";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -87,6 +88,7 @@ export default function RootLayout({
           {children}
           <FloatingActions />
           <Chatbot />
+          <Toaster position="bottom-right" toastOptions={{ className: "bg-surface text-text border border-white/10" }} />
         </Providers>
         {/* Razorpay checkout removed — payments handled by external SUN endpoint */}
       </body>

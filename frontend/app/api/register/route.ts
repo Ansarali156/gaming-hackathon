@@ -5,14 +5,34 @@ import { PRICING } from "@/lib/constants";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "@/lib/mailer";
 import { forwardToSun, makeSunRedirectUrl } from "@/lib/sunForwarder";
+import { z } from "zod";
 
-function isValidEmail(email: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
+const memberSchema = z.object({
+  name: z.string().trim().min(1, "Member name is required"),
+  email: z.string().trim().email("Member email is invalid"),
+  skills: z.array(z.string()).optional(),
+  role: z.string().optional(),
+});
 
-function isValidPhone(phone: string) {
-  return /^[6-9]\d{9}$/.test(phone.replace(/\s/g, ""));
-}
+const registrationSchema = z.object({
+  category: z.string().min(1, "Category is required"),
+  teamName: z.string().trim().min(1, "Team name is required"),
+  projectTheme: z.string().optional(),
+  techStack: z.string().optional(),
+  validateOnly: z.boolean().optional(),
+  paymentDetails: z.any().optional(),
+  leader: z.object({
+    name: z.string().trim().min(1, "Leader name is required"),
+    email: z.string().trim().email("Leader email is invalid"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    mobile: z.string().regex(/^[6-9]\d{9}$/, "Leader mobile must be a valid 10-digit Indian number"),
+    college: z.string().optional(),
+    discordId: z.string().optional(),
+    linkedin: z.string().optional(),
+    skills: z.array(z.string()).optional(),
+  }),
+  members: z.array(memberSchema).min(1, "At least one team member is required"),
+});
 
 export async function POST(request: Request) {
   try {
@@ -21,38 +41,14 @@ export async function POST(request: Request) {
     const loginUrl = `${protocol}://${host}/login`;
 
     const body = await request.json();
-    const { category, teamName, leader, members, projectTheme, techStack, validateOnly, paymentDetails } = body;
-
-    // ── Required field checks ──────────────────────────────────────────────
-    if (!category || !teamName?.trim()) {
-      return NextResponse.json({ error: "Category and team name are required." }, { status: 400 });
-    }
-    if (!leader?.name?.trim() || !leader?.email?.trim() || !leader?.password) {
-      return NextResponse.json({ error: "Leader name, email, and password are required." }, { status: 400 });
-    }
-    if (!isValidEmail(leader.email)) {
-      return NextResponse.json({ error: "Leader email is not valid." }, { status: 400 });
-    }
-    if (leader.password.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
-    }
-    if (leader.mobile && !isValidPhone(leader.mobile)) {
-      return NextResponse.json({ error: "Leader mobile must be a valid 10-digit Indian number." }, { status: 400 });
+    // ── Zod Validation ──────────────────────────────────────────────
+    const parseResult = registrationSchema.safeParse(body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0].message;
+      return NextResponse.json({ error: firstError }, { status: 400 });
     }
 
-    // ── Validate team members ────────────────────────────────────────────
-    if (!Array.isArray(members) || members.length < 1) {
-      return NextResponse.json({ error: "At least one team member is required." }, { status: 400 });
-    }
-    for (let i = 0; i < members.length; i++) {
-      const m = members[i];
-      if (!m.name?.trim()) {
-        return NextResponse.json({ error: `Member ${i + 1}: name is required.` }, { status: 400 });
-      }
-      if (!m.email?.trim() || !isValidEmail(m.email)) {
-        return NextResponse.json({ error: `Member ${i + 1}: a valid email is required.` }, { status: 400 });
-      }
-    }
+    const { category, teamName, leader, members, projectTheme, techStack, validateOnly, paymentDetails } = parseResult.data;
 
     // ── Leader email uniqueness (each leader gets a fresh account + cleanup if pending) ───────
     const existingUser = await prisma.user.findUnique({

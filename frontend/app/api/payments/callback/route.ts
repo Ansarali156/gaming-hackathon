@@ -127,93 +127,104 @@ export async function POST(request: Request) {
 
     // ── Generate a dynamically guaranteed unique teamId ──
     let activeTeamId = teamId;
-    const conflict = await prisma.team.findUnique({ where: { teamId: activeTeamId } });
-    if (conflict) {
-      let isUnique = false;
-      let attempt = 1;
-      const prefix = "INC";
-      const year = new Date().getFullYear().toString().slice(-2);
-      while (!isUnique) {
-        const count = await prisma.team.count();
-        const number = (count + attempt).toString().padStart(4, "0");
-        activeTeamId = `${prefix}${year}${number}`;
-        const duplicate = await prisma.team.findUnique({ where: { teamId: activeTeamId } });
-        if (!duplicate) {
-          isUnique = true;
+    let team: any;
+    let attempts = 0;
+    const prefix = "INC";
+    const year = new Date().getFullYear().toString().slice(-2);
+
+    // 5. Create Team, User (Leader + Members), and Payment records atomically, and delete the draft
+    // Wrapped in a retry loop to prevent TOCTOU race conditions on teamId generation
+    while (attempts < 10) {
+      try {
+        team = await prisma.$transaction(async (tx) => {
+          const t = await tx.team.create({
+            data: {
+              teamId: activeTeamId,
+              name: teamName,
+              category,
+              projectTheme,
+              techStack,
+              status: "APPROVED",
+              members: {
+                create: [
+                  {
+                    user: {
+                      create: {
+                        email: leader.email.toLowerCase(),
+                        name: leader.name,
+                        mobile: leader.mobile,
+                        college: leader.college,
+                        linkedin: leader.linkedin,
+                        password: leader.password, // Already hashed password
+                        role: "PARTICIPANT",
+                      },
+                    },
+                    role: "LEADER",
+                    skills: leader.skills,
+                  },
+                  ...members.map((m: any) => ({
+                    user: {
+                      connectOrCreate: {
+                        where: { email: m.email.toLowerCase() },
+                        create: {
+                          email: m.email.toLowerCase(),
+                          name: m.name,
+                          role: "PARTICIPANT",
+                        },
+                      },
+                    },
+                    role: "MEMBER",
+                    skills: m.skills,
+                    position: m.role,
+                  })),
+                ] as any,
+              },
+              payment: {
+                create: {
+                  amount: baseAmount,
+                  gst: gst,
+                  finalAmount: finalAmount,
+                  status: "SUCCESS",
+                  razorpayPaymentId: payment_id,
+                  razorpayOrderId: order_id || undefined,
+                },
+              },
+            },
+            include: {
+              members: { include: { user: true } },
+              payment: true,
+            },
+          });
+
+          // Delete the pending registration draft
+          await tx.pendingRegistration.delete({
+            where: { id: draft.id },
+          });
+
+          return t;
+        });
+
+        // If transaction succeeds, break out of the retry loop
+        break;
+      } catch (e: any) {
+        // Prisma error code for Unique constraint failed
+        if (e.code === 'P2002' && (e.meta?.target?.includes('teamId') || e.meta?.target === 'Team_teamId_key' || String(e.message).includes('teamId'))) {
+          attempts++;
+          console.warn(`Race condition caught: teamId ${activeTeamId} already exists. Retrying... (Attempt ${attempts})`);
+          // Generate a new ID based on a fresh count
+          const count = await prisma.team.count();
+          const number = (count + attempts + 1).toString().padStart(4, "0");
+          activeTeamId = `${prefix}${year}${number}`;
         } else {
-          attempt++;
+          // If it's a different error (e.g. email already taken), throw it to the outer catch
+          throw e;
         }
       }
     }
 
-    // 5. Create Team, User (Leader + Members), and Payment records atomically, and delete the draft
-    const team = await prisma.$transaction(async (tx) => {
-      const t = await tx.team.create({
-        data: {
-          teamId: activeTeamId,
-          name: teamName,
-          category,
-          projectTheme,
-          techStack,
-          status: "APPROVED",
-          members: {
-            create: [
-              {
-                user: {
-                  create: {
-                    email: leader.email.toLowerCase(),
-                    name: leader.name,
-                    mobile: leader.mobile,
-                    college: leader.college,
-                    linkedin: leader.linkedin,
-                    password: leader.password, // Already hashed password
-                    role: "PARTICIPANT",
-                  },
-                },
-                role: "LEADER",
-                skills: leader.skills,
-              },
-              ...members.map((m: any) => ({
-                user: {
-                  connectOrCreate: {
-                    where: { email: m.email.toLowerCase() },
-                    create: {
-                      email: m.email.toLowerCase(),
-                      name: m.name,
-                      role: "PARTICIPANT",
-                    },
-                  },
-                },
-                role: "MEMBER",
-                skills: m.skills,
-                position: m.role,
-              })),
-            ] as any,
-          },
-          payment: {
-            create: {
-              amount: baseAmount,
-              gst: gst,
-              finalAmount: finalAmount,
-              status: "SUCCESS",
-              razorpayPaymentId: payment_id,
-              razorpayOrderId: order_id || undefined,
-            },
-          },
-        },
-        include: {
-          members: { include: { user: true } },
-          payment: true,
-        },
-      });
-
-      // Delete the pending registration draft
-      await tx.pendingRegistration.delete({
-        where: { id: draft.id },
-      });
-
-      return t;
-    });
+    if (!team) {
+      throw new Error("Failed to generate a unique Team ID after 10 attempts.");
+    }
 
     const payment = team.payment!;
     console.log(`🎉 Payment successfully verified and team/user account created for team "${team.name}" (ID: ${team.teamId}). Payment ID: ${payment_id}`);
