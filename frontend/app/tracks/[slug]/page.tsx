@@ -47,9 +47,9 @@ export default async function TrackPage({ params }: { params: Promise<{ slug: st
           </Link>
         </div>
 
-        {params.slug === "track-01" && <Track1Grid category={category} categoryIndex={categoryIndex} />}
-        {params.slug === "track-02" && <Track2Content />}
-        {params.slug === "track-03" && <Track3Content />}
+        {slug === "track-01" && <Track1Grid category={category} categoryIndex={categoryIndex} />}
+        {slug === "track-02" && <Track2Content />}
+        {slug === "track-03" && <Track3Content />}
       </div>
 
       <Footer />
