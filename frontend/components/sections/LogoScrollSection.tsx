@@ -2,13 +2,13 @@
 
 const logos = [
   "/rtih_logo.png",
-  "https://www.collegecircle.cc/assets/cclogo.PNG",
-  "https://dc-cdn.s3-ap-southeast-1.amazonaws.com/dc-Cover-4upece6p9dvb9msn1tlcgsivc6-20160519052405.Medi.jpeg",
+  "/cclogo.png",
+  "https://www.livelaw.in/h-upload/2022/08/05/429112-andhra-pradesh-govt.jpg",
   "/incuxai_new.png",
-  "https://upload.wikimedia.org/wikipedia/en/e/ea/Appolice%28emblem%29.png",
-  "https://hinduengg.com/hinduenggnew/New-Images-HCET/College/Logos/hcet.png",
-  "https://studentunionfornation.org/sunimages/logo.png",
-  "https://smq.oym.mybluehostin.me/wp-content/uploads/2024/01/NuLeap-Logo.png"
+  "/appolice_logo.png",
+  "/hcet_logo.png",
+  "/sun_logo.png",
+  "/nuleap_logo.png",
 ];
 
 const marqueeLogos = [...logos, ...logos, ...logos, ...logos, ...logos, ...logos];

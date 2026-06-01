@@ -71,11 +71,14 @@ function Track1Grid({ category, categoryIndex }: { category: any, categoryIndex:
             <p className="text-text-muted text-sm leading-relaxed mb-6 flex-grow">{track.description}</p>
             
             {track.elements && track.elements.length > 0 && (
-              <div className="mt-auto border-t border-white/5 pt-4">
-                <p className="text-[10px] font-bold text-text-muted mb-3 uppercase tracking-widest">Mandatory Interface Elements</p>
+              <div className="mt-auto border-t border-primary/30 pt-4">
+                <p className="text-[11px] font-bold text-primary mb-3 uppercase tracking-widest flex items-center gap-1.5">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                  Mandatory Interface Elements
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {track.elements.map((el: string) => (
-                    <span key={el} className="text-[10px] px-2 py-1 bg-white/5 border border-white/10 rounded-full text-text-dim">
+                    <span key={el} className="text-[11px] px-2.5 py-1 bg-primary/15 border border-primary/40 rounded-full text-primary font-semibold">
                       {el}
                     </span>
                   ))}
