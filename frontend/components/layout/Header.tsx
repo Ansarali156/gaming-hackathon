@@ -39,16 +39,20 @@ export function Header() {
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="flex items-center gap-2">
-              <img 
-                src="/apgovt_logo.jpg" 
-                alt="AP Government Logo" 
-                className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 group-hover:scale-105"
-              />
-              <img 
-                src="/rtih_logo.png" 
-                alt="RTIH Logo" 
-                className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 group-hover:scale-105"
-              />
+              <div className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 overflow-hidden rounded-md shadow border border-white/5 bg-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                <img 
+                  src="/apgovt_logo_v2.jpg" 
+                  alt="AP Government Logo" 
+                  className="h-full w-full object-contain scale-[1.15]"
+                />
+              </div>
+              <div className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 overflow-hidden rounded-md shadow border border-white/5 bg-white/5 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                <img 
+                  src="/rtih_logo.png" 
+                  alt="RTIH Logo" 
+                  className="h-full w-full object-contain scale-[1.15]"
+                />
+              </div>
             </div>
             <span className="font-display text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold gradient-text hidden sm:inline-block leading-none tracking-tight">
               AI Gaming Hackathon

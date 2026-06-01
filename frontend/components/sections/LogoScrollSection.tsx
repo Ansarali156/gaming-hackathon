@@ -3,7 +3,7 @@
 const logos = [
   "/rtih_logo.png",
   "/cclogo.png",
-  "/apgovt_logo.jpg",
+  "/apgovt_logo_v2.jpg",
   "/incuxai_new.png",
   "/appolice_logo.png",
   "/hcet_logo.png",
@@ -36,7 +36,9 @@ export function LogoScrollSection() {
               key={`a-${i}`}
               src={logo}
               alt="Partner Logo"
-              className="h-20 md:h-24 object-contain rounded-lg shadow-lg opacity-80 hover:opacity-100 transition-opacity shrink-0"
+              className={`h-20 md:h-24 object-contain rounded-lg shadow-lg opacity-80 hover:opacity-100 transition-opacity shrink-0 ${
+                logo.includes("apgovt_logo") ? "bg-white" : ""
+              }`}
             />
           ))}
         </div>
@@ -46,7 +48,9 @@ export function LogoScrollSection() {
               key={`b-${i}`}
               src={logo}
               alt="Partner Logo"
-              className="h-20 md:h-24 object-contain rounded-lg shadow-lg opacity-80 hover:opacity-100 transition-opacity shrink-0"
+              className={`h-20 md:h-24 object-contain rounded-lg shadow-lg opacity-80 hover:opacity-100 transition-opacity shrink-0 ${
+                logo.includes("apgovt_logo") ? "bg-white" : ""
+              }`}
             />
           ))}
         </div>
