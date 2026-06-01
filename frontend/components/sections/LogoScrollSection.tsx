@@ -3,7 +3,7 @@
 const logos = [
   "/rtih_logo.png",
   "/cclogo.png",
-  "https://www.livelaw.in/h-upload/2022/08/05/429112-andhra-pradesh-govt.jpg",
+  "/apgovt_logo.jpg",
   "/incuxai_new.png",
   "/appolice_logo.png",
   "/hcet_logo.png",
