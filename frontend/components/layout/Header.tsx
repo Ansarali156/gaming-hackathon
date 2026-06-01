@@ -40,8 +40,8 @@ export function Header() {
           <Link href="/" className="flex items-center gap-3 group">
             <div className="flex items-center gap-2">
               <img 
-                src="https://scontent.fvga7-1.fna.fbcdn.net/v/t39.30808-6/462228572_3821598438114122_1927581696670989735_n.png?stp=dst-jpg_tt6&_nc_cat=109&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=MIEnFTa5i7IQ7kNvwFcuPFo&_nc_oc=Adrgho52WJebKn9y9OUJ5Xz2BjmylnkD8buymT1zcMziJO9pe9uT5HCidZJBayH8RIQ&_nc_zt=23&_nc_ht=scontent.fvga7-1.fna&_nc_gid=FUZaUO2qWlrYpGMhw1yXnQ&_nc_ss=7b289&oh=00_Af7o82fI2gaU2GiWnYoQqlS9DlPvBLAdCOoYYFZOZj57hA&oe=6A1C6219" 
-                alt="Partner Logo" 
+                src="/apgovt_logo.jpg" 
+                alt="AP Government Logo" 
                 className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 group-hover:scale-105"
               />
               <img 
@@ -111,7 +111,7 @@ export function Header() {
 
             <div className="flex items-center gap-2 ml-1 xl:ml-3 shrink-0">
               <img 
-                src="https://www.collegecircle.cc/assets/cclogo.PNG" 
+                src="/cclogo.png" 
                 alt="College Circle Logo" 
                 className="h-8 w-8 xl:h-10 xl:w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
               />
@@ -198,7 +198,7 @@ export function Header() {
 
               <div className="flex items-center justify-center gap-4 mt-4 pt-2">
                 <img 
-                  src="https://www.collegecircle.cc/assets/cclogo.PNG" 
+                  src="/cclogo.png" 
                   alt="College Circle Logo" 
                   className="h-10 w-10 object-contain rounded-md shadow border border-white/5 bg-white/5"
                 />
