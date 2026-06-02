@@ -10,7 +10,7 @@ import { z } from "zod";
 const memberSchema = z.object({
   name: z.string().trim().min(1, "Member name is required"),
   email: z.string().trim().email("Member email is invalid"),
-  skills: z.array(z.string()).optional(),
+  skills: z.string().optional(),
   role: z.string().optional(),
 });
 
@@ -29,7 +29,7 @@ const registrationSchema = z.object({
     college: z.string().optional(),
     discordId: z.string().optional(),
     linkedin: z.string().optional(),
-    skills: z.array(z.string()).optional(),
+    skills: z.string().optional(),
   }),
   members: z.array(memberSchema).min(1, "At least one team member is required"),
 });
