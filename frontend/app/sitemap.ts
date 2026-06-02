@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://incuxai.com";
+  const baseUrl = "https://aigaminghackathon.incuxai.com";
   
   const routes = [
     "",

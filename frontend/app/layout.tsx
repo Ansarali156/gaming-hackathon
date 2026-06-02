@@ -16,7 +16,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://incuxai.com"),
+  metadataBase: new URL("https://aigaminghackathon.incuxai.com"),
   title: {
     default: "AI Gaming Hackathon | India's Ultimate AI Gaming Innovation Festival",
     template: "%s | AI Gaming Hackathon"
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://incuxai.com",
+    url: "https://aigaminghackathon.incuxai.com",
     title: "AI Gaming Hackathon | India's Ultimate AI Gaming Innovation Festival",
     description: "Connect, build, and battle. Join elite students, startups, and game developers in India's first large-scale AI Gaming Hackathon with prizes worth ₹10 Lakhs.",
     siteName: "AI Gaming Hackathon",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     creator: "@incuxai",
   },
   alternates: {
-    canonical: "https://incuxai.com",
+    canonical: "https://aigaminghackathon.incuxai.com",
   },
   icons: {
     icon: "/incuxai_new.png",
