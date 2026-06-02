@@ -62,6 +62,11 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const host = request.headers.get("host") || "localhost:3000";
+    const protocol = host.includes("localhost") ? "http" : "https";
+    const baseUrl = process.env.NEXTAUTH_URL || `${protocol}://${host}`;
+    const loginUrl = `${baseUrl}/login`;
+
     const body = await request.json();
     const { teamId, status } = body;
 
@@ -86,7 +91,7 @@ export async function PATCH(request: Request) {
               <h2>Congratulations, ${leader.user.name}!</h2>
               <p>Your team <strong>${team.name}</strong> has been <strong>SELECTED</strong> for the next round of the IncuXai Gaming Hackathon.</p>
               <p>Please log in to your dashboard to view the latest timeline and prepare for the next phase!</p>
-              <a href="http://localhost:3000/login" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 20px;">Go to Dashboard</a>
+              <a href="${loginUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 20px;">Go to Dashboard</a>
             </div>
           `
         });
