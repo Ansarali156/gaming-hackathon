@@ -130,7 +130,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (announcements.length > 0) {
       const lastSeenTime = localStorage.getItem("incux_admin_last_seen_notification_time") || "0";
-      const hasNew = announcements.some((a: any) => new Date(a.createdAt).getTime() > parseInt(lastSeenTime));
+      const hasNew = announcements.some((a: Record<string, any>) => new Date(a.createdAt).getTime() > parseInt(lastSeenTime));
       setHasUnreadNotification(hasNew);
     }
   }, [announcements]);
@@ -231,7 +231,7 @@ export default function AdminDashboard() {
   // CSV Exporter for teams
   const handleExportCSV = () => {
     const headers = ["Team ID", "Team Name", "Category", "Approval Status", "Payment Status", "Members"];
-    const rows = participants.map((team: any) => [
+    const rows = participants.map((team: Record<string, any>) => [
       team.teamId,
       `"${team.name}"`,
       team.category,
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
 
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e: any) => e.join(","))].join("\n");
+      [headers.join(","), ...rows.map((e: string[]) => e.join(","))].join("\n");
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -467,7 +467,7 @@ function NavItem({ icon, label, active, onClick, unread }: { icon: React.ReactNo
 /* ============================================================================
    A. OVERVIEW PANE
    ============================================================================ */
-function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[] }) {
+function OverviewPane({ analytics, sponsors }: { analytics: Record<string, any>; sponsors: Record<string, any>[] }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
       <div>
@@ -491,15 +491,16 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Registration Line Trend Chart (SVG) */}
         <div className="glass-card p-6">
-          <h3 className="font-display font-bold text-text mb-4">Registration Trends (7 Days)</h3>
-          <div className="h-64 flex items-end justify-between gap-2 pt-6 relative border-l border-b border-white/10 pb-2 pl-2">
-            {analytics.dailyRegistrations?.map((item: any, idx: number) => {
-              const maxCount = Math.max(...analytics.dailyRegistrations.map((d: any) => d._count), 1);
+          <h3 className="font-display font-bold text-text mb-4">Registration Trends</h3>
+          <div className="overflow-x-auto pb-4 custom-scrollbar">
+            <div className="h-64 flex items-end justify-start gap-4 pt-10 relative border-l border-b border-white/10 pb-2 pl-2 min-w-max pr-4">
+            {analytics.dailyRegistrations?.map((item: Record<string, any>, idx: number) => {
+              const maxCount = Math.max(...analytics.dailyRegistrations.map((d: Record<string, any>) => d._count), 1);
               const pct = (item._count / maxCount) * 100;
               return (
-                <div key={idx} className="flex-1 flex flex-col items-center group relative h-full justify-end">
-                  <span className="absolute bottom-full mb-1 bg-surface-light px-2 py-0.5 rounded text-xs text-primary font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                    {item._count} teams
+                <div key={idx} className="flex flex-col items-center group relative h-full justify-end w-12 flex-shrink-0">
+                  <span className="absolute bottom-full mb-1 bg-surface-light px-2 py-0.5 rounded text-xs text-primary font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                    {item._count}
                   </span>
                   <div
                     style={{ height: `${pct}%` }}
@@ -509,19 +510,21 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
 
         {/* Revenue Area Trend Chart (SVG) */}
         <div className="glass-card p-6">
-          <h3 className="font-display font-bold text-text mb-4">Revenue Analytics (7 Days)</h3>
-          <div className="h-64 flex items-end justify-between gap-2 pt-6 relative border-l border-b border-white/10 pb-2 pl-2">
-            {analytics.revenueTrends?.map((item: any, idx: number) => {
-              const maxAmount = Math.max(...analytics.revenueTrends.map((d: any) => d.amount), 1);
+          <h3 className="font-display font-bold text-text mb-4">Revenue Analytics</h3>
+          <div className="overflow-x-auto pb-4 custom-scrollbar">
+            <div className="h-64 flex items-end justify-start gap-4 pt-10 relative border-l border-b border-white/10 pb-2 pl-2 min-w-max pr-4">
+            {analytics.revenueTrends?.map((item: Record<string, any>, idx: number) => {
+              const maxAmount = Math.max(...analytics.revenueTrends.map((d: Record<string, any>) => d.amount), 1);
               const pct = (item.amount / maxAmount) * 100;
               return (
-                <div key={idx} className="flex-1 flex flex-col items-center group relative h-full justify-end">
-                  <span className="absolute bottom-full mb-1 bg-surface-light px-2 py-0.5 rounded text-xs text-neon-green font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                <div key={idx} className="flex flex-col items-center group relative h-full justify-end w-12 flex-shrink-0">
+                  <span className="absolute bottom-full mb-1 bg-surface-light px-2 py-0.5 rounded text-xs text-neon-green font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                     ₹{item.amount}
                   </span>
                   <div
@@ -532,6 +535,7 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
 
@@ -540,7 +544,7 @@ function OverviewPane({ analytics, sponsors }: { analytics: any; sponsors: any[]
           <div>
             <h3 className="font-display font-bold text-text mb-4">Category Distribution</h3>
             <div className="space-y-4">
-              {analytics.categoryDistribution?.map((cat: any) => {
+              {analytics.categoryDistribution?.map((cat: Record<string, any>) => {
                 const total = analytics.totalRegistrations || 1;
                 const percent = Math.round((cat._count / total) * 100);
                 return (
@@ -608,7 +612,7 @@ function ParticipantsPane({
   handleExportCSV,
   setSelectedReceipt,
   setSelectedTeam
-}: any) {
+}: Record<string, any>) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -662,7 +666,7 @@ function ParticipantsPane({
             </thead>
             <tbody className="divide-y divide-white/5 text-sm">
               {participants.length > 0 ? (
-                participants.map((team: any) => {
+                participants.map((team: Record<string, any>) => {
                   const hasSubmission = !!team.submission;
                   return (
                     <tr key={team.id} className="hover:bg-white/5 transition-colors">
@@ -718,7 +722,7 @@ function ParticipantsPane({
 /* ============================================================================
    B2. SUBMISSIONS PANE
    ============================================================================ */
-function SubmissionsPane({ submissions }: { submissions: any[] }) {
+function SubmissionsPane({ submissions }: { submissions: Record<string, any>[] }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
@@ -741,7 +745,7 @@ function SubmissionsPane({ submissions }: { submissions: any[] }) {
             </thead>
             <tbody className="divide-y divide-white/5 text-sm">
               {submissions.length > 0 ? (
-                submissions.map((sub: any) => (
+                submissions.map((sub: Record<string, any>) => (
                   <tr key={sub.id} className="hover:bg-white/5 transition-colors">
                     <td className="p-4">
                       <span className="text-text font-medium block">{sub.team?.name}</span>
@@ -795,7 +799,7 @@ function LinkBadge({ url, label, color = "text-primary" }: { url: string; label:
 /* ============================================================================
    C. PAYMENT MANAGEMENT
    ============================================================================ */
-function PaymentsPane({ payments, setSelectedReceipt }: any) {
+function PaymentsPane({ payments, setSelectedReceipt }: Record<string, any>) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
@@ -816,7 +820,7 @@ function PaymentsPane({ payments, setSelectedReceipt }: any) {
             </thead>
             <tbody className="divide-y divide-white/5 text-sm">
               {payments.length > 0 ? (
-                payments.map((payment: any) => (
+                payments.map((payment: Record<string, any>) => (
                   <tr key={payment.id} className="hover:bg-white/5 transition-colors">
                     <td className="p-4">
                       {payment.status === "SUCCESS" ? (
@@ -875,7 +879,7 @@ function AnnouncementsPane({
   setChannels,
   handleSendAnnouncement,
   announcementLogs
-}: any) {
+}: Record<string, any>) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Create Announcement Form */}
@@ -979,7 +983,7 @@ function AnnouncementsPane({
       <div className="space-y-4">
         <h3 className="font-display font-bold text-lg text-text">Broadcast Log</h3>
         <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-          {announcements.map((ann: any) => (
+          {announcements.map((ann: Record<string, any>) => (
             <div key={ann.id} className="p-4 bg-white/5 border border-white/5 rounded-xl space-y-2">
               <div className="flex justify-between items-start gap-4">
                 <h4 className="text-text font-bold text-sm leading-snug">{ann.title}</h4>
@@ -1039,8 +1043,8 @@ function parseSponsorDetails(message: string) {
   };
 }
 
-function AdminNotificationsPane({ announcements }: { announcements: any[] }) {
-  const sponsorNotifications = announcements.filter((a: any) => a.visibility === "ADMIN");
+function AdminNotificationsPane({ announcements }: { announcements: Record<string, any>[] }) {
+  const sponsorNotifications = announcements.filter((a: Record<string, any>) => a.visibility === "ADMIN");
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -1057,7 +1061,7 @@ function AdminNotificationsPane({ announcements }: { announcements: any[] }) {
             <p className="text-text-dim text-xs">Notifications from sponsor inquiries and system events will appear here.</p>
           </div>
         ) : (
-          sponsorNotifications.map((a: any) => {
+          sponsorNotifications.map((a: Record<string, any>) => {
             const details = parseSponsorDetails(a.message || "");
             return (
               <div
@@ -1146,13 +1150,13 @@ function AdminNotificationsPane({ announcements }: { announcements: any[] }) {
 }
 
 
-function TeamDetailsModal({ team, onClose }: { team: any; onClose: () => void }) {
+function TeamDetailsModal({ team, onClose }: { team: Record<string, any>; onClose: () => void }) {
   if (!team) return null;
 
   // Extract leader and members correctly from Prisma structure
-  const leaderData = team.members?.find((m: any) => m.role === "LEADER");
+  const leaderData = team.members?.find((m: Record<string, any>) => m.role === "LEADER");
   const leader = leaderData?.user;
-  const regularMembers = team.members?.filter((m: any) => m.role !== "LEADER") || [];
+  const regularMembers = team.members?.filter((m: Record<string, any>) => m.role !== "LEADER") || [];
 
   const mainTrack = TRACK_CATEGORIES.find(c => c.tracks.some(t => t.title === team.projectTheme))?.category.split(":")[0] || "N/A";
 
@@ -1221,7 +1225,7 @@ function TeamDetailsModal({ team, onClose }: { team: any; onClose: () => void })
             <div className="bg-white/5 p-4 rounded-xl">
               <h3 className="font-bold text-text mb-3">Team Members ({regularMembers.length})</h3>
               <div className="space-y-2">
-                {regularMembers.map((m: any, i: number) => (
+                {regularMembers.map((m: Record<string, any>, i: number) => (
                   <div key={i} className="flex justify-between text-sm border-b border-white/5 pb-2 last:border-0">
                     <span className="text-text">{m.user?.name || "Unknown"}</span>
                     <span className="text-text-muted">{m.user?.email || "No Email"}</span>
@@ -1264,7 +1268,7 @@ function SponsorsPane({
   handleToggleSponsorStatus,
   handleDeleteSponsor,
   handleUpdateInquiryStatus
-}: any) {
+}: Record<string, any>) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex justify-between items-center">
@@ -1365,7 +1369,7 @@ function SponsorsPane({
 
       {/* Sponsors Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {sponsors.map((sp: any) => (
+        {sponsors.map((sp: Record<string, any>) => (
           <div key={sp.id} className="glass-card p-5 flex flex-col justify-between border border-white/5 relative">
             <div className="flex gap-4">
               <div className="w-16 h-16 rounded bg-white/5 flex-shrink-0 flex items-center justify-center overflow-hidden border border-white/10">
@@ -1447,7 +1451,7 @@ function SponsorsPane({
               </thead>
               <tbody className="divide-y divide-white/5 text-sm">
                 {inquiries?.length > 0 ? (
-                  inquiries.map((inq: any) => (
+                  inquiries.map((inq: Record<string, any>) => (
                     <tr key={inq.id} className="hover:bg-white/5 transition-colors">
                       <td className="p-4">
                         <span className="text-text font-medium block">{inq.name}</span>
@@ -1494,7 +1498,7 @@ function SponsorsPane({
 /* ============================================================================
    J. ABANDONED REGISTRATIONS PANE
    ============================================================================ */
-function DraftsPane({ drafts }: { drafts: any[] }) {
+function DraftsPane({ drafts }: { drafts: Record<string, any>[] }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
@@ -1516,7 +1520,7 @@ function DraftsPane({ drafts }: { drafts: any[] }) {
             </thead>
             <tbody className="divide-y divide-white/5 text-sm">
               {drafts.length > 0 ? (
-                drafts.map((draft: any) => (
+                drafts.map((draft: Record<string, any>) => (
                   <tr key={draft.id} className="hover:bg-white/5 transition-colors">
                     <td className="p-4 text-text-muted text-xs whitespace-nowrap">
                       {new Date(draft.createdAt).toLocaleDateString()} {new Date(draft.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

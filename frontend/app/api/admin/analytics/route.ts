@@ -5,14 +5,6 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const today = new Date();
-    const past7Days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(today.getDate() - i);
-      d.setHours(0, 0, 0, 0);
-      return d;
-    }).reverse();
-
     const totalRegistrations = await prisma.team.count({
       where: {
         OR: [
@@ -63,8 +55,24 @@ export async function GET() {
       _sum: { points: true },
     });
 
-    // Build 7-day registration trends
-    const dailyRegistrations = past7Days.map(date => {
+    // Find earliest date
+    const teamDates = allTeams.map(t => new Date(t.createdAt).getTime());
+    const paymentDates = allPayments.map(p => new Date(p.createdAt).getTime());
+    
+    const earliestTime = Math.min(...teamDates, ...paymentDates, Date.now());
+    const earliestDate = new Date(earliestTime);
+    earliestDate.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const allDays = [];
+    for (let d = new Date(earliestDate); d <= today; d.setDate(d.getDate() + 1)) {
+      allDays.push(new Date(d));
+    }
+
+    // Build full registration trends
+    const dailyRegistrations = allDays.map(date => {
       const count = allTeams.filter(t => {
         const d = new Date(t.createdAt);
         return d.toDateString() === date.toDateString();
@@ -75,8 +83,8 @@ export async function GET() {
       };
     });
 
-    // Build 7-day revenue trends
-    const revenueTrends = past7Days.map(date => {
+    // Build full revenue trends
+    const revenueTrends = allDays.map(date => {
       const amount = allPayments.filter(p => {
         const d = new Date(p.createdAt);
         return d.toDateString() === date.toDateString();
