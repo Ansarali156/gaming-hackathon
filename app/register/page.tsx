@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { PRICING, TRACK_CATEGORIES } from "@/lib/constants";
@@ -218,12 +219,12 @@ export default function RegisterPage() {
               to submit your project links and manage your team.
             </p>
             <div className="flex flex-col gap-3">
-              <a href="/login" className="btn-primary w-full text-center">
+              <Link href="/login" className="btn-primary w-full text-center">
                 Login to Dashboard
-              </a>
-              <a href="/" className="btn-secondary w-full text-center">
+              </Link>
+              <Link href="/" className="btn-secondary w-full text-center">
                 Back to Home
-              </a>
+              </Link>
             </div>
           </motion.div>
         </main>
@@ -252,7 +253,7 @@ export default function RegisterPage() {
               Register Now
             </h1>
             <p className="text-text-muted">
-              Join India's Ultimate AI Gaming Hackathon —{" "}
+              Join India&apos;s Ultimate AI Gaming Hackathon —{" "}
               <span className="text-primary font-semibold">Secure Your Spot</span>
             </p>
           </motion.div>
