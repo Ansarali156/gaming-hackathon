@@ -195,28 +195,7 @@ export async function POST(request: Request) {
       });
     }
 
-    // ── Send Welcome Registration & Payment Email ────────────────────────
-    try {
-      await sendEmail({
-        to: leader.email.toLowerCase(),
-        subject: "Registration Received - IncuXai Gaming Hackathon",
-        html: `
-          <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #a855f7;">Registration Received ✅</h2>
-            <p>Hi <strong>${leader.name.trim()}</strong>,</p>
-            <p>Your team <strong>${teamName.trim()}</strong> has been registered. The registration record is saved and payment instructions have been forwarded to our payment partner.</p>
-            <p><strong>Team ID:</strong> ${teamId}</p>
-            <p><strong>Amount Due:</strong> ₹${finalAmount}</p>
-            <p>Please follow the payment instructions sent to your email or contact support if you don't receive them within a few minutes.</p>
-            <div style="margin-top: 30px; text-align: center;">
-              <a href="${loginUrl}" style="display: inline-block; padding: 12px 24px; background-color: #a855f7; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
-            </div>
-          </div>
-        `,
-      });
-    } catch (emailErr) {
-      console.error("Failed to send registration email:", emailErr);
-    }
+
 
     return NextResponse.json({
       success: true,
