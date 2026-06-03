@@ -185,12 +185,11 @@ The application will be available at **http://localhost:3000**.
 
 | Phase | Date |
 |-------|------|
-| Registrations Open | May 18, 2026 |
-| Hackathon Begins | June 12, 2026 |
-| Final Submission | June 20, 2026 |
-| Round 1 | June 20, 2026 |
-| Round 2 | June 27-28, 2026 |
-| Winner Announcement | June 28, 2026 |
+| Registrations Open | May 25, 2026 |
+| Registration Closes & Round 1 Submission | June 25, 2026 |
+| Round 1 Results | June 28, 2026 |
+| Round 2 Offline | July 4-5, 2026 |
+| Winner Announcement | July 5, 2026 |
 
 ---
 
@@ -199,14 +198,12 @@ The application will be available at **http://localhost:3000**.
 | Category | Fee | Team Size |
 |----------|-----|-----------|
 | Students | ₹300/person | 2-5 members |
-| IT Professionals | ₹1000/person | 2-3 members |
-| Startups | ₹5000/company | 2 members |
+| IT Professionals | ₹1000/person | 2-4 members |
+| Startups | ₹1000/person | 2-4 members |
 
 **Total Prize Pool: ₹10,00,000+**
-- 1st Place: ₹1,00,000
-- 2nd Place: ₹50,000
-- Best AI Innovation: ₹15,000
-- Best Game Design: ₹15,000
+- Grand Prize: Up to ₹10,00,000
+- Additional Opportunities: Creative Ideas, Internships, Incubation, and Startup Investments.
 
 ---
 
