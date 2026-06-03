@@ -19,7 +19,7 @@ export function LogoScrollSection() {
       <p className="text-center text-text-muted text-xs uppercase tracking-widest mb-6 font-semibold">
         Supported & Recognized By
       </p>
-      <div className="w-full py-8 bg-surface-light/50 border-y border-white/5 flex overflow-hidden">
+      <div className="group w-full py-8 bg-surface-light/50 border-y border-white/5 flex overflow-hidden">
       <style>{`
         @keyframes scroll-ltr {
           0% { transform: translateX(-50%); }
@@ -29,7 +29,7 @@ export function LogoScrollSection() {
           animation: scroll-ltr 90s linear infinite;
         }
       `}</style>
-      <div className="flex w-max animate-scroll-ltr items-center hover:[animation-play-state:paused]">
+      <div className="flex w-max animate-scroll-ltr items-center group-hover:[animation-play-state:paused]">
         <div className="flex w-max items-center gap-16 px-8">
           {marqueeLogos.map((logo, i) => (
             <img
