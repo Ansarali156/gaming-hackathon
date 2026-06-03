@@ -156,13 +156,6 @@ The application will be available at **http://localhost:3000**.
 - [x] Project submission portal
 - [x] Support ticket & Referral system
 
-### 🚧 Coming Soon
-- [ ] Live countdown timer
-- [ ] QR ticket generation
-- [ ] Real-time participant counter
-- [ ] NFT certificates
-- [ ] AI mentor assistant
-- [ ] Resume scanner
 
 ---
 
