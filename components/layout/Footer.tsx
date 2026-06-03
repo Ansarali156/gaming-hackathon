@@ -36,7 +36,7 @@ export function Footer() {
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="space-y-4">
-            <Link href="/" className="font-display text-2xl font-bold gradient-text">
+            <Link prefetch={false} href="/" className="font-display text-2xl font-bold gradient-text">
               AI Gaming Hackathon
             </Link>
             <p className="text-text-muted">
@@ -56,7 +56,7 @@ export function Footer() {
                 {links.map((link) => (
                   <li key={link.label}>
                     {link.href ? (
-                      <Link href={link.href} className="text-text-muted hover:text-primary transition-colors">
+                      <Link prefetch={false} href={link.href} className="text-text-muted hover:text-primary transition-colors">
                         {link.label}
                       </Link>
                     ) : (

@@ -230,7 +230,7 @@ export async function POST(request: Request) {
     console.log(`🎉 Payment successfully verified and team/user account created for team "${team.name}" (ID: ${team.teamId}). Payment ID: ${payment_id}`);
 
     // Generate dynamic loginUrl using request host
-    const host = request.headers.get("host") || "localhost:3000";
+    const host = request.headers.get("host") || "aigaminghackathon.incuxai.com";
     const protocol = host.includes("localhost") ? "http" : "https";
     const loginUrl = `${protocol}://${host}/login`;
 

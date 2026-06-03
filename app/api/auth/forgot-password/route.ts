@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     });
 
     // 6. Generate dynamic domain URL using request headers
-    const host = request.headers.get("host") || "localhost:3000";
+    const host = request.headers.get("host") || "aigaminghackathon.incuxai.com";
     const protocol = host.includes("localhost") ? "http" : "https";
     const resetUrl = `${protocol}://${host}/reset-password?token=${token}`;
 

@@ -62,7 +62,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const host = request.headers.get("host") || "localhost:3000";
+    const host = request.headers.get("host") || "aigaminghackathon.incuxai.com";
     const protocol = host.includes("localhost") ? "http" : "https";
     const baseUrl = process.env.NEXTAUTH_URL || `${protocol}://${host}`;
     const loginUrl = `${baseUrl}/login`;

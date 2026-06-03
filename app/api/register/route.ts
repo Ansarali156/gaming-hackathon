@@ -36,7 +36,7 @@ const registrationSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const host = request.headers.get("host") || "localhost:3000";
+    const host = request.headers.get("host") || "aigaminghackathon.incuxai.com";
     const protocol = host.includes("localhost") ? "http" : "https";
     const loginUrl = `${protocol}://${host}/login`;
 
@@ -171,7 +171,7 @@ export async function POST(request: Request) {
         finalAmount: finalAmount,
         teamId,
         teamName: teamName.trim(),
-        callbackBase: process.env.NEXTAUTH_URL || "http://localhost:3000",
+        callbackBase: process.env.NEXTAUTH_URL || "http://aigaminghackathon.incuxai.com",
       };
 
       if (body.returnSunRedirect) {

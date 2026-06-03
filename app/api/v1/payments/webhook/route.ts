@@ -5,7 +5,7 @@ import { sendEmail } from '@/lib/mailer';
 
 export async function POST(request: Request) {
   try {
-    const host = request.headers.get("host") || "localhost:3000";
+    const host = request.headers.get("host") || "aigaminghackathon.incuxai.com";
     const protocol = host.includes("localhost") ? "http" : "https";
     const loginUrl = `${protocol}://${host}/login`;
 

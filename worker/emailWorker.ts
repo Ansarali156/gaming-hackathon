@@ -49,7 +49,7 @@ async function sendEmail(to: string, type: string, payload: any) {
         You can now log in to your participant dashboard using your registered credentials to view tracks, timelines, and prepare for official submissions.
       </p>
       <div style="text-align: center; margin-top: 30px;">
-        <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login" style="background-color: #a855f7; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(168, 85, 247, 0.2);">Go to Dashboard</a>
+        <a href="${process.env.NEXTAUTH_URL || 'http://aigaminghackathon.incuxai.com'}/login" style="background-color: #a855f7; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(168, 85, 247, 0.2);">Go to Dashboard</a>
       </div>
       <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;">
         Secured by Razorpay • IncuXai Platform Support

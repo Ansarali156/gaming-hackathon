@@ -44,7 +44,7 @@ export async function GET(request: Request) {
       finalAmount: amount,
       teamId,
       teamName,
-      callbackBase: process.env.NEXTAUTH_URL || "http://localhost:3000",
+      callbackBase: process.env.NEXTAUTH_URL || "http://aigaminghackathon.incuxai.com",
     };
 
     const sunRedirectUrl = makeSunRedirectUrl(redirectPayload as any);

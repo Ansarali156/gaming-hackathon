@@ -37,7 +37,7 @@ export function Header() {
     >
       <div className="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop">
         <div className="flex items-center justify-between h-20">
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link prefetch={false} href="/" className="flex items-center gap-3 group">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 overflow-hidden rounded-md shadow border border-white/5 bg-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
                 <img 
@@ -64,8 +64,7 @@ export function Header() {
 
           <nav className="hidden lg:flex items-center gap-5 xl:gap-8">
             {navLinks.map((link) => (
-              <Link
-                key={link.href}
+              <Link prefetch={false} key={link.href}
                 href={link.href}
                 target={link.href.endsWith(".pdf") ? "_blank" : undefined}
                 rel={link.href.endsWith(".pdf") ? "noopener noreferrer" : undefined}
@@ -81,8 +80,7 @@ export function Header() {
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             ) : session ? (
               <>
-                <Link
-                  href={dashboardUrl}
+                <Link prefetch={false} href={dashboardUrl}
                   className="px-4 py-1.5 xl:px-6 xl:py-2 border border-primary/50 text-primary rounded-lg hover:bg-primary/10 transition-all font-medium flex items-center gap-2 text-sm xl:text-base"
                 >
                   <LayoutDashboard size={16} />
@@ -98,14 +96,12 @@ export function Header() {
               </>
             ) : (
               <>
-                <Link
-                  href="/login"
+                <Link prefetch={false} href="/login"
                   className="px-4 py-1.5 xl:px-6 xl:py-2 border border-primary/50 text-primary rounded-lg hover:bg-primary/10 transition-all font-medium text-sm xl:text-base"
                 >
                   Login
                 </Link>
-                <Link
-                  href="/register"
+                <Link prefetch={false} href="/register"
                   className="px-4 py-1.5 xl:px-6 xl:py-2 bg-primary text-background rounded-lg hover:neon-glow transition-all font-bold text-sm xl:text-base whitespace-nowrap shadow-lg shadow-primary/10 hover:shadow-primary/20"
                 >
                   Register Now
@@ -144,8 +140,7 @@ export function Header() {
         >
           <div className="px-6 py-4 space-y-4">
             {navLinks.map((link) => (
-              <Link
-                key={link.href}
+              <Link prefetch={false} key={link.href}
                 href={link.href}
                 target={link.href.endsWith(".pdf") ? "_blank" : undefined}
                 rel={link.href.endsWith(".pdf") ? "noopener noreferrer" : undefined}
@@ -162,8 +157,7 @@ export function Header() {
                 </div>
               ) : session ? (
                 <>
-                  <Link
-                    href={dashboardUrl}
+                  <Link prefetch={false} href={dashboardUrl}
                     onClick={() => setMobileOpen(false)}
                     className="w-full text-center py-2.5 border border-primary/50 text-primary rounded-lg flex items-center justify-center gap-2 font-medium"
                   >
@@ -183,15 +177,13 @@ export function Header() {
                 </>
               ) : (
                 <div className="flex gap-4">
-                  <Link
-                    href="/login"
+                  <Link prefetch={false} href="/login"
                     onClick={() => setMobileOpen(false)}
                     className="flex-1 text-center py-2.5 border border-primary/50 text-primary rounded-lg font-medium"
                   >
                     Login
                   </Link>
-                  <Link
-                    href="/register"
+                  <Link prefetch={false} href="/register"
                     onClick={() => setMobileOpen(false)}
                     className="flex-1 text-center py-2.5 bg-primary text-background rounded-lg font-bold shadow-lg shadow-primary/10"
                   >
