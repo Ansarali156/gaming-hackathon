@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateTeamId } from "@/lib/utils";
 import { PRICING } from "@/lib/constants";
@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { sendEmail } from "@/lib/mailer";
 import { forwardToSun, makeSunRedirectUrl } from "@/lib/sunForwarder";
 import { z } from "zod";
+import { applyRateLimit, registrationLimiter } from "@/lib/rate-limit";
 
 const memberSchema = z.object({
   name: z.string().trim().min(1, "Member name is required"),
@@ -34,7 +35,11 @@ const registrationSchema = z.object({
   members: z.array(memberSchema).min(1, "At least one team member is required"),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // ── Rate Limiting ────────────────────────────────────────────────────────
+  const rateLimited = await applyRateLimit(request, registrationLimiter);
+  if (rateLimited) return rateLimited;
+
   try {
     const host = request.headers.get("host") || "aigaminghackathon.incuxai.com";
     const protocol = host.includes("localhost") ? "http" : "https";

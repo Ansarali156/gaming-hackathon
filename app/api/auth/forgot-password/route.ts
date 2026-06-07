@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { sendEmail } from "@/lib/mailer";
+import { applyRateLimit, authLimiter } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +44,11 @@ function getResetEmailHtml(name: string, resetUrl: string) {
   `;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // ── Rate Limiting: prevent email flooding attacks ─────────────────────
+  const rateLimited = await applyRateLimit(request, authLimiter);
+  if (rateLimited) return rateLimited;
+
   try {
     const { email } = await request.json();
 

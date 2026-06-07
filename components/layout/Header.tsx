@@ -32,29 +32,31 @@ export function Header() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-background/80 backdrop-blur-xl border-b border-white/5" : ""
+        scrolled 
+          ? "bg-surface/90 border-b border-primary/10 shadow-[0_4px_20px_rgba(92,107,252,0.05)] backdrop-blur-md" 
+          : "bg-transparent border-b border-transparent"
       }`}
     >
       <div className="max-w-container-max mx-auto px-margin-mobile lg:px-margin-desktop">
-        <div className="flex items-center justify-between h-20">
+        <div className={`flex items-center justify-between transition-all duration-300 ${scrolled ? "h-16" : "h-20"}`}>
           <Link prefetch={false} href="/" className="flex items-center gap-3 group">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 overflow-hidden rounded-md shadow border border-white/5 bg-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+              <div className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 overflow-hidden rounded-xl shadow-[0_4px_10px_rgba(92,107,252,0.05)] border border-primary/10 bg-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
                 <img 
                   src="/apgovt_logo_v2.jpg" 
                   alt="AP Government Logo" 
-                  className="h-full w-full object-contain"
+                  className="h-full w-full object-contain p-0.5"
                 />
               </div>
-              <div className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 overflow-hidden rounded-md shadow border border-white/5 bg-white/5 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+              <div className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 overflow-hidden rounded-xl shadow-[0_4px_10px_rgba(92,107,252,0.05)] border border-primary/10 bg-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
                 <img 
                   src="/rtih_logo.png" 
                   alt="RTIH Logo" 
-                  className="h-full w-full object-contain scale-[1.15]"
+                  className="h-full w-full object-contain p-0.5 scale-[1.15]"
                 />
               </div>
             </div>
-            <span className="font-display text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold gradient-text hidden sm:inline-block leading-none tracking-tight">
+            <span className="font-display text-sm sm:text-base md:text-lg lg:text-xl font-bold gradient-text hidden sm:inline-block leading-none tracking-tight">
               AI Gaming Hackathon
             </span>
             <span className="font-display text-sm sm:text-base font-bold gradient-text sm:hidden leading-none tracking-tight">
@@ -62,13 +64,13 @@ export function Header() {
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-5 xl:gap-8">
+          <nav className="hidden lg:flex items-center gap-2 xl:gap-4">
             {navLinks.map((link) => (
               <Link prefetch={false} key={link.href}
                 href={link.href}
                 target={link.href.endsWith(".pdf") ? "_blank" : undefined}
                 rel={link.href.endsWith(".pdf") ? "noopener noreferrer" : undefined}
-                className="text-text-muted hover:text-primary transition-colors font-medium text-sm xl:text-base"
+                className="px-3.5 py-2 rounded-xl text-text-muted hover:text-primary hover:bg-primary/5 transition-all duration-300 font-semibold text-sm xl:text-base"
               >
                 {link.label}
               </Link>
@@ -81,14 +83,14 @@ export function Header() {
             ) : session ? (
               <>
                 <Link prefetch={false} href={dashboardUrl}
-                  className="px-4 py-1.5 xl:px-6 xl:py-2 border border-primary/50 text-primary rounded-lg hover:bg-primary/10 transition-all font-medium flex items-center gap-2 text-sm xl:text-base"
+                  className="px-4 py-2 border border-primary/15 bg-white text-primary font-bold rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] shadow-[0_4px_12px_rgba(92,107,252,0.03),inset_2px_2px_4px_rgba(255,255,255,0.9),inset_-2px_-2px_4px_rgba(92,107,252,0.04)] flex items-center gap-2 text-sm xl:text-base"
                 >
                   <LayoutDashboard size={16} />
                   Dashboard
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="px-4 py-1.5 xl:px-6 xl:py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-all font-bold flex items-center gap-2 text-sm xl:text-base"
+                  className="px-4 py-2 bg-red-500/10 text-red-500 font-bold rounded-xl transition-all duration-300 hover:bg-red-500/15 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2 text-sm xl:text-base shadow-[0_4px_12px_rgba(239,68,68,0.02)]"
                 >
                   <LogOut size={16} />
                   Logout
@@ -97,35 +99,37 @@ export function Header() {
             ) : (
               <>
                 <Link prefetch={false} href="/login"
-                  className="px-4 py-1.5 xl:px-6 xl:py-2 border border-primary/50 text-primary rounded-lg hover:bg-primary/10 transition-all font-medium text-sm xl:text-base"
+                  className="px-4 py-2 border border-primary/15 bg-white text-primary font-bold rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] shadow-[0_4px_12px_rgba(92,107,252,0.03),inset_2px_2px_4px_rgba(255,255,255,0.9),inset_-2px_-2px_4px_rgba(92,107,252,0.04)] text-sm xl:text-base"
                 >
                   Login
                 </Link>
                 <Link prefetch={false} href="/register"
-                  className="px-4 py-1.5 xl:px-6 xl:py-2 bg-primary text-background rounded-lg hover:neon-glow transition-all font-bold text-sm xl:text-base whitespace-nowrap shadow-lg shadow-primary/10 hover:shadow-primary/20"
+                  className="px-4 py-2 bg-primary text-white font-bold rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(92,107,252,0.25)] active:translate-y-0 active:scale-[0.98] shadow-[0_6px_15px_rgba(92,107,252,0.18),inset_2px_2px_4px_rgba(255,255,255,0.4),inset_-3px_-3px_6px_rgba(0,0,0,0.15)] text-sm xl:text-base whitespace-nowrap"
                 >
                   Register Now
                 </Link>
               </>
             )}
 
-            <div className="flex items-center gap-2 ml-1 xl:ml-3 shrink-0">
+            <div className="w-px h-6 bg-primary/10" />
+
+            <div className="flex items-center gap-2 shrink-0">
               <img 
                 src="/cclogo.png" 
                 alt="College Circle Logo" 
-                className="h-8 w-8 xl:h-10 xl:w-10 object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
+                className="h-8 w-8 xl:h-9 xl:w-9 object-contain rounded-xl shadow-[0_4px_10px_rgba(92,107,252,0.05)] border border-primary/10 bg-white transition-transform duration-300 hover:scale-105 p-0.5"
               />
               <img 
                 src="/incuxai_new.png" 
                 alt="IncuXai Logo" 
-                className="h-8 xl:h-10 w-auto max-w-[90px] xl:max-w-[120px] object-contain rounded-md shadow border border-white/5 bg-white/5 transition-transform duration-300 hover:scale-105"
+                className="h-8 xl:h-9 w-auto max-w-[80px] xl:max-w-[100px] object-contain rounded-xl shadow-[0_4px_10px_rgba(92,107,252,0.05)] border border-primary/10 bg-white transition-transform duration-300 hover:scale-105 p-0.5"
               />
             </div>
           </div>
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden text-text p-2 hover:bg-white/5 rounded-lg transition-colors"
+            className="lg:hidden text-text p-2 hover:bg-primary/5 rounded-xl transition-colors border border-transparent hover:border-primary/10"
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -136,7 +140,7 @@ export function Header() {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="lg:hidden bg-surface/95 backdrop-blur-xl border-t border-white/5 shadow-2xl"
+          className="lg:hidden bg-surface/95 backdrop-blur-xl border-t border-primary/10 shadow-2xl overflow-hidden"
         >
           <div className="px-6 py-4 space-y-4">
             {navLinks.map((link) => (
@@ -145,12 +149,12 @@ export function Header() {
                 target={link.href.endsWith(".pdf") ? "_blank" : undefined}
                 rel={link.href.endsWith(".pdf") ? "noopener noreferrer" : undefined}
                 onClick={() => setMobileOpen(false)}
-                className="block text-text-muted hover:text-primary transition-colors text-base py-1"
+                className="block text-text-muted hover:text-primary transition-colors text-base py-1.5 font-semibold"
               >
                 {link.label}
               </Link>
             ))}
-            <div className="flex flex-col gap-3 pt-4 border-t border-white/5">
+            <div className="flex flex-col gap-3 pt-4 border-t border-primary/10">
               {status === "loading" ? (
                 <div className="flex justify-center py-2">
                   <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -159,7 +163,7 @@ export function Header() {
                 <>
                   <Link prefetch={false} href={dashboardUrl}
                     onClick={() => setMobileOpen(false)}
-                    className="w-full text-center py-2.5 border border-primary/50 text-primary rounded-lg flex items-center justify-center gap-2 font-medium"
+                    className="w-full text-center py-2.5 border border-primary/15 bg-white text-primary rounded-xl flex items-center justify-center gap-2 font-bold shadow-[inset_2px_2px_4px_rgba(255,255,255,0.9)]"
                   >
                     <LayoutDashboard size={16} />
                     Dashboard
@@ -169,7 +173,7 @@ export function Header() {
                       setMobileOpen(false);
                       signOut({ callbackUrl: "/" });
                     }}
-                    className="w-full text-center py-2.5 bg-red-500/10 text-red-400 rounded-lg font-bold flex items-center justify-center gap-2"
+                    className="w-full text-center py-2.5 bg-red-500/10 text-red-500 rounded-xl font-bold flex items-center justify-center gap-2"
                   >
                     <LogOut size={16} />
                     Logout
@@ -179,29 +183,29 @@ export function Header() {
                 <div className="flex gap-4">
                   <Link prefetch={false} href="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="flex-1 text-center py-2.5 border border-primary/50 text-primary rounded-lg font-medium"
+                    className="flex-1 text-center py-2.5 border border-primary/15 bg-white text-primary rounded-xl font-bold shadow-[inset_2px_2px_4px_rgba(255,255,255,0.9)]"
                   >
                     Login
                   </Link>
                   <Link prefetch={false} href="/register"
                     onClick={() => setMobileOpen(false)}
-                    className="flex-1 text-center py-2.5 bg-primary text-background rounded-lg font-bold shadow-lg shadow-primary/10"
+                    className="flex-1 text-center py-2.5 bg-primary text-white rounded-xl font-bold shadow-[0_4px_12px_rgba(92,107,252,0.18)]"
                   >
                     Register
                   </Link>
                 </div>
               )}
 
-              <div className="flex items-center justify-center gap-4 mt-4 pt-2">
+              <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-primary/10">
                 <img 
                   src="/cclogo.png" 
                   alt="College Circle Logo" 
-                  className="h-10 w-10 object-contain rounded-md shadow border border-white/5 bg-white/5"
+                  className="h-9 w-9 object-contain rounded-xl shadow-[0_4px_10px_rgba(92,107,252,0.05)] border border-primary/10 bg-white p-0.5"
                 />
                 <img 
                   src="/incuxai_new.png" 
                   alt="IncuXai Logo" 
-                  className="h-10 w-auto max-w-[120px] object-contain rounded-md shadow border border-white/5 bg-white/5"
+                  className="h-9 w-auto max-w-[100px] object-contain rounded-xl shadow-[0_4px_10px_rgba(92,107,252,0.05)] border border-primary/10 bg-white p-0.5"
                 />
               </div>
             </div>

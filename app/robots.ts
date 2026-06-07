@@ -12,6 +12,6 @@ export default function robots(): MetadataRoute.Robots {
         "/pay/callback"
       ],
     },
-    sitemap: "https://incuxai.com/sitemap.xml",
+    sitemap: "https://aigaminghackathon.incuxai.com/sitemap.xml",
   };
 }

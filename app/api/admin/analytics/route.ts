@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCached, CACHE_KEYS, CACHE_TTL } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    const data = await getCached(CACHE_KEYS.ANALYTICS, CACHE_TTL.ANALYTICS, async () => {
     const totalRegistrations = await prisma.team.count({
       where: {
         OR: [
@@ -101,7 +103,7 @@ export async function GET() {
       totalPoints: referralPointsAggregate._sum.points || 0
     };
 
-    return NextResponse.json({
+    return {
       totalRegistrations,
       totalRevenue: totalRevenue._sum.amount || 0,
       discordJoins,
@@ -110,7 +112,10 @@ export async function GET() {
       dailyRegistrations,
       revenueTrends,
       referralAnalytics
-    });
+    };
+    }); // end getCached
+
+    return NextResponse.json(data);
   } catch (error: any) {
     console.error("Analytics error:", error);
     return NextResponse.json({ error: "Failed to fetch analytics", details: error?.message || String(error) }, { status: 500 });
