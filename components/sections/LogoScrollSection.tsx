@@ -27,10 +27,7 @@ export function LogoScrollSection() {
           100% { transform: translateX(0); }
         }
         .animate-scroll-ltr {
-          animation: scroll-ltr 90s linear infinite;
-        }
-        .scroll-container:hover .animate-scroll-ltr {
-          animation-play-state: paused !important;
+          animation: scroll-ltr 150s linear infinite;
         }
       `}</style>
       <div className="flex w-max animate-scroll-ltr items-center">
