@@ -9,6 +9,7 @@ const logos = [
   "/hcet_logo.png",
   "/sun_logo.png",
   "/nuleap_logo.png",
+  "/student_tribe.png",
 ];
 
 const marqueeLogos = [...logos, ...logos, ...logos, ...logos, ...logos, ...logos];
